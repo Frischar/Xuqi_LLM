@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ settings.theme }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome - Xuqi LLM Chat</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="topbar-stack">
+      <div class="topbar">
+        <a class="brand" href="/">Xuqi LLM Chat</a>
+        <nav class="topnav">
+          <a class="navlink active" href="/">Welcome</a>
+          <a class="navlink" href="/chat">Chat</a>
+          <a class="navlink" href="/config">Config</a>
+          <a class="navlink" href="/config/card">Card Config</a>
+          <a class="navlink" href="/config/sprite">Sprite</a>
+          <a class="navlink" href="/config/memory">Memory</a>
+        </nav>
+      </div>
+    </div>
+
+    <main class="welcome-shell">
+      <section class="welcome-hero panel">
+        <div class="welcome-copy">
+          <p class="eyebrow">Frischar Project</p>
+          <h1>欢迎来到 Xuqi LLM Chat</h1>
+          <p class="welcome-lead">
+            这是一个面向长期陪伴聊天场景的本地 WebUI，支持角色卡、记忆库、世界书、差分立绘、独立存档和运行时配置。
+          </p>
+          <p class="muted">
+            当前版本由 <strong>Frischar</strong> 制作与整理，目标是把多角色陪伴聊天、可视化调教和本地化存档整合到一套顺手的工作流里。
+          </p>
+          <div class="welcome-actions">
+            <a class="welcome-primary" href="/chat">进入聊天</a>
+            <a class="welcome-secondary" href="/config">打开配置</a>
+          </div>
+        </div>
+
+        <div class="welcome-card-grid">
+          <article class="welcome-card">
+            <p class="eyebrow">Features</p>
+            <h2>功能概览</h2>
+            <ul class="welcome-list">
+              <li>独立存档隔离人设、立绘、记忆和世界书</li>
+              <li>角色卡导入、编辑、导出</li>
+              <li>记忆库长期前情提要投喂</li>
+              <li>世界书命中与调试显示</li>
+            </ul>
+          </article>
+
+          <article class="welcome-card">
+            <p class="eyebrow">Workflow</p>
+            <h2>建议使用顺序</h2>
+            <ol class="welcome-list ordered">
+              <li>先在 `Config` 里填聊天模型参数</li>
+              <li>在 `Card Config` 或导入卡里准备人设</li>
+              <li>在 `Sprite` 页放好当前存档的表情图</li>
+              <li>在 `Memory` 和世界书里补前情</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

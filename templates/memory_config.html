@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ settings.theme }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory - Xuqi LLM Chat</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="topbar-stack">
+      <div class="topbar">
+        <a class="brand" href="/">Xuqi LLM Chat</a>
+        <nav class="topnav">
+          <a class="navlink" href="/">Welcome</a>
+          <a class="navlink" href="/chat">Chat</a>
+          <a class="navlink" href="/config">Config</a>
+          <a class="navlink" href="/config/card">Card Config</a>
+          <a class="navlink" href="/config/sprite">Sprite</a>
+          <a class="navlink active" href="/config/memory">Memory</a>
+        </nav>
+      </div>
+      <div class="slot-toolbar">
+        <div class="slot-toolbar-left">
+          <span class="slot-badge">Save</span>
+          <div class="slot-meta">
+            <strong>当前存档：{{ slot_registry.slots | selectattr("id", "equalto", active_slot) | map(attribute="name") | first or active_slot }}</strong>
+            <p class="slot-hint">这里维护的是当前存档独有的长期记忆条目。</p>
+          </div>
+        </div>
+        <div class="slot-toolbar-right">
+          <select id="slot-select" class="slot-select">
+            {% for slot in slot_registry.slots %}
+            <option value="{{ slot.id }}" {% if slot.id == active_slot %}selected{% endif %}>{{ slot.name }}</option>
+            {% endfor %}
+          </select>
+          <button id="rename-slot" type="button" class="secondary compact">重命名</button>
+          <button id="reset-slot" type="button" class="secondary compact">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="config-shell compact">
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Memory</p>
+          <h2>记忆库管理</h2>
+          <p class="muted">这里的每一条记忆都会在每次聊天时作为固定前情提要投喂给模型。你可以手动新增、修改、删除，然后点保存立即生效。</p>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-label">当前条数</span>
+            <strong id="memory-count">{{ memory_count }}</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">生效方式</span>
+            <strong>每轮聊天固定前情提要</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel config-panel full-span">
+        <div class="memory-actions">
+          <div class="button-row">
+            <button id="add-memory" type="button">新增记忆</button>
+            <button id="save-memories" type="button" class="secondary">保存全部记忆</button>
+            <button id="reload-memories" type="button" class="secondary">重新读取</button>
+          </div>
+        </div>
+
+        <div id="memory-list" class="memory-list">
+          {% for item in memories %}
+          <article class="memory-card">
+            <div class="memory-card-head">
+              <strong>记忆 {{ loop.index }}</strong>
+              <button type="button" class="secondary compact remove-memory">删除</button>
+            </div>
+
+            <label>标题</label>
+            <input class="memory-title" value="{{ item.title }}" placeholder="例如：和用户的关系进展" />
+
+            <label>正文</label>
+            <textarea class="memory-content" rows="4" placeholder="这里写给模型看的核心前情提要">{{ item.content }}</textarea>
+
+            <label>标签</label>
+            <input class="memory-tags" value="{{ item.tags | join(', ') }}" placeholder="用英文逗号分隔，例如 日常, 关系, 设定" />
+
+            <label>备注</label>
+            <textarea class="memory-notes" rows="3" placeholder="补充说明，可选">{{ item.notes }}</textarea>
+
+            <input class="memory-id" type="hidden" value="{{ item.id }}" />
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Status</p>
+          <h2>当前状态</h2>
+          <p id="status-text" class="muted status-line">就绪</p>
+        </div>
+      </section>
+    </div>
+
+    <template id="memory-card-template">
+      <article class="memory-card">
+        <div class="memory-card-head">
+          <strong>新记忆</strong>
+          <button type="button" class="secondary compact remove-memory">删除</button>
+        </div>
+
+        <label>标题</label>
+        <input class="memory-title" placeholder="例如：主角色的固定偏好" />
+
+        <label>正文</label>
+        <textarea class="memory-content" rows="4" placeholder="这里写给模型看的核心前情提要"></textarea>
+
+        <label>标签</label>
+        <input class="memory-tags" placeholder="用英文逗号分隔，例如 日常, 关系, 设定" />
+
+        <label>备注</label>
+        <textarea class="memory-notes" rows="3" placeholder="补充说明，可选"></textarea>
+
+        <input class="memory-id" type="hidden" />
+      </article>
+    </template>
+
+    <script>
+      const rootEl = document.documentElement;
+      const bodyEl = document.body;
+      const statusEl = document.getElementById("status-text");
+      const memoryListEl = document.getElementById("memory-list");
+      const memoryCountEl = document.getElementById("memory-count");
+      const templateEl = document.getElementById("memory-card-template");
+      const ACTIVE_SLOT = {{ active_slot | tojson }};
+
+      const currentTheme = {{ settings.theme | tojson }};
+      const currentOpacity = {{ settings.ui_opacity | tojson }};
+      const currentBackground = {{ settings.background_image_url | tojson }};
+      const currentOverlay = {{ settings.background_overlay | tojson }};
+
+      async function selectSlot(slotId) {
+        await postJson("/api/slots/select", { slot_id: slotId });
+        window.location.reload();
+      }
+
+      async function renameSlot(slotId) {
+        const currentName = document.getElementById("slot-select").selectedOptions[0]?.textContent || slotId;
+        const nextName = window.prompt("给这个存档起个名字：", currentName);
+        if (nextName === null) return;
+        await postJson("/api/slots/rename", { slot_id: slotId, name: nextName });
+        window.location.reload();
+      }
+
+      async function resetSlot(slotId) {
+        const confirmed = window.confirm("重置后，这个存档里的立绘、人设、记忆、世界书和聊天记录都会清空。要继续吗？");
+        if (!confirmed) return;
+        await postJson("/api/slots/reset", { slot_id: slotId });
+        window.location.reload();
+      }
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function applyTheme(theme) {
+        rootEl.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+      }
+
+      function applyUiOpacity(value) {
+        const opacity = Math.min(Math.max(Number(value || 0.84), 0.2), 1);
+        const theme = rootEl.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const palette = theme === "dark"
+          ? { panel: "18, 27, 37", strong: "20, 30, 41", input: "11, 18, 26", user: "34, 52, 70", assistant: "23, 33, 46" }
+          : { panel: "255, 250, 244", strong: "255, 250, 244", input: "255, 255, 255", user: "239, 220, 206", assistant: "255, 248, 242" };
+        rootEl.style.setProperty("--panel", `rgba(${palette.panel}, ${opacity.toFixed(2)})`);
+        rootEl.style.setProperty("--panel-strong", `rgba(${palette.strong}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--input-bg", `rgba(${palette.input}, ${Math.max(opacity - 0.1, 0.16).toFixed(2)})`);
+        rootEl.style.setProperty("--user", `rgba(${palette.user}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--assistant", `rgba(${palette.assistant}, ${Math.min(opacity + 0.12, 0.99).toFixed(2)})`);
+      }
+
+      function applyBackground(url, overlay) {
+        const normalizedOverlay = Math.min(Math.max(Number(overlay || 0), 0), 0.85);
+        bodyEl.style.setProperty("--background-overlay-opacity", String(normalizedOverlay));
+        bodyEl.style.setProperty("--background-image", url ? `url("${url}")` : "none");
+      }
+
+      function updateMemoryCount() {
+        memoryCountEl.textContent = String(memoryListEl.querySelectorAll(".memory-card").length);
+      }
+
+      function attachRemoveHandler(card) {
+        card.querySelector(".remove-memory").addEventListener("click", () => {
+          card.remove();
+          updateMemoryCount();
+          setStatus("已删除一条记忆，记得保存。");
+        });
+      }
+
+      function createMemoryCard(item = {}) {
+        const fragment = templateEl.content.cloneNode(true);
+        const card = fragment.querySelector(".memory-card");
+        card.querySelector(".memory-title").value = item.title || "";
+        card.querySelector(".memory-content").value = item.content || "";
+        card.querySelector(".memory-tags").value = Array.isArray(item.tags) ? item.tags.join(", ") : "";
+        card.querySelector(".memory-notes").value = item.notes || "";
+        card.querySelector(".memory-id").value = item.id || "";
+        const titleEl = card.querySelector(".memory-card-head strong");
+        titleEl.textContent = item.title ? item.title : "新记忆";
+        attachRemoveHandler(card);
+        return card;
+      }
+
+      function collectMemories() {
+        return [...memoryListEl.querySelectorAll(".memory-card")].map((card, index) => {
+          const id = card.querySelector(".memory-id").value.trim() || `memory-manual-${Date.now()}-${index}`;
+          const title = card.querySelector(".memory-title").value.trim();
+          const content = card.querySelector(".memory-content").value.trim();
+          const tags = card.querySelector(".memory-tags").value.split(",").map((item) => item.trim()).filter(Boolean);
+          const notes = card.querySelector(".memory-notes").value.trim();
+          return { id, title, content, tags, notes };
+        });
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "请求失败");
+        }
+        return response.json();
+      }
+
+      async function loadMemories() {
+        const items = await fetch("/api/memories").then((response) => response.json());
+        memoryListEl.innerHTML = "";
+        for (const item of items) {
+          memoryListEl.appendChild(createMemoryCard(item));
+        }
+        updateMemoryCount();
+        setStatus("记忆库已重新读取。");
+      }
+
+      async function saveMemories() {
+        const items = collectMemories();
+        const data = await postJson("/api/memories", { items });
+        memoryListEl.innerHTML = "";
+        for (const item of data.items || []) {
+          memoryListEl.appendChild(createMemoryCard(item));
+        }
+        updateMemoryCount();
+        setStatus("记忆库已保存，并会在每次聊天时作为前情提要生效。");
+      }
+
+      document.querySelectorAll(".memory-card").forEach((card) => {
+        attachRemoveHandler(card);
+      });
+
+      memoryListEl.addEventListener("input", (event) => {
+        const card = event.target.closest(".memory-card");
+        if (!card) return;
+        const titleText = card.querySelector(".memory-title").value.trim();
+        card.querySelector(".memory-card-head strong").textContent = titleText || "新记忆";
+      });
+
+      document.getElementById("add-memory").addEventListener("click", () => {
+        memoryListEl.appendChild(createMemoryCard());
+        updateMemoryCount();
+        setStatus("已新增一条空白记忆。");
+      });
+
+      document.getElementById("save-memories").addEventListener("click", async () => {
+        try {
+          await saveMemories();
+        } catch (error) {
+          setStatus(`保存失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("reload-memories").addEventListener("click", async () => {
+        try {
+          await loadMemories();
+        } catch (error) {
+          setStatus(`读取失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("slot-select").addEventListener("change", async (event) => {
+        try {
+          setStatus("正在切换存档...");
+          await selectSlot(event.target.value);
+        } catch (error) {
+          setStatus(`切换存档失败：${error.message}`);
+          event.target.value = ACTIVE_SLOT;
+        }
+      });
+
+      document.getElementById("rename-slot").addEventListener("click", async () => {
+        try {
+          await renameSlot(document.getElementById("slot-select").value);
+        } catch (error) {
+          setStatus(`重命名失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("reset-slot").addEventListener("click", async () => {
+        try {
+          await resetSlot(document.getElementById("slot-select").value);
+        } catch (error) {
+          setStatus(`重置失败：${error.message}`);
+        }
+      });
+
+      updateMemoryCount();
+      applyTheme(currentTheme);
+      applyUiOpacity(currentOpacity);
+      applyBackground(currentBackground, currentOverlay);
+    </script>
+  </body>
+</html>

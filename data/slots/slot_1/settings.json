@@ -1,0 +1,29 @@
+{
+  "llm_base_url": "",
+  "llm_api_key": "",
+  "llm_model": "",
+  "theme": "light",
+  "temperature": 0.85,
+  "history_limit": 20,
+  "request_timeout": 120,
+  "demo_mode": false,
+  "ui_opacity": 0.33,
+  "background_image_url": "",
+  "background_overlay": 0.42,
+  "sprite_enabled": true,
+  "sprite_base_path": "/static/sprites/slot_1",
+  "embedding_base_url": "",
+  "embedding_api_key": "",
+  "embedding_model": "",
+  "embedding_fields": [
+    "title",
+    "content",
+    "tags"
+  ],
+  "retrieval_top_k": 4,
+  "rerank_enabled": false,
+  "rerank_base_url": "",
+  "rerank_api_key": "",
+  "rerank_model": "",
+  "rerank_top_n": 3
+}
