@@ -50,8 +50,7 @@ Made by `Frischar`.
 |-- requirements.txt
 |-- README.md
 |-- 启动webui.bat
-|-- 启动器.bat
-|-- 封包启动器.bat
+|-- 封包器.bat
 |-- data/
 |   |-- settings.json
 |   |-- persona.json
