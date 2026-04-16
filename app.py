@@ -1406,6 +1406,12 @@ def build_headers(api_key: str) -> dict[str, str]:
     return headers
 
 
+def should_retry_status_code(status_code: int) -> bool:
+    if status_code in {408, 409, 425, 429}:
+        return True
+    return status_code >= 500
+
+
 async def request_json(
     *,
     url: str,
@@ -1445,7 +1451,7 @@ async def request_json(
                 last_error_detail or "<empty>",
             )
             status_code = exc.response.status_code if exc.response is not None else 0
-            if 400 <= status_code < 500 and status_code not in {408, 409, 429}:
+            if 400 <= status_code < 500 and not should_retry_status_code(status_code):
                 break
         except httpx.HTTPError as exc:
             last_error = exc
@@ -2121,54 +2127,102 @@ async def stream_model_reply(
     accumulated_think = ""
     sprite_tag = ""
     was_thinking = False
+    stream_started = False
+    last_error: Exception | None = None
+    last_error_detail = ""
 
-    async with httpx.AsyncClient(timeout=float(llm_config["request_timeout"])) as client:
-        async with client.stream("POST", url, headers=build_headers(llm_config["api_key"]), json=payload) as response:
-            response.raise_for_status()
-            async for line in response.aiter_lines():
-                if not line:
-                    continue
-                if not line.startswith("data:"):
-                    continue
-                data_line = line[5:].strip()
-                if not data_line or data_line == "[DONE]":
-                    break
-                try:
-                    data = json.loads(data_line)
-                except ValueError:
-                    continue
+    for attempt in range(1, REQUEST_RETRY_ATTEMPTS + 1):
+        try:
+            async with httpx.AsyncClient(timeout=float(llm_config["request_timeout"])) as client:
+                async with client.stream(
+                    "POST",
+                    url,
+                    headers=build_headers(llm_config["api_key"]),
+                    json=payload,
+                ) as response:
+                    response.raise_for_status()
+                    async for line in response.aiter_lines():
+                        if not line:
+                            continue
+                        if not line.startswith("data:"):
+                            continue
+                        data_line = line[5:].strip()
+                        if not data_line or data_line == "[DONE]":
+                            break
+                        try:
+                            data = json.loads(data_line)
+                        except ValueError:
+                            continue
 
-                choices = data.get("choices") or []
-                if not isinstance(choices, list) or not choices:
-                    continue
-                delta = choices[0].get("delta") or {}
-                chunk = delta.get("content")
-                if not isinstance(chunk, str) or not chunk:
-                    continue
+                        choices = data.get("choices") or []
+                        if not isinstance(choices, list) or not choices:
+                            continue
+                        delta = choices[0].get("delta") or {}
+                        chunk = delta.get("content")
+                        if not isinstance(chunk, str) or not chunk:
+                            continue
 
-                accumulated_raw += chunk
-                reply_parts = extract_reply_parts(accumulated_raw)
-                parsed_tag = str(reply_parts["sprite_tag"])
-                visible_text = str(reply_parts["visible"])
-                think_text = str(reply_parts["think"])
-                is_thinking = bool(reply_parts["thinking"])
-                if parsed_tag and not sprite_tag:
-                    sprite_tag = parsed_tag
-                if is_thinking and not was_thinking:
-                    yield {"type": "think_start"}
-                if len(think_text) > len(accumulated_think):
-                    think_delta = think_text[len(accumulated_think) :]
-                    accumulated_think = think_text
-                    if think_delta:
-                        yield {"type": "think_chunk", "delta": think_delta}
-                if was_thinking and not is_thinking:
-                    yield {"type": "think_end"}
-                was_thinking = is_thinking
-                if len(visible_text) > len(accumulated_visible):
-                    delta_text = visible_text[len(accumulated_visible) :]
-                    accumulated_visible = visible_text
-                    if delta_text:
-                        yield {"type": "chunk", "delta": delta_text}
+                        stream_started = True
+                        accumulated_raw += chunk
+                        reply_parts = extract_reply_parts(accumulated_raw)
+                        parsed_tag = str(reply_parts["sprite_tag"])
+                        visible_text = str(reply_parts["visible"])
+                        think_text = str(reply_parts["think"])
+                        is_thinking = bool(reply_parts["thinking"])
+                        if parsed_tag and not sprite_tag:
+                            sprite_tag = parsed_tag
+                        if is_thinking and not was_thinking:
+                            yield {"type": "think_start"}
+                        if len(think_text) > len(accumulated_think):
+                            think_delta = think_text[len(accumulated_think) :]
+                            accumulated_think = think_text
+                            if think_delta:
+                                yield {"type": "think_chunk", "delta": think_delta}
+                        if was_thinking and not is_thinking:
+                            yield {"type": "think_end"}
+                        was_thinking = is_thinking
+                        if len(visible_text) > len(accumulated_visible):
+                            delta_text = visible_text[len(accumulated_visible) :]
+                            accumulated_visible = visible_text
+                            if delta_text:
+                                yield {"type": "chunk", "delta": delta_text}
+            break
+        except httpx.HTTPStatusError as exc:
+            last_error = exc
+            response_text = exc.response.text.strip() if exc.response is not None else ""
+            last_error_detail = response_text[:500]
+            status_code = exc.response.status_code if exc.response is not None else 0
+            logger.warning(
+                "Upstream stream request failed on attempt %s/%s for %s: %s | body=%s",
+                attempt,
+                REQUEST_RETRY_ATTEMPTS,
+                url,
+                exc,
+                last_error_detail or "<empty>",
+            )
+            if stream_started or (400 <= status_code < 500 and not should_retry_status_code(status_code)):
+                break
+        except httpx.HTTPError as exc:
+            last_error = exc
+            last_error_detail = ""
+            logger.warning(
+                "Upstream stream request failed on attempt %s/%s for %s: %s",
+                attempt,
+                REQUEST_RETRY_ATTEMPTS,
+                url,
+                exc,
+            )
+            if stream_started:
+                break
+
+        if attempt < REQUEST_RETRY_ATTEMPTS and not stream_started:
+            await asyncio.sleep(REQUEST_RETRY_BASE_DELAY_SECONDS * attempt)
+
+    if last_error and not accumulated_raw and not accumulated_visible and not accumulated_think:
+        detail = f"模型流式请求失败: {last_error}"
+        if last_error_detail:
+            detail = f"{detail} | upstream={last_error_detail}"
+        raise HTTPException(status_code=502, detail=detail) from last_error
 
     reply_result: dict[str, Any] = {
         "reply": enforce_worldbook_fact_in_reply(
