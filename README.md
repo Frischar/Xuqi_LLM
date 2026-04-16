@@ -7,6 +7,8 @@
 
 Made by `Frischar`.
 
+第一次搞这种东西....做的不好见谅
+
 使用`AI coding`制作
 
 ## 更新日志v1.1
