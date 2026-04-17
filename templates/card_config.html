@@ -481,7 +481,8 @@
           apply_now: true,
         });
 
-        fillCardForm(data.card || {});
+        const importedCard = data.card?.raw || data.card || {};
+        fillCardForm(importedCard);
         document.getElementById("card-filename").value = data.filename || file.name || "imported_role_card.json";
         await refreshCardList(data.filename || file.name || "");
         setStatus(`本地角色卡已导入：${data.filename || file.name}`);

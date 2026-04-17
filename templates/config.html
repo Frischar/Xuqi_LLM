@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Config - Xuqi LLM Chat</title>
     <link rel="stylesheet" href="/static/styles.css" />
+    <style>
+      [hidden] {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
     <div class="topbar-stack">
@@ -95,7 +100,14 @@
         </div>
 
         <label for="llm-model">模型名</label>
-        <input id="llm-model" value="{{ settings.llm_model }}" placeholder="例如 deepseek-chat" />
+        <div class="inline-field">
+          <input id="llm-model" value="{{ settings.llm_model }}" placeholder="例如 deepseek-chat" />
+          <button type="button" id="fetch-models" class="secondary compact">拉取模型</button>
+        </div>
+        <select id="llm-model-select">
+          <option value="">可手动输入，或先拉取模型列表</option>
+        </select>
+        <p class="muted helper-text">如果服务支持 <code>/models</code>，可以直接拉取并从下拉框选择；不支持时仍可手动输入。</p>
 
         <div class="grid-two">
           <div>
@@ -244,7 +256,7 @@
       </section>
     </div>
 
-    <div id="result-modal" class="result-modal" hidden>
+    <div id="result-modal" class="result-modal" hidden style="display:none;">
       <div id="result-modal-backdrop" class="result-modal-backdrop"></div>
       <div class="result-modal-card panel">
         <div class="memory-card-head">
@@ -338,13 +350,17 @@
       }
 
       function showResultModal(title, body) {
-        resultModalTitleEl.textContent = title;
-        resultModalBodyEl.textContent = body;
+        resultModalTitleEl.textContent = title || "测试结果";
+        resultModalBodyEl.textContent = body || "";
         resultModalEl.hidden = false;
+        resultModalEl.style.display = "block";
       }
 
       function hideResultModal() {
         resultModalEl.hidden = true;
+        resultModalEl.style.display = "none";
+        resultModalTitleEl.textContent = "测试结果";
+        resultModalBodyEl.textContent = "";
       }
 
       function scheduleSave(handler, text, delay = 600) {
@@ -421,6 +437,42 @@
 
       function selectedEmbeddingFields() {
         return [...document.querySelectorAll(".embedding-field:checked")].map((el) => el.value);
+      }
+
+      function fillModelSelect(items = [], selectedValue = "") {
+        const selectEl = document.getElementById("llm-model-select");
+        const currentInput = document.getElementById("llm-model").value.trim();
+        const desiredValue = selectedValue || currentInput;
+
+        selectEl.innerHTML = "";
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = items.length ? "请选择一个模型" : "未拉取到模型，可继续手动输入";
+        selectEl.appendChild(defaultOption);
+
+        for (const modelName of items) {
+          const option = document.createElement("option");
+          option.value = modelName;
+          option.textContent = modelName;
+          if (modelName === desiredValue) {
+            option.selected = true;
+          }
+          selectEl.appendChild(option);
+        }
+
+        if (!items.length) {
+          selectEl.value = "";
+        }
+      }
+
+      async function fetchModels() {
+        await saveSettings("正在拉取模型列表...");
+        const data = await postJson("/api/models", {});
+        fillModelSelect(data.items || [], data.preferred_model || data.current_model || "");
+        if (data.preferred_model) {
+          document.getElementById("llm-model").value = data.preferred_model;
+        }
+        setStatus(data.items?.length ? `已拉取 ${data.items.length} 个模型。` : "模型列表为空，可继续手动输入。");
       }
 
       function settingsPayload() {
@@ -538,6 +590,22 @@
         }
       });
 
+      document.getElementById("fetch-models").addEventListener("click", async () => {
+        try {
+          await fetchModels();
+        } catch (error) {
+          setStatus(`拉取模型失败：${error.message}`);
+          showResultModal("拉取模型失败", String(error.message || error));
+        }
+      });
+
+      document.getElementById("llm-model-select").addEventListener("change", () => {
+        const value = document.getElementById("llm-model-select").value;
+        if (!value) return;
+        document.getElementById("llm-model").value = value;
+        scheduleSave(saveSettings, "模型名切换中...", 250);
+      });
+
       document.getElementById("reset-chat").addEventListener("click", async () => {
         try {
           await postJson("/api/reset", {});
@@ -650,6 +718,8 @@
       toggleSecret("llm-api-key", "toggle-llm-api-key");
       toggleSecret("embedding-api-key", "toggle-embedding-api-key");
       toggleSecret("rerank-api-key", "toggle-rerank-api-key");
+      hideResultModal();
+      fillModelSelect([], document.getElementById("llm-model").value.trim());
       applyPresetSelection("custom");
       applyTheme({{ settings.theme | tojson }});
       applyUiOpacity({{ settings.ui_opacity | tojson }});
