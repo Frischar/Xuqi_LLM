@@ -18,6 +18,17 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 from starlette.requests import Request
+from preset_rules import (
+    PRESET_MODULE_RULES,
+    activate_preset_in_store,
+    build_preset_prompt_from_preset,
+    create_preset_in_store,
+    default_preset_store as default_preset_store_data,
+    delete_preset_from_store,
+    duplicate_preset_in_store,
+    get_active_preset_from_store,
+    sanitize_preset_store as sanitize_preset_store_data,
+)
 
 
 def get_runtime_base_dir() -> Path:
@@ -64,6 +75,7 @@ LEGACY_MEMORIES_PATH = DATA_DIR / "memories.json"
 LEGACY_WORLDBOOK_PATH = DATA_DIR / "worldbook.json"
 LEGACY_CURRENT_CARD_PATH = DATA_DIR / "current_role_card.json"
 SLOT_MIGRATION_MARKER_PATH = DATA_DIR / ".slot_migration_done"
+PRESET_FILENAME = "preset.json"
 
 ALLOWED_EMBEDDING_FIELDS = ("title", "content", "tags", "notes")
 ALLOWED_IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
@@ -219,6 +231,61 @@ def default_user_profile() -> dict[str, Any]:
         "avatar_url": "",
     }
 
+def default_preset_store() -> dict[str, Any]:
+    return default_preset_store_data()
+
+
+def sanitize_preset_store(raw: Any) -> dict[str, Any]:
+    return sanitize_preset_store_data(raw)
+
+
+def preset_path(slot_id: str | None = None) -> Path:
+    return get_slot_dir(slot_id) / PRESET_FILENAME
+
+
+def get_preset_store(slot_id: str | None = None) -> dict[str, Any]:
+    return sanitize_preset_store(read_json(preset_path(slot_id), default_preset_store()))
+
+
+def save_preset_store(payload: dict[str, Any], slot_id: str | None = None) -> dict[str, Any]:
+    sanitized = sanitize_preset_store(payload)
+    persist_json(
+        preset_path(slot_id),
+        sanitized,
+        detail="预设保存失败，请检查磁盘空间或文件权限。",
+    )
+    return sanitized
+
+
+def get_active_preset(slot_id: str | None = None) -> dict[str, Any]:
+    return get_active_preset_from_store(get_preset_store(slot_id))
+
+
+def build_preset_prompt(slot_id: str | None = None) -> str:
+    return build_preset_prompt_from_preset(get_active_preset(slot_id))
+
+
+def get_active_preset_module_labels(slot_id: str | None = None) -> list[str]:
+    preset = get_active_preset(slot_id)
+    modules = preset.get("modules", {}) if isinstance(preset, dict) else {}
+    labels: list[str] = []
+    for key, meta in PRESET_MODULE_RULES.items():
+        if modules.get(key):
+            labels.append(str(meta.get("label", key)))
+    return labels
+
+
+def build_preset_debug_payload(slot_id: str | None = None) -> dict[str, Any]:
+    store = get_preset_store(slot_id)
+    preset = get_active_preset_from_store(store)
+    prompt = build_preset_prompt_from_preset(preset)
+    return {
+        "active_preset_id": str(store.get("active_preset_id", "")).strip(),
+        "active_preset_name": str(preset.get("name", "未命名预设")).strip() or "未命名预设",
+        "enabled": bool(preset.get("enabled", True)),
+        "active_modules": get_active_preset_module_labels(slot_id),
+        "prompt": prompt,
+    }
 
 def load_env_file() -> None:
     env_path = BASE_DIR / ".env"
@@ -673,6 +740,7 @@ def reset_slot_data(slot_id: str) -> dict[str, Any]:
     persist_json(worldbook_path(target), {}, detail="存档重置失败：无法清空世界书。")
     persist_json(current_card_path(target), {}, detail="存档重置失败：无法清空角色卡记录。")
     persist_json(user_profile_path(target), default_user_profile(), detail="存档重置失败：无法重置用户资料。")
+    persist_json(preset_path(target), default_preset_store(), detail="存档重置失败：无法重置预设。")
     remove_upload_variants(f"user_avatar_{target}")
     remove_upload_variants(f"role_avatar_{target}")
     return slot_summary(target)
@@ -943,6 +1011,8 @@ def ensure_data_files() -> None:
             write_json(current_card_path(slot_id), {})
         if not user_profile_path(slot_id).exists():
             write_json(user_profile_path(slot_id), default_user_profile())
+        if not preset_path(slot_id).exists():
+            write_json(preset_path(slot_id), default_preset_store())
     migrate_legacy_root_to_primary_slot()
 
 
@@ -2145,6 +2215,10 @@ def build_messages(
     messages: list[dict[str, str]] = []
     system_sections: list[str] = []
 
+    preset_prompt = build_preset_prompt()
+    if preset_prompt:
+        system_sections.append(preset_prompt)
+
     system_prompt = persona.get("system_prompt", "").strip()
     if system_prompt:
         system_sections.append(system_prompt)
@@ -2708,6 +2782,40 @@ class WorldbookPayload(BaseModel):
     settings: WorldbookSettingsPayload | None = None
 
 
+class PresetPromptPayload(BaseModel):
+    id: str = ""
+    name: str = ""
+    enabled: bool = True
+    content: str = ""
+
+
+class PresetItemPayload(BaseModel):
+    id: str = ""
+    name: str = "默认预设"
+    enabled: bool = True
+    base_system_prompt: str = ""
+    modules: dict[str, bool] = Field(default_factory=dict)
+    extra_prompts: list[PresetPromptPayload] = Field(default_factory=list)
+
+
+class PresetStorePayload(BaseModel):
+    active_preset_id: str = ""
+    presets: list[PresetItemPayload] = Field(default_factory=list)
+
+
+class PresetCreatePayload(BaseModel):
+    name: str = ""
+
+
+class PresetActionPayload(BaseModel):
+    preset_id: str = ""
+
+
+class PresetImportPayload(BaseModel):
+    raw_json: str = ""
+    activate_now: bool = True
+
+
 class SaveSlotSelectPayload(BaseModel):
     slot_id: str
 
@@ -2737,6 +2845,9 @@ class RoleCardLoadPayload(BaseModel):
 
 def build_chat_template_context() -> dict[str, Any]:
     active_slot = get_active_slot_id()
+    preset_store = get_preset_store(active_slot)
+    active_preset = get_active_preset_from_store(preset_store)
+    preset_debug = build_preset_debug_payload(active_slot)
     return {
         "persona": get_persona(active_slot),
         "history": get_conversation(active_slot),
@@ -2745,6 +2856,10 @@ def build_chat_template_context() -> dict[str, Any]:
         "role_avatar_url": get_role_avatar_url(active_slot),
         "active_slot": active_slot,
         "slot_registry": get_slot_registry(),
+        "preset_store": preset_store,
+        "active_preset": active_preset,
+        "active_preset_modules": preset_debug["active_modules"],
+        "preset_debug": preset_debug,
     }
 
 
@@ -2787,6 +2902,30 @@ async def config_page(request: Request) -> HTMLResponse:
     )
 
 
+@app.get("/config/preset", response_class=HTMLResponse)
+async def preset_config_page(request: Request) -> HTMLResponse:
+    active_slot = get_active_slot_id()
+    preset_store = get_preset_store(active_slot)
+    active_preset = get_active_preset_from_store(preset_store)
+    preset_modules = [
+        {"key": key, "label": meta.get("label", key)}
+        for key, meta in PRESET_MODULE_RULES.items()
+    ]
+    return templates.TemplateResponse(
+        request,
+        "preset.html",
+        {
+            "settings": get_settings(active_slot),
+            "preset_store": preset_store,
+            "active_preset": active_preset,
+            "preset_count": len(preset_store.get("presets", [])),
+            "active_slot": active_slot,
+            "slot_registry": get_slot_registry(),
+            "preset_modules": preset_modules,
+        },
+    )
+
+
 @app.get("/config/user", response_class=HTMLResponse)
 async def user_config_page(request: Request) -> HTMLResponse:
     active_slot = get_active_slot_id()
@@ -2806,6 +2945,9 @@ async def user_config_page(request: Request) -> HTMLResponse:
 async def card_config_page(request: Request) -> HTMLResponse:
     active_slot = get_active_slot_id()
     current_card = get_current_card(active_slot)
+    card_template = normalize_role_card(
+        current_card.get("normalized") or current_card.get("raw", {})
+    )
     return templates.TemplateResponse(
         request,
         "card_config.html",
@@ -2813,7 +2955,9 @@ async def card_config_page(request: Request) -> HTMLResponse:
             "settings": get_settings(active_slot),
             "cards": list_role_card_files(),
             "current_card": current_card,
-            "card_template": normalize_role_card(current_card.get("raw", {})),
+            "card_template": card_template,
+            "stage_items": list(card_template.get("plotStages", {}).items()),
+            "persona_items": list(card_template.get("personas", {}).items()),
             "active_slot": active_slot,
             "slot_registry": get_slot_registry(),
         },
@@ -2926,6 +3070,201 @@ async def api_upload_role_avatar(file: UploadFile = File(...)) -> dict[str, Any]
         save_failed_detail="角色头像保存失败，请检查磁盘空间或文件权限。",
     )
     return {"ok": True, "active_slot": active_slot, "role_avatar_url": url, "profile": get_user_profile(active_slot)}
+
+
+@app.get("/api/preset")
+async def api_get_preset() -> dict[str, Any]:
+    active_slot = get_active_slot_id()
+    store = get_preset_store(active_slot)
+    return {
+        "active_slot": active_slot,
+        "preset_store": store,
+        "active_preset": get_active_preset_from_store(store),
+        "preset_debug": build_preset_debug_payload(active_slot),
+    }
+
+
+@app.post("/api/preset")
+async def api_save_preset(payload: PresetStorePayload) -> dict[str, Any]:
+    active_slot = get_active_slot_id()
+    store = save_preset_store(payload.model_dump(), active_slot)
+    return {
+        "ok": True,
+        "active_slot": active_slot,
+        "preset_store": store,
+        "active_preset": get_active_preset_from_store(store),
+        "preset_debug": build_preset_debug_payload(active_slot),
+    }
+
+
+@app.post("/api/preset/create")
+async def api_create_preset(payload: PresetCreatePayload) -> dict[str, Any]:
+    active_slot = get_active_slot_id()
+    store = create_preset_in_store(get_preset_store(active_slot), payload.name)
+    created_preset = store.get("presets", [])[-1] if store.get("presets") else {}
+    store = save_preset_store(store, active_slot)
+    return {
+        "ok": True,
+        "active_slot": active_slot,
+        "preset_store": store,
+        "active_preset": get_active_preset_from_store(store),
+        "created_preset_id": str(created_preset.get("id", "")).strip(),
+        "preset_debug": build_preset_debug_payload(active_slot),
+    }
+
+
+@app.post("/api/preset/activate")
+async def api_activate_preset(payload: PresetActionPayload) -> dict[str, Any]:
+    active_slot = get_active_slot_id()
+    store = activate_preset_in_store(get_preset_store(active_slot), payload.preset_id)
+    store = save_preset_store(store, active_slot)
+    return {
+        "ok": True,
+        "active_slot": active_slot,
+        "preset_store": store,
+        "active_preset": get_active_preset_from_store(store),
+        "preset_debug": build_preset_debug_payload(active_slot),
+    }
+
+
+@app.post("/api/preset/duplicate")
+async def api_duplicate_preset(payload: PresetActionPayload) -> dict[str, Any]:
+    active_slot = get_active_slot_id()
+    store = duplicate_preset_in_store(get_preset_store(active_slot), payload.preset_id)
+    duplicated_preset = store.get("presets", [])[-1] if store.get("presets") else {}
+    store = save_preset_store(store, active_slot)
+    return {
+        "ok": True,
+        "active_slot": active_slot,
+        "preset_store": store,
+        "active_preset": get_active_preset_from_store(store),
+        "duplicated_preset_id": str(duplicated_preset.get("id", "")).strip(),
+        "preset_debug": build_preset_debug_payload(active_slot),
+    }
+
+
+@app.post("/api/preset/delete")
+async def api_delete_preset(payload: PresetActionPayload) -> dict[str, Any]:
+    active_slot = get_active_slot_id()
+    store = delete_preset_from_store(get_preset_store(active_slot), payload.preset_id)
+    store = save_preset_store(store, active_slot)
+    return {
+        "ok": True,
+        "active_slot": active_slot,
+        "preset_store": store,
+        "active_preset": get_active_preset_from_store(store),
+        "preset_debug": build_preset_debug_payload(active_slot),
+    }
+
+
+@app.get("/api/preset/export/current")
+async def api_export_current_preset() -> FileResponse:
+    active_slot = get_active_slot_id()
+    preset = get_active_preset(active_slot)
+    if not isinstance(preset, dict):
+        raise HTTPException(status_code=404, detail="当前预设不存在。")
+    EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+    safe_name = re.sub(r'[\\/:*?"<>|]+', '_', str(preset.get("name", "preset")).strip() or "preset")
+    filename = f"{safe_name}.preset.json"
+    target = EXPORT_DIR / filename
+    persist_json(target, preset, detail="导出预设失败，请检查磁盘空间或文件权限。")
+    return FileResponse(target, media_type="application/json", filename=filename)
+
+
+def strip_json_comments(raw_text: str) -> str:
+    result: list[str] = []
+    in_string = False
+    escape = False
+    in_line_comment = False
+    in_block_comment = False
+    index = 0
+    while index < len(raw_text):
+        char = raw_text[index]
+        next_char = raw_text[index + 1] if index + 1 < len(raw_text) else ""
+        if in_line_comment:
+            if char == "\n":
+                in_line_comment = False
+                result.append(char)
+            index += 1
+            continue
+        if in_block_comment:
+            if char == "*" and next_char == "/":
+                in_block_comment = False
+                index += 2
+            else:
+                index += 1
+            continue
+        if in_string:
+            result.append(char)
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == '"':
+                in_string = False
+            index += 1
+            continue
+        if char == '"':
+            in_string = True
+            result.append(char)
+            index += 1
+            continue
+        if char == "/" and next_char == "/":
+            in_line_comment = True
+            index += 2
+            continue
+        if char == "/" and next_char == "*":
+            in_block_comment = True
+            index += 2
+            continue
+        result.append(char)
+        index += 1
+    return "".join(result)
+
+
+@app.post("/api/preset/import")
+async def api_import_preset(payload: PresetImportPayload) -> dict[str, Any]:
+    active_slot = get_active_slot_id()
+    raw_text = str(payload.raw_json or "").strip()
+    if not raw_text:
+        raise HTTPException(status_code=400, detail="导入内容不能为空。")
+    try:
+        parsed = json.loads(raw_text)
+    except ValueError as exc:
+        try:
+            parsed = json.loads(strip_json_comments(raw_text))
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"预设 JSON 解析失败：{exc}") from exc
+
+    current_store = get_preset_store(active_slot)
+    imported_store = sanitize_preset_store(parsed)
+    imported_presets = imported_store.get("presets", []) if isinstance(parsed, dict) and "presets" in parsed else [get_active_preset_from_store(imported_store)]
+
+    existing_ids = {item.get("id") for item in current_store.get("presets", []) if isinstance(item, dict)}
+    added_ids: list[str] = []
+    for item in imported_presets:
+        if not isinstance(item, dict):
+            continue
+        cloned = json.loads(json.dumps(item, ensure_ascii=False))
+        preset_id = str(cloned.get("id", "")).strip()
+        if not preset_id or preset_id in existing_ids:
+            from preset_rules import generate_preset_id
+            cloned["id"] = generate_preset_id()
+        existing_ids.add(cloned["id"])
+        current_store.setdefault("presets", []).append(cloned)
+        added_ids.append(cloned["id"])
+    if not added_ids:
+        raise HTTPException(status_code=400, detail="没有可导入的预设内容。")
+    if payload.activate_now:
+        current_store["active_preset_id"] = added_ids[-1]
+    store = save_preset_store(current_store, active_slot)
+    return {
+        "ok": True,
+        "active_slot": active_slot,
+        "preset_store": store,
+        "active_preset": get_active_preset_from_store(store),
+        "preset_debug": build_preset_debug_payload(active_slot),
+    }
 
 
 @app.get("/api/persona")
@@ -3322,6 +3661,7 @@ async def api_chat(payload: ChatRequest) -> dict[str, Any]:
     append_messages(entries)
 
     worldbook_debug = build_worldbook_debug_payload(message, worldbook_matches, reply_result=reply_result)
+    preset_debug = build_preset_debug_payload()
 
     return {
         "reply": reply,
@@ -3330,6 +3670,7 @@ async def api_chat(payload: ChatRequest) -> dict[str, Any]:
         "worldbook_debug": worldbook_debug,
         "sprite_tag": reply_result.get("sprite_tag", ""),
         "memory_item": None,
+        "preset_debug": preset_debug,
     }
 
 
@@ -3344,6 +3685,7 @@ async def api_chat_stream(payload: ChatRequest) -> StreamingResponse:
     retrieved_items = await retrieve_memories(message, runtime_overrides)
     worldbook_matches = match_worldbook_entries(message)
     worldbook_debug = build_worldbook_debug_payload(message, worldbook_matches)
+    preset_debug = build_preset_debug_payload()
 
     if not (llm_config["base_url"] and llm_config["model"]):
         if not llm_config["demo_mode"]:
@@ -3359,6 +3701,7 @@ async def api_chat_stream(payload: ChatRequest) -> StreamingResponse:
                 "retrieved_items": retrieved_items,
                 "worldbook_hits": worldbook_matches,
                 "worldbook_debug": worldbook_debug,
+                "preset_debug": preset_debug,
             }
             yield f"data: {json.dumps(meta, ensure_ascii=False)}\n\n"
             done = {"type": "done", "reply": "", "sprite_tag": "", "worldbook_enforced": False}
@@ -3372,6 +3715,7 @@ async def api_chat_stream(payload: ChatRequest) -> StreamingResponse:
             "retrieved_items": retrieved_items,
             "worldbook_hits": worldbook_matches,
             "worldbook_debug": worldbook_debug,
+            "preset_debug": preset_debug,
         }
         yield f"data: {json.dumps(meta, ensure_ascii=False)}\n\n"
 

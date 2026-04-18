@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ settings.theme }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preset - Xuqi LLM Chat</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <style>
+      .preset-layout { display: grid; grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); gap: 1rem; }
+      .preset-sidebar { position: sticky; top: 1rem; align-self: start; }
+      .preset-list { display: flex; flex-direction: column; gap: 0.75rem; }
+      .preset-item { border: 1px solid var(--border); border-radius: 0.9rem; padding: 0.9rem; background: var(--panel-strong); cursor: pointer; text-align: left; color: inherit; }
+      .preset-item.active-editor { outline: 2px solid var(--text); }
+      .preset-item.current-runtime .preset-pill { font-weight: 700; }
+      .preset-item-head { display: flex; justify-content: space-between; gap: 0.75rem; align-items: center; }
+      .preset-item small { color: var(--muted); display: block; margin-top: 0.35rem; }
+      .preset-pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.55rem; border-radius: 999px; background: var(--input-bg); font-size: 0.78rem; }
+      .preset-editor-grid { display: grid; gap: 1rem; }
+      .preset-meta-grid { display: grid; grid-template-columns: 1fr auto; gap: 1rem; }
+      .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.75rem 1rem; }
+      .block-actions { display:flex; justify-content:space-between; gap:1rem; align-items:end; flex-wrap: wrap; }
+      @media (max-width: 980px) { .preset-layout { grid-template-columns: 1fr; } .preset-sidebar { position: static; } }
+    </style>
+  </head>
+  <body>
+    <div class="topbar-stack">
+      <div class="topbar">
+        <a class="brand" href="/">Xuqi LLM Chat</a>
+        <nav class="topnav">
+          <a class="navlink" href="/">Welcome</a>
+          <a class="navlink" href="/chat">Chat</a>
+          <a class="navlink" href="/config">Config</a>
+          <a class="navlink active" href="/config/preset">Preset</a>
+          <a class="navlink" href="/config/user">User</a>
+          <a class="navlink" href="/config/card">Card</a>
+          <a class="navlink" href="/config/sprite">Sprite</a>
+          <a class="navlink" href="/config/memory">Memory</a>
+          <a class="navlink" href="/config/worldbook">WB Set</a>
+          <a class="navlink" href="/config/worldbook/entries">WB List</a>
+        </nav>
+      </div>
+      <div class="slot-toolbar">
+        <div class="slot-toolbar-left">
+          <span class="slot-badge">Save</span>
+          <div class="slot-meta">
+            <strong>当前存档：{{ slot_registry.slots | selectattr("id", "equalto", active_slot) | map(attribute="name") | first or active_slot }}</strong>
+            <p class="slot-hint">这里维护当前存档专属的多套写作预设，不会污染角色卡本体。</p>
+          </div>
+        </div>
+        <div class="slot-toolbar-right">
+          <select id="slot-select" class="slot-select">{% for slot in slot_registry.slots %}<option value="{{ slot.id }}" {% if slot.id == active_slot %}selected{% endif %}>{{ slot.name }}</option>{% endfor %}</select>
+          <button id="rename-slot" type="button" class="secondary compact">重命名</button>
+          <button id="reset-slot" type="button" class="secondary compact">重置</button>
+        </div>
+      </div>
+    </div>
+    <div class="config-shell compact">
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Preset</p>
+          <h2>多预设管理</h2>
+          <p class="muted">一个存档内可保存多套写作预设；聊天时只会使用当前激活的那一份。</p>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><span class="stat-label">当前激活</span><strong id="active-preset-label">{{ active_preset.name }}</strong></div>
+          <div class="stat-box"><span class="stat-label">预设总数</span><strong id="preset-count">{{ preset_count }}</strong></div>
+          <div class="stat-box"><span class="stat-label">状态</span><strong id="preset-enabled-label">{{ '启用' if active_preset.enabled else '停用' }}</strong></div>
+        </div>
+      </section>
+      <div class="preset-layout full-span">
+        <aside class="panel config-panel preset-sidebar">
+          <div class="section-head">
+            <p class="eyebrow">Library</p>
+            <h2>预设列表</h2>
+            <p class="muted">点击左侧项目可切换编辑对象；只有点“设为当前”后才会用于聊天。</p>
+          </div>
+          <div class="button-row"><button id="create-preset" type="button">新增</button><button id="duplicate-preset" type="button" class="secondary">复制</button></div>
+          <div class="button-row"><button id="activate-preset" type="button" class="secondary">设为当前</button><button id="delete-preset" type="button" class="secondary">删除</button></div>
+          <div class="button-row"><button id="import-preset" type="button" class="secondary">导入</button><button id="export-preset" type="button" class="secondary">导出当前</button><input id="import-preset-file" type="file" accept=".json,.jsonc,application/json,text/plain" style="display:none" /></div>
+          <div id="preset-items" class="preset-list"></div>
+        </aside>
+        <main class="preset-editor-grid">
+          <section class="panel config-panel full-span">
+            <div class="preset-meta-grid">
+              <div><label for="preset-name">预设名称</label><input id="preset-name" placeholder="例如：通用陪伴预设" /></div>
+              <div><label class="checkbox-row offset-top"><input id="preset-enabled" type="checkbox" /><span>启用当前编辑预设</span></label></div>
+            </div>
+            <label for="base-system-prompt">基础系统规则</label>
+            <textarea id="base-system-prompt" rows="10" placeholder="这里放每轮都要稳定生效的系统规则。"></textarea>
+            <div class="button-row"><button id="save-preset" type="button">保存当前预设</button><button id="reload-preset" type="button" class="secondary">重新读取</button></div>
+          </section>
+          <section class="panel config-panel full-span">
+            <div class="section-head"><p class="eyebrow">Modules</p><h2>常用模块</h2><p class="muted">模块规则集中配置，适合跨角色复用；互斥项会自动互斥。</p></div>
+            <div class="module-grid">{% for item in preset_modules %}<label class="checkbox-row"><input class="preset-module" data-key="{{ item.key }}" type="checkbox" /><span>{{ item.label }}</span></label>{% endfor %}</div>
+          </section>
+          <section class="panel config-panel full-span">
+            <div class="section-head"><p class="eyebrow">Blocks</p><h2>额外规则块</h2><p class="muted">适合维护少量高频的风格规则、对白规则、推进规则。</p></div>
+            <div class="block-actions"><div class="button-row"><button id="add-preset-block" type="button">新增规则块</button><button id="collapse-all-blocks" type="button" class="secondary">全部折叠</button><button id="expand-all-blocks" type="button" class="secondary">全部展开</button></div><div><label for="preset-search">搜索规则块</label><input id="preset-search" type="text" placeholder="按标题或正文搜索" /></div></div>
+            <div id="preset-list" class="memory-list"></div>
+          </section>
+        </main>
+      </div>
+      <section class="panel config-panel full-span"><div class="section-head"><p class="eyebrow">Status</p><h2>当前状态</h2><p id="status-text" class="muted status-line">就绪</p></div></section>
+    </div>
+    <template id="preset-card-template">
+      <article class="memory-card preset-card" data-collapsed="false">
+        <div class="memory-card-head"><strong>新规则块</strong><div class="button-row"><button type="button" class="secondary compact toggle-preset-card">折叠</button><button type="button" class="secondary compact remove-preset-card">删除</button></div></div>
+        <div class="memory-card-body">
+          <div class="grid-two"><div><label>标题</label><input class="preset-block-name" placeholder="例如：对白节奏" /></div><div><label class="checkbox-row offset-top"><input class="preset-block-enabled" type="checkbox" checked /><span>启用当前规则块</span></label></div></div>
+          <label>正文</label><textarea class="preset-block-content" rows="5" placeholder="这里填写要拼进系统规则的文本。"></textarea><input class="preset-block-id" type="hidden" />
+        </div>
+      </article>
+    </template>
+    <script>
+      const rootEl = document.documentElement;
+      const bodyEl = document.body;
+      const statusEl = document.getElementById("status-text");
+      const presetListEl = document.getElementById("preset-list");
+      const presetItemsEl = document.getElementById("preset-items");
+      const presetCountEl = document.getElementById("preset-count");
+      const activePresetLabelEl = document.getElementById("active-preset-label");
+      const presetEnabledLabelEl = document.getElementById("preset-enabled-label");
+      const templateEl = document.getElementById("preset-card-template");
+      const ACTIVE_SLOT = {{ active_slot | tojson }};
+      const currentTheme = {{ settings.theme | tojson }};
+      const currentOpacity = {{ settings.ui_opacity | tojson }};
+      const currentBackground = {{ settings.background_image_url | tojson }};
+      const currentOverlay = {{ settings.background_overlay | tojson }};
+      let presetStore = {{ preset_store | tojson }};
+      let editingPresetId = presetStore.active_preset_id;
+      const MODULE_MUTEX = { short_paragraph: ["long_paragraph"], long_paragraph: ["short_paragraph"], second_person: ["third_person"], third_person: ["second_person"] };
+      function setStatus(text){ statusEl.textContent = text; }
+      function applyTheme(theme){ rootEl.setAttribute("data-theme", theme === "dark" ? "dark" : "light"); }
+      function applyUiOpacity(opacity){ const normalized = Math.min(Math.max(Number(opacity || 0.84), 0.2), 1); rootEl.style.setProperty("--panel-opacity", normalized.toFixed(2)); rootEl.style.setProperty("--input-opacity", Math.min(normalized + 0.04, 1).toFixed(2)); }
+      function applyBackground(url, overlay){ const normalizedOverlay = Math.min(Math.max(Number(overlay || 0), 0), 0.85); bodyEl.style.setProperty("--background-overlay-opacity", String(normalizedOverlay)); bodyEl.style.setProperty("--background-image", url ? `url("${url}")` : "none"); }
+      async function postJson(url,payload){ const response = await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}); if(!response.ok){ const data = await response.json().catch(()=>({})); throw new Error(data.detail || "请求失败"); } return response.json(); }
+      async function selectSlot(slotId){ await postJson('/api/slots/select',{slot_id:slotId}); window.location.reload(); }
+      async function renameSlot(slotId){ const currentName = document.getElementById('slot-select').selectedOptions[0]?.textContent || slotId; const nextName = window.prompt('给这个存档起个名字：', currentName); if(nextName===null) return; await postJson('/api/slots/rename',{slot_id:slotId,name:nextName}); window.location.reload(); }
+      async function resetSlot(slotId){ const confirmed = window.confirm('重置后，这个存档里的立绘、人设、记忆、世界书、聊天记录和预设都会清空。要继续吗？'); if(!confirmed) return; await postJson('/api/slots/reset',{slot_id:slotId}); window.location.reload(); }
+      function getPresetById(id){ return (presetStore.presets || []).find(item => item.id === id) || presetStore.presets?.[0] || null; }
+      function setCardCollapsed(card, collapsed){ card.dataset.collapsed = collapsed ? 'true' : 'false'; const body = card.querySelector('.memory-card-body'); const toggle = card.querySelector('.toggle-preset-card'); if(body) body.hidden = collapsed; if(toggle) toggle.textContent = collapsed ? '展开' : '折叠'; }
+      function attachPresetCardHandlers(card){ card.querySelector('.remove-preset-card')?.addEventListener('click',()=>{ card.remove(); applySearch(); }); card.querySelector('.toggle-preset-card')?.addEventListener('click',()=>{ setCardCollapsed(card, card.dataset.collapsed !== 'true'); }); }
+      function createPresetCard(item={}){ const fragment = templateEl.content.cloneNode(true); const card = fragment.querySelector('.preset-card'); card.querySelector('.preset-block-name').value = item.name || ''; card.querySelector('.preset-block-content').value = item.content || ''; card.querySelector('.preset-block-enabled').checked = item.enabled !== false; card.querySelector('.preset-block-id').value = item.id || ''; card.querySelector('.memory-card-head strong').textContent = item.name || '新规则块'; attachPresetCardHandlers(card); return card; }
+      function renderPresetList(){ presetItemsEl.innerHTML=''; const items = presetStore.presets || []; presetCountEl.textContent = String(items.length); const activePreset = getPresetById(presetStore.active_preset_id); activePresetLabelEl.textContent = activePreset?.name || '未命名预设'; presetEnabledLabelEl.textContent = activePreset?.enabled === false ? '停用' : '启用'; for(const item of items){ const btn=document.createElement('button'); btn.type='button'; btn.className='preset-item' + (item.id===editingPresetId ? ' active-editor' : '') + (item.id===presetStore.active_preset_id ? ' current-runtime' : ''); btn.innerHTML = `<div class="preset-item-head"><strong>${item.name || '未命名预设'}</strong><span class="preset-pill">${item.id===presetStore.active_preset_id ? '当前' : '候选'}</span></div><small>${item.enabled===false ? '已停用' : '已启用'} · ${item.extra_prompts?.length || 0} 个规则块</small>`; btn.addEventListener('click',()=>{ syncEditorToStore(); editingPresetId = item.id; renderPresetList(); applyPreset(getPresetById(editingPresetId)); setStatus(`正在编辑：${item.name || '未命名预设'}`); }); presetItemsEl.appendChild(btn);} }
+      function applySearch(){ const keyword = document.getElementById('preset-search').value.trim().toLowerCase(); presetListEl.querySelectorAll('.preset-card').forEach((card)=>{ const text=[card.querySelector('.preset-block-name')?.value || '', card.querySelector('.preset-block-content')?.value || ''].join(' ').toLowerCase(); card.hidden = keyword ? !text.includes(keyword) : false; }); }
+      function applyPreset(preset){ const target = preset || getPresetById(editingPresetId); if(!target) return; document.getElementById('preset-name').value = target.name || '默认预设'; document.getElementById('preset-enabled').checked = target.enabled !== false; document.getElementById('base-system-prompt').value = target.base_system_prompt || ''; const modules = target.modules || {}; document.querySelectorAll('.preset-module').forEach((el)=>{ el.checked = Boolean(modules[el.dataset.key]); }); presetListEl.innerHTML=''; for(const item of (target.extra_prompts || [])){ presetListEl.appendChild(createPresetCard(item)); } applySearch(); }
+      function collectCurrentPreset(){ return { id: editingPresetId, name: document.getElementById('preset-name').value.trim() || '默认预设', enabled: document.getElementById('preset-enabled').checked, base_system_prompt: document.getElementById('base-system-prompt').value.trim(), modules: Object.fromEntries(Array.from(document.querySelectorAll('.preset-module')).map((el)=>[el.dataset.key, el.checked])), extra_prompts: Array.from(presetListEl.querySelectorAll('.preset-card')).map((card,index)=>({ id: card.querySelector('.preset-block-id').value.trim() || `preset-block-${Date.now()}-${index}`, name: card.querySelector('.preset-block-name').value.trim() || `规则块 ${index+1}`, enabled: card.querySelector('.preset-block-enabled').checked, content: card.querySelector('.preset-block-content').value.trim() })) }; }
+      function syncEditorToStore(){ const current = collectCurrentPreset(); presetStore.presets = (presetStore.presets || []).map((item)=> item.id === current.id ? current : item); }
+      function applyMutex(changedKey){ const opposites = MODULE_MUTEX[changedKey] || []; const changedEl = document.querySelector(`.preset-module[data-key="${changedKey}"]`); if(!changedEl?.checked) return; opposites.forEach((key)=>{ const el=document.querySelector(`.preset-module[data-key="${key}"]`); if(el) el.checked=false; }); }
+      async function reloadStore(){ const data = await fetch('/api/preset').then((response)=>response.json()); presetStore = data.preset_store || {active_preset_id:'',presets:[]}; editingPresetId = presetStore.active_preset_id || presetStore.presets?.[0]?.id || ''; renderPresetList(); applyPreset(getPresetById(editingPresetId)); setStatus('预设已重新读取。'); }
+      async function saveStore(){ syncEditorToStore(); const data = await postJson('/api/preset', presetStore); presetStore = data.preset_store || presetStore; renderPresetList(); applyPreset(getPresetById(editingPresetId)); setStatus('预设已保存。'); }
+      async function createPreset(){ syncEditorToStore(); const name = window.prompt('新预设名称：', '新预设'); const data = await postJson('/api/preset/create', {name: name || ''}); presetStore = data.preset_store || presetStore; editingPresetId = data.created_preset_id || presetStore.active_preset_id; renderPresetList(); applyPreset(getPresetById(editingPresetId)); setStatus('已新增预设（未自动设为当前）。'); }
+      async function duplicatePreset(){ syncEditorToStore(); const data = await postJson('/api/preset/duplicate', {preset_id: editingPresetId}); presetStore = data.preset_store || presetStore; editingPresetId = data.duplicated_preset_id || presetStore.active_preset_id; renderPresetList(); applyPreset(getPresetById(editingPresetId)); setStatus('已复制当前预设（未自动设为当前）。'); }
+      async function activatePreset(){ syncEditorToStore(); await saveStore(); const data = await postJson('/api/preset/activate', {preset_id: editingPresetId}); presetStore = data.preset_store || presetStore; renderPresetList(); applyPreset(getPresetById(editingPresetId)); setStatus('已切换当前激活预设。'); }
+      async function deletePreset(){ const current = getPresetById(editingPresetId); if(!current) return; const confirmed = window.confirm(`要删除预设「${current.name || '未命名预设'}」吗？`); if(!confirmed) return; const data = await postJson('/api/preset/delete', {preset_id: editingPresetId}); presetStore = data.preset_store || presetStore; editingPresetId = presetStore.active_preset_id || presetStore.presets?.[0]?.id || ''; renderPresetList(); applyPreset(getPresetById(editingPresetId)); setStatus('预设已删除。'); }
+      presetListEl.addEventListener('input', (event)=>{ const card = event.target.closest('.preset-card'); if(!card) return; card.querySelector('.memory-card-head strong').textContent = card.querySelector('.preset-block-name').value.trim() || '新规则块'; applySearch(); });
+      document.querySelectorAll('.preset-module').forEach((el)=>{ el.addEventListener('change', ()=>applyMutex(el.dataset.key)); });
+      document.getElementById('add-preset-block').addEventListener('click', ()=>{ presetListEl.prepend(createPresetCard()); applySearch(); setStatus('已新增一条空白规则块。'); });
+      document.getElementById('save-preset').addEventListener('click', async()=>{ try{ await saveStore(); } catch(error){ setStatus(`保存失败：${error.message}`); } });
+      document.getElementById('reload-preset').addEventListener('click', async()=>{ try{ await reloadStore(); } catch(error){ setStatus(`读取失败：${error.message}`); } });
+      document.getElementById('create-preset').addEventListener('click', async()=>{ try{ await createPreset(); } catch(error){ setStatus(`新增失败：${error.message}`); } });
+      document.getElementById('duplicate-preset').addEventListener('click', async()=>{ try{ await duplicatePreset(); } catch(error){ setStatus(`复制失败：${error.message}`); } });
+      document.getElementById('activate-preset').addEventListener('click', async()=>{ try{ await activatePreset(); } catch(error){ setStatus(`切换失败：${error.message}`); } });
+      document.getElementById('delete-preset').addEventListener('click', async()=>{ try{ await deletePreset(); } catch(error){ setStatus(`删除失败：${error.message}`); } });
+      async function importPresetFile(file){ const text = await file.text(); const data = await postJson('/api/preset/import', { raw_json: text, activate_now: true }); presetStore = data.preset_store || presetStore; editingPresetId = presetStore.active_preset_id || presetStore.presets?.[0]?.id || ''; renderPresetList(); applyPreset(getPresetById(editingPresetId)); setStatus('预设已导入。'); }
+      async function exportCurrentPreset(){ const response = await fetch('/api/preset/export/current'); if(!response.ok){ const data = await response.json().catch(() => ({})); throw new Error(data.detail || '导出失败'); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; const disposition = response.headers.get('Content-Disposition') || ''; const match = disposition.match(/filename=\"?([^\";]+)\"?/); a.download = match ? decodeURIComponent(match[1]) : 'preset.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+      document.getElementById('import-preset').addEventListener('click', ()=>document.getElementById('import-preset-file').click());
+      document.getElementById('import-preset-file').addEventListener('change', async(event)=>{ const file = event.target.files?.[0]; if(!file) return; try{ await importPresetFile(file); } catch(error){ setStatus(`导入失败：${error.message}`); } finally { event.target.value = ''; } });
+      document.getElementById('export-preset').addEventListener('click', async()=>{ try{ await exportCurrentPreset(); setStatus('已导出当前预设。'); } catch(error){ setStatus(`导出失败：${error.message}`); } });
+      document.getElementById('preset-search').addEventListener('input', applySearch);
+      document.getElementById('collapse-all-blocks').addEventListener('click', ()=>{ presetListEl.querySelectorAll('.preset-card').forEach((card)=>setCardCollapsed(card,true)); setStatus('已折叠全部规则块。'); });
+      document.getElementById('expand-all-blocks').addEventListener('click', ()=>{ presetListEl.querySelectorAll('.preset-card').forEach((card)=>setCardCollapsed(card,false)); setStatus('已展开全部规则块。'); });
+      document.getElementById('slot-select').addEventListener('change', async(event)=>{ try{ setStatus('正在切换存档。'); await selectSlot(event.target.value); } catch(error){ setStatus(`切换存档失败：${error.message}`); event.target.value = ACTIVE_SLOT; } });
+      document.getElementById('rename-slot').addEventListener('click', async()=>{ try{ await renameSlot(document.getElementById('slot-select').value); } catch(error){ setStatus(`重命名失败：${error.message}`); } });
+      document.getElementById('reset-slot').addEventListener('click', async()=>{ try{ await resetSlot(document.getElementById('slot-select').value); } catch(error){ setStatus(`重置失败：${error.message}`); } });
+      applyTheme(currentTheme); applyUiOpacity(currentOpacity); applyBackground(currentBackground, currentOverlay); renderPresetList(); applyPreset(getPresetById(editingPresetId));
+    </script>
+  </body>
+</html>
