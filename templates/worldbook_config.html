@@ -68,6 +68,11 @@
           <span>启用世界书</span>
         </label>
 
+        <label class="checkbox-row">
+          <input id="wb-debug-enabled" type="checkbox" {% if worldbook_settings.debug_enabled %}checked{% endif %} />
+          <span>仅在开启时于 Chat 页面显示 Worldbook Debug 面板</span>
+        </label>
+
         <div class="grid-two">
           <div>
             <label for="wb-max-hits">每轮最多命中条数</label>
@@ -190,6 +195,7 @@
       function readSettingsForm() {
         return {
           enabled: document.getElementById("wb-enabled").checked,
+          debug_enabled: document.getElementById("wb-debug-enabled").checked,
           max_hits: Number(document.getElementById("wb-max-hits").value || 3),
           default_case_sensitive: document.getElementById("wb-default-case-sensitive").checked,
           default_whole_word: document.getElementById("wb-default-whole-word").checked,
@@ -200,6 +206,7 @@
 
       function fillSettingsForm(settings) {
         document.getElementById("wb-enabled").checked = Boolean(settings.enabled);
+        document.getElementById("wb-debug-enabled").checked = Boolean(settings.debug_enabled);
         document.getElementById("wb-max-hits").value = settings.max_hits ?? 3;
         document.getElementById("wb-default-case-sensitive").checked = Boolean(settings.default_case_sensitive);
         document.getElementById("wb-default-whole-word").checked = Boolean(settings.default_whole_word);

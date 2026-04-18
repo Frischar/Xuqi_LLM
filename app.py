@@ -461,6 +461,7 @@ def sanitize_memories(raw: Any) -> list[dict[str, Any]]:
 
 DEFAULT_WORLDBOOK_SETTINGS = {
     "enabled": True,
+    "debug_enabled": False,
     "max_hits": 3,
     "default_case_sensitive": False,
     "default_whole_word": False,
@@ -479,6 +480,7 @@ def sanitize_worldbook_settings(raw: Any) -> dict[str, Any]:
         return settings
 
     settings["enabled"] = bool(raw.get("enabled", settings["enabled"]))
+    settings["debug_enabled"] = bool(raw.get("debug_enabled", settings["debug_enabled"]))
     try:
         settings["max_hits"] = max(1, min(20, int(raw.get("max_hits", settings["max_hits"]))))
     except (TypeError, ValueError):
@@ -2313,6 +2315,8 @@ def build_worldbook_debug_payload(
     *,
     reply_result: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    if not get_worldbook_settings().get("debug_enabled", False):
+        return {}
     return {
         "hit_count": len(worldbook_matches),
         "prompt": build_worldbook_prompt(worldbook_matches),
@@ -2770,6 +2774,7 @@ class WorldbookEntryPayload(BaseModel):
 
 class WorldbookSettingsPayload(BaseModel):
     enabled: bool = True
+    debug_enabled: bool = False
     max_hits: int = 3
     default_case_sensitive: bool = False
     default_whole_word: bool = False
@@ -2852,6 +2857,7 @@ def build_chat_template_context() -> dict[str, Any]:
         "persona": get_persona(active_slot),
         "history": get_conversation(active_slot),
         "settings": get_settings(active_slot),
+        "worldbook_settings": get_worldbook_settings(active_slot),
         "user_profile": get_user_profile(active_slot),
         "role_avatar_url": get_role_avatar_url(active_slot),
         "active_slot": active_slot,
