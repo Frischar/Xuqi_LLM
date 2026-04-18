@@ -449,6 +449,8 @@
           filename,
           apply_now: true,
         });
+        const savedCard = data.card?.raw || data.card || card;
+        fillCardForm(savedCard);
         document.getElementById("card-filename").value = data.filename || filename;
         await refreshCardList(data.filename || filename);
         setStatus(`角色卡已保存并加载：${data.filename}`);
@@ -460,8 +462,9 @@
           throw new Error("请先选择一个角色卡文件");
         }
         const data = await postJson("/api/cards/load", { filename });
+        const loadedCard = data.card?.raw || data.card || {};
         document.getElementById("card-filename").value = data.filename || filename;
-        fillCardForm(data.card || {});
+        fillCardForm(loadedCard);
         await refreshCardList(data.filename || filename);
         setStatus(`角色卡已加载：${data.filename}`);
       }

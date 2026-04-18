@@ -2806,6 +2806,9 @@ async def user_config_page(request: Request) -> HTMLResponse:
 async def card_config_page(request: Request) -> HTMLResponse:
     active_slot = get_active_slot_id()
     current_card = get_current_card(active_slot)
+    card_template = normalize_role_card(
+        current_card.get("normalized") or current_card.get("raw", {})
+    )
     return templates.TemplateResponse(
         request,
         "card_config.html",
@@ -2813,7 +2816,9 @@ async def card_config_page(request: Request) -> HTMLResponse:
             "settings": get_settings(active_slot),
             "cards": list_role_card_files(),
             "current_card": current_card,
-            "card_template": normalize_role_card(current_card.get("raw", {})),
+            "card_template": card_template,
+            "stage_items": list(card_template.get("plotStages", {}).items()),
+            "persona_items": list(card_template.get("personas", {}).items()),
             "active_slot": active_slot,
             "slot_registry": get_slot_registry(),
         },
