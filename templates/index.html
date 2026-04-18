@@ -63,6 +63,247 @@
         }
       }
     </style>
+  
+    <style>
+      .preset-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.95rem 1rem;
+        border-radius: 1rem;
+        border: 1px solid var(--border);
+        background: var(--panel-strong);
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 1rem;
+      }
+      .preset-toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        min-width: 0;
+      }
+      .preset-pill-label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.38rem 0.75rem;
+        border-radius: 999px;
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+      .preset-current-meta {
+        min-width: 0;
+      }
+      .preset-current-meta strong {
+        display: block;
+        font-size: 0.98rem;
+        line-height: 1.2;
+      }
+      .preset-current-meta p {
+        margin: 0.18rem 0 0;
+        font-size: 0.84rem;
+        line-height: 1.3;
+      }
+      .preset-toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .preset-combo {
+        position: relative;
+      }
+      .preset-pill-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 2.55rem;
+        padding: 0.7rem 1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, var(--panel), var(--panel-strong));
+        color: var(--text);
+        box-shadow: var(--shadow-soft);
+        cursor: pointer;
+        transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      }
+      .preset-pill-button:hover {
+        transform: translateY(-1px);
+        border-color: var(--accent, var(--border));
+      }
+      .preset-pill-arrow {
+        font-size: 0.85rem;
+        opacity: 0.75;
+      }
+      .preset-manage-link {
+        text-decoration: none;
+      }
+      .preset-menu {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        min-width: 18rem;
+        max-width: min(26rem, 80vw);
+        max-height: 20rem;
+        overflow-y: auto;
+        padding: 0.45rem;
+        border-radius: 1rem;
+        border: 1px solid var(--border);
+        background: var(--panel-strong);
+        box-shadow: var(--shadow-soft);
+        z-index: 50;
+      }
+      .preset-menu-item {
+        width: 100%;
+        border: none;
+        background: transparent;
+        color: var(--text);
+        text-align: left;
+        padding: 0.75rem 0.85rem;
+        border-radius: 0.8rem;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      .preset-menu-item:hover {
+        background: var(--input-bg);
+      }
+      .preset-menu-item.active {
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+      }
+      .preset-menu-title {
+        display: block;
+        font-weight: 700;
+        font-size: 0.95rem;
+        line-height: 1.2;
+      }
+      .preset-menu-meta {
+        display: block;
+        margin-top: 0.22rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+        line-height: 1.3;
+      }
+      .drawer-preset-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.85rem;
+      }
+      .drawer-preset-current {
+        padding: 0.85rem 0.95rem;
+        border: 1px solid var(--border);
+        border-radius: 0.9rem;
+        background: var(--panel);
+        margin-bottom: 0.85rem;
+      }
+      .drawer-preset-current strong {
+        display: block;
+        font-size: 0.95rem;
+        margin-bottom: 0.18rem;
+      }
+      .drawer-preset-current p {
+        margin: 0;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .drawer-debug-panel {
+        border: 1px solid var(--border);
+        border-radius: 0.9rem;
+        background: var(--panel);
+        padding: 0.85rem 0.95rem;
+      }
+      .drawer-debug-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .drawer-debug-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        flex-wrap: wrap;
+      }
+      .drawer-debug-title {
+        font-weight: 700;
+      }
+      .drawer-debug-body {
+        margin-top: 0.8rem;
+      }
+      .preset-debug-panel {
+        margin-bottom: 1rem;
+      }
+      .preset-debug-status-row {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.6rem;
+      }
+      .preset-debug-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--input-bg);
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+      .preset-debug-chip.active {
+        border-color: var(--accent, var(--border));
+      }
+      .preset-module-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin: 0.5rem 0 0.8rem;
+      }
+      .preset-module-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.28rem 0.68rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        font-size: 0.78rem;
+      }
+      #preset-debug-body[hidden] {
+        display: none !important;
+      }
+      @media (max-width: 768px) {
+        .preset-toolbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .preset-toolbar-right {
+          justify-content: stretch;
+        }
+        .preset-combo,
+        .preset-pill-button,
+        .preset-manage-link {
+          width: 100%;
+        }
+        .preset-menu {
+          left: 0;
+          right: 0;
+          max-width: 100%;
+        }
+      }
+    </style>
+
   </head>
   <body>
     <div class="topbar topbar-chat">
@@ -74,6 +315,7 @@
         <a class="navlink" href="/">Welcome</a>
         <a class="navlink active" href="/chat">Chat</a>
         <a class="navlink" href="/config">Config</a>
+        <a class="navlink" href="/config/preset">Preset</a>
         <a class="navlink" href="/config/user">User</a>
         <a class="navlink" href="/config/card">Card</a>
         <a class="navlink" href="/config/sprite">Sprite</a>
@@ -129,6 +371,27 @@
               <div class="theme-pill" id="theme-pill">{{ "暗色模式" if settings.theme == "dark" else "浅色模式" }}</div>
               <button id="open-drawer-secondary" type="button" class="secondary compact">打开侧栏</button>
             </div>
+          </div>
+
+
+          <div class="preset-toolbar">
+            <div class="preset-toolbar-left">
+              <span class="preset-pill-label">Preset</span>
+              <div class="preset-current-meta">
+                <strong id="chat-preset-name">未选择预设</strong>
+                <p id="chat-preset-modules" class="muted">当前无激活模块</p>
+              </div>
+            </div>
+
+            <div class="preset-toolbar-right">
+              <div class="preset-combo">
+                <button id="toggle-preset-menu" type="button" class="preset-pill-button">
+                  <span id="preset-pill-text">切换预设</span>
+                  <span class="preset-pill-arrow">▾</span>
+                </button>
+                <div id="preset-menu" class="preset-menu" hidden></div>
+              </div>
+              </div>
           </div>
 
           <div class="retrieval-bar" id="retrieval-bar" hidden>
@@ -205,6 +468,34 @@
       </div>
 
       <div class="drawer-body">
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Preset</p>
+            <h3>预设侧栏</h3>
+            <p class="muted">这里集中放预设管理与调试，不占聊天主区域。</p>
+          </div>
+          <div class="drawer-preset-tools">
+            <a href="/config/preset" class="secondary compact preset-manage-link">管理预设</a>
+            <button id="toggle-preset-debug" type="button" class="secondary compact">展开 Debug</button>
+          </div>
+          <div class="drawer-preset-current">
+            <strong id="drawer-preset-name">未选择预设</strong>
+            <p id="drawer-preset-modules">当前无激活模块</p>
+          </div>
+          <div id="preset-debug-panel" class="drawer-debug-panel" hidden>
+            <div class="drawer-debug-head">
+              <div class="drawer-debug-meta">
+                <span class="drawer-debug-title">Preset Debug</span>
+                <span id="preset-debug-status" class="preset-debug-chip">启用</span>
+                <span id="preset-debug-name" class="muted">当前预设：未选择预设</span>
+              </div>
+            </div>
+            <div id="preset-debug-body" class="drawer-debug-body">
+              <div id="preset-debug-modules" class="preset-module-chip-row"></div>
+              <pre id="preset-debug-prompt" class="debug-code-block"></pre>
+            </div>
+          </div>
+        </section>
         <section class="drawer-section">
           <div class="section-head">
             <p class="eyebrow">LLM</p>
@@ -371,6 +662,21 @@
       const worldbookDebugStatusEl = document.getElementById("worldbook-debug-status");
       const worldbookDebugCountEl = document.getElementById("worldbook-debug-count");
       const worldbookDebugPromptEl = document.getElementById("worldbook-debug-prompt");
+      const presetNameEl = document.getElementById("chat-preset-name");
+      const presetModulesEl = document.getElementById("chat-preset-modules");
+      const drawerPresetNameEl = document.getElementById("drawer-preset-name");
+      const drawerPresetModulesEl = document.getElementById("drawer-preset-modules");
+      const presetMenuEl = document.getElementById("preset-menu");
+      const togglePresetMenuBtn = document.getElementById("toggle-preset-menu");
+      const presetPillTextEl = document.getElementById("preset-pill-text");
+      const presetDebugPanelEl = document.getElementById("preset-debug-panel");
+      const presetDebugStatusEl = document.getElementById("preset-debug-status");
+      const presetDebugNameEl = document.getElementById("preset-debug-name");
+      const presetDebugModulesEl = document.getElementById("preset-debug-modules");
+      const presetDebugPromptEl = document.getElementById("preset-debug-prompt");
+      const presetDebugBodyEl = document.getElementById("preset-debug-body");
+      const togglePresetDebugBtn = document.getElementById("toggle-preset-debug");
+      let presetDebugCollapsed = true;
       const drawerEl = document.getElementById("config-drawer");
       const drawerOverlayEl = document.getElementById("drawer-overlay");
       const spriteImageEl = document.getElementById("sprite-image");
@@ -836,19 +1142,34 @@
       function createMessage(role, content, createdAt = new Date().toLocaleString()) {
         const wrapper = document.createElement("div");
         wrapper.className = `message ${role}`;
+
         const bubbleWrap = document.createElement("div");
         bubbleWrap.className = "bubble-wrap";
+
         const bubble = document.createElement("div");
         bubble.className = "bubble";
         renderBubbleContent(bubble, content);
+
         const meta = document.createElement("div");
         meta.className = "message-meta";
         meta.textContent = createdAt;
+
+        const avatar = buildAvatar(role);
+
         bubbleWrap.appendChild(bubble);
         bubbleWrap.appendChild(meta);
-        wrapper.appendChild(bubbleWrap);
+
+        if (role === "user") {
+          wrapper.appendChild(bubbleWrap);
+          wrapper.appendChild(avatar);
+        } else {
+          wrapper.appendChild(avatar);
+          wrapper.appendChild(bubbleWrap);
+        }
+
         messagesEl.appendChild(wrapper);
         messagesEl.scrollTop = messagesEl.scrollHeight;
+
         return {
           wrapper,
           bubble,
@@ -1015,6 +1336,204 @@
         worldbookDebugCountEl.textContent = `${hits.length} items`;
         worldbookDebugPromptEl.textContent = prompt || hits.map((item) => item.trigger).join("\n");
         worldbookDebugPanelEl.hidden = false;
+      }
+
+
+      let presetStoreCache = null;
+
+      function getPresetStorePayload(data) {
+        if (data && typeof data === "object") {
+          if (data.preset_store && typeof data.preset_store === "object") {
+            return data.preset_store;
+          }
+          if (data.preset && typeof data.preset === "object") {
+            return data.preset;
+          }
+          if (data.store && typeof data.store === "object") {
+            return data.store;
+          }
+          if (Array.isArray(data.presets) || typeof data.active_preset_id === "string") {
+            return data;
+          }
+        }
+        return null;
+      }
+
+      function getPresetDebugPayload(data) {
+        if (data && typeof data === "object" && data.preset_debug && typeof data.preset_debug === "object") {
+          return data.preset_debug;
+        }
+        return null;
+      }
+
+      function getEnabledModuleLabels(modules) {
+        const labels = {
+          no_user_speaking: "防抢话",
+          short_paragraph: "短段落",
+          long_paragraph: "长段落",
+          second_person: "第二人称",
+          third_person: "第三人称",
+          anti_repeat: "抗重复",
+          no_closing_feel: "弱收尾",
+        };
+        return Object.entries(modules || {})
+          .filter(([key, value]) => Boolean(value) && labels[key])
+          .map(([key]) => labels[key]);
+      }
+
+      function getActivePresetFromStore(store) {
+        if (!store || !Array.isArray(store.presets)) return null;
+        return store.presets.find((item) => item.id === store.active_preset_id) || store.presets[0] || null;
+      }
+
+      function renderPresetSummaryFromStore(store) {
+        if (!store) {
+          presetNameEl.textContent = "未选择预设";
+          presetModulesEl.textContent = "当前无激活模块";
+          presetPillTextEl.textContent = "切换预设";
+          return;
+        }
+        const active = getActivePresetFromStore(store);
+        if (!active) {
+          presetNameEl.textContent = "未选择预设";
+          presetModulesEl.textContent = "当前无激活模块";
+          presetPillTextEl.textContent = "切换预设";
+          return;
+        }
+        presetNameEl.textContent = active.name || "未命名预设";
+        presetPillTextEl.textContent = active.name || "切换预设";
+        const enabledModules = getEnabledModuleLabels(active.modules);
+        presetModulesEl.textContent = enabledModules.length
+          ? `激活模块：${enabledModules.join(" / ")}`
+          : "当前无激活模块";
+      }
+
+      function renderPresetDebug(debug, store = presetStoreCache) {
+        const active = getActivePresetFromStore(store);
+        const activeName = debug?.active_preset_name || active?.name || "未选择预设";
+        const enabledModules = Array.isArray(debug?.active_modules)
+          ? debug.active_modules
+          : getEnabledModuleLabels(active?.modules || {});
+        const promptText = typeof debug?.prompt === "string"
+          ? debug.prompt.trim()
+          : String(active?.base_system_prompt || "").trim();
+
+        if (!active && !promptText && !enabledModules.length) {
+          presetDebugPanelEl.hidden = true;
+          presetDebugPromptEl.textContent = "";
+          presetDebugModulesEl.innerHTML = "";
+          presetDebugStatusEl.classList.remove("active");
+          return;
+        }
+
+        presetDebugStatusEl.textContent = active?.enabled === false ? "停用" : "启用";
+        presetDebugStatusEl.classList.toggle("active", active?.enabled !== false);
+        presetDebugNameEl.textContent = `当前预设：${activeName}`;
+
+        presetDebugModulesEl.innerHTML = "";
+        if (enabledModules.length) {
+          enabledModules.forEach((label) => {
+            const chip = document.createElement("span");
+            chip.className = "preset-module-chip";
+            chip.textContent = label;
+            presetDebugModulesEl.appendChild(chip);
+          });
+        }
+
+        presetDebugPromptEl.textContent = promptText || "当前没有可预览的 preset prompt。";
+        presetDebugPanelEl.hidden = false;
+        setPresetDebugCollapsed(true);
+      }
+
+      function renderPresetMenu(store) {
+        if (!presetMenuEl) return;
+        presetMenuEl.innerHTML = "";
+        const activeId = store?.active_preset_id;
+        const presets = Array.isArray(store?.presets) ? store.presets : [];
+
+        if (!presets.length) {
+          const empty = document.createElement("div");
+          empty.className = "preset-menu-item";
+          empty.textContent = "当前没有可用预设";
+          presetMenuEl.appendChild(empty);
+          return;
+        }
+
+        for (const preset of presets) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "preset-menu-item" + (preset.id === activeId ? " active" : "");
+          const enabledModules = getEnabledModuleLabels(preset.modules);
+          btn.innerHTML = `
+            <span class="preset-menu-title">${preset.name || "未命名预设"}</span>
+            <span class="preset-menu-meta">${preset.enabled ? "启用" : "停用"} · ${enabledModules.length ? enabledModules.join(" / ") : "无激活模块"}</span>
+          `;
+          btn.addEventListener("click", async () => {
+            try {
+              const response = await fetch("/api/preset/activate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ preset_id: preset.id }),
+              });
+              if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.detail || "切换预设失败");
+              }
+              const data = await response.json();
+              const storePayload = getPresetStorePayload(data);
+              const debugPayload = getPresetDebugPayload(data);
+              presetStoreCache = storePayload;
+              renderPresetSummaryFromStore(storePayload);
+              renderPresetMenu(storePayload);
+              renderPresetDebug(debugPayload, storePayload);
+              presetMenuEl.hidden = true;
+              setStatus(`已切换预设：${getActivePresetFromStore(storePayload)?.name || "完成"}`);
+            } catch (error) {
+              console.error(error);
+              setStatus(`切换预设失败：${error.message}`);
+            }
+          });
+          presetMenuEl.appendChild(btn);
+        }
+      }
+
+
+      function setPresetDebugCollapsed(collapsed) {
+        presetDebugCollapsed = !!collapsed;
+        if (presetDebugBodyEl) {
+          presetDebugBodyEl.hidden = presetDebugCollapsed;
+        }
+        if (togglePresetDebugBtn) {
+          togglePresetDebugBtn.textContent = presetDebugCollapsed ? "展开 Debug" : "折叠 Debug";
+        }
+      }
+
+      if (togglePresetDebugBtn) {
+        togglePresetDebugBtn.addEventListener("click", () => {
+          setPresetDebugCollapsed(!presetDebugCollapsed);
+        });
+      }
+
+      async function loadPresetStoreForChat() {
+        try {
+          const response = await fetch("/api/preset");
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.detail || "读取预设失败");
+          }
+          const data = await response.json();
+          const storePayload = getPresetStorePayload(data);
+          const debugPayload = getPresetDebugPayload(data);
+          presetStoreCache = storePayload;
+          renderPresetSummaryFromStore(storePayload);
+          renderPresetMenu(storePayload);
+          renderPresetDebug(debugPayload, storePayload);
+        } catch (error) {
+          console.error(error);
+          presetNameEl.textContent = "读取预设失败";
+          presetModulesEl.textContent = "请检查 preset 接口";
+          presetDebugPanelEl.hidden = true;
+        }
       }
 
       async function postJson(url, payload) {
@@ -1213,6 +1732,7 @@
               renderRetrievedItems(data.retrieved_items || []);
               renderWorldbookHits(data.worldbook_hits || []);
               renderWorldbookDebug(data.worldbook_debug || {});
+              renderPresetDebug(data.preset_debug || {}, presetStoreCache);
             },
             onThinkStart() {
               assistantEntry.state.thinking = true;
@@ -1321,6 +1841,18 @@
         }
       });
 
+      if (togglePresetMenuBtn && presetMenuEl) {
+        togglePresetMenuBtn.addEventListener("click", () => {
+          presetMenuEl.hidden = !presetMenuEl.hidden;
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!presetMenuEl.hidden && !presetMenuEl.contains(event.target) && !togglePresetMenuBtn.contains(event.target)) {
+            presetMenuEl.hidden = true;
+          }
+        });
+      }
+
       document.getElementById("slot-select").addEventListener("change", async (event) => {
         try {
           setStatus("正在切换存档...");
@@ -1352,6 +1884,9 @@
       applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
       syncDrawerFromState();
       hydrateExistingMessages();
+      loadPresetStoreForChat().catch(() => {
+        presetDebugPanelEl.hidden = true;
+      });
       loadWorldbook().catch(() => {
         worldbookEntries = [];
         renderWorldbookEditor();
