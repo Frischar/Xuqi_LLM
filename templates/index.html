@@ -213,7 +213,7 @@
           <label for="drawer-llm-base-url">API URL</label>
           <input id="drawer-llm-base-url" placeholder="例如 https://api.deepseek.com/v1" />
           <label for="drawer-llm-api-key">API Key</label>
-          <input id="drawer-llm-api-key" type="password" placeholder="只保存在本地 localStorage" />
+          <input id="drawer-llm-api-key" type="password" placeholder="保存到当前存档的服务端配置" />
           <label for="drawer-llm-model">模型名</label>
           <input id="drawer-llm-model" placeholder="例如 deepseek-chat" />
           <div class="grid-two">
@@ -423,17 +423,24 @@
       }
 
       const ACTIVE_SLOT = {{ active_slot | tojson }};
-      const STORAGE_KEY = `xuqi.runtime.sidebar.v1.${ACTIVE_SLOT}`;
       const DEFAULT_SLOT_SPRITE_BASE_PATH = {{ settings.sprite_base_path | tojson }};
-      const SERVER_VISUAL_KEYS = [
-        "theme",
-        "ui_opacity",
-        "background_image_url",
-        "background_overlay",
-        "sprite_enabled",
-        "sprite_base_path",
-      ];
-      const SERVER_VISUAL_INPUT_IDS = new Set([
+      const DRAWER_SERVER_INPUT_IDS = new Set([
+        "drawer-llm-base-url",
+        "drawer-llm-api-key",
+        "drawer-llm-model",
+        "drawer-temperature",
+        "drawer-history-limit",
+        "drawer-request-timeout",
+        "drawer-demo-mode",
+        "drawer-embedding-base-url",
+        "drawer-embedding-api-key",
+        "drawer-embedding-model",
+        "drawer-retrieval-top-k",
+        "drawer-rerank-enabled",
+        "drawer-rerank-base-url",
+        "drawer-rerank-api-key",
+        "drawer-rerank-model",
+        "drawer-rerank-top-n",
         "drawer-theme",
         "drawer-ui-opacity",
         "drawer-background-url",
@@ -467,11 +474,11 @@
         sprite_base_path: DEFAULT_SLOT_SPRITE_BASE_PATH
       };
 
-      let serverState = { ...initialState };
-      let runtimeState = loadRuntimeState();
+      let serverState = normalizeRuntimeState(initialState);
+      let runtimeState = { ...serverState };
       let worldbookEntries = [];
       const streamingEntries = new Set();
-      let visualSettingsSaveTimer = null;
+      let drawerSettingsSaveTimer = null;
 
       async function selectSlot(slotId) {
         await postJson("/api/slots/select", { slot_id: slotId });
@@ -493,50 +500,19 @@
         window.location.reload();
       }
 
-      function stripServerVisualState(state) {
-        const stripped = { ...(state || {}) };
-        SERVER_VISUAL_KEYS.forEach((key) => {
-          delete stripped[key];
-        });
-        return stripped;
-      }
-
-      function pickServerVisualState(state) {
-        return SERVER_VISUAL_KEYS.reduce((acc, key) => {
-          acc[key] = state[key];
-          return acc;
-        }, {});
-      }
-
-      function loadRuntimeState() {
-        try {
-          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-          const merged = { ...initialState, ...stripServerVisualState(saved) };
-          if (!merged.sprite_base_path || merged.sprite_base_path === "/static/sprites") {
-            merged.sprite_base_path = DEFAULT_SLOT_SPRITE_BASE_PATH;
-          }
-          return merged;
-        } catch {
-          return { ...initialState };
+      function normalizeRuntimeState(state) {
+        const normalized = { ...(state || {}) };
+        normalized.embedding_fields = Array.isArray(normalized.embedding_fields) ? normalized.embedding_fields : [];
+        if (!normalized.sprite_base_path || normalized.sprite_base_path === "/static/sprites") {
+          normalized.sprite_base_path = DEFAULT_SLOT_SPRITE_BASE_PATH;
         }
+        return normalized;
       }
 
-      function persistRuntimeState() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(stripServerVisualState(runtimeState)));
-      }
-
-      async function saveVisualSettingsToServer(statusText = "") {
-        const payload = {
-          ...serverState,
-          ...pickServerVisualState(runtimeState),
-        };
-        const data = await postJson("/api/settings", payload);
-        serverState = { ...data.settings };
-        runtimeState = {
-          ...runtimeState,
-          ...pickServerVisualState(serverState),
-        };
-        persistRuntimeState();
+      async function saveRuntimeStateToServer(statusText = "") {
+        const data = await postJson("/api/settings", runtimeState);
+        serverState = normalizeRuntimeState(data.settings || {});
+        runtimeState = { ...serverState };
         applyTheme(runtimeState.theme);
         applyUiOpacity(runtimeState.ui_opacity);
         applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
@@ -546,7 +522,18 @@
         }
       }
 
+      function scheduleRuntimeStateSave() {
+        window.clearTimeout(drawerSettingsSaveTimer);
+        drawerSettingsSaveTimer = window.setTimeout(() => {
+          saveRuntimeStateToServer().catch((error) => {
+            setStatus(`侧边栏配置保存失败：${error.message}`);
+          });
+        }, 250);
+      }
+
       function scheduleVisualSettingsSave() {
+        scheduleRuntimeStateSave();
+        return;
         window.clearTimeout(visualSettingsSaveTimer);
         visualSettingsSaveTimer = window.setTimeout(() => {
           saveVisualSettingsToServer().catch((error) => {
@@ -623,13 +610,14 @@
           sprite_base_path: drawerInput("drawer-sprite-base-path").value.trim() || {{ settings.sprite_base_path | tojson }},
         };
 
-        persistRuntimeState();
         applyTheme(runtimeState.theme);
         applyUiOpacity(runtimeState.ui_opacity);
         applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
 
-        if (SERVER_VISUAL_INPUT_IDS.has(event?.target?.id || "")) {
-          scheduleVisualSettingsSave();
+        const shouldSyncServer = DRAWER_SERVER_INPUT_IDS.has(event?.target?.id || "")
+          || !!event?.target?.classList?.contains("drawer-embedding-field");
+        if (shouldSyncServer) {
+          scheduleRuntimeStateSave();
         }
       }
 
@@ -1171,10 +1159,8 @@
         const data = await response.json();
         runtimeState.background_image_url = data.url || "";
         drawerInput("drawer-background-url").value = runtimeState.background_image_url;
-        persistRuntimeState();
         applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
-        await saveVisualSettingsToServer("背景图已上传并保存到聊天界面");
-        setStatus("背景图已上传到本地 static/uploads");
+        await saveRuntimeStateToServer("背景图已上传并同步到服务端配置");
       }
 
       function buildChatRuntimeConfig() {
@@ -1364,7 +1350,6 @@
       applyTheme(runtimeState.theme);
       applyUiOpacity(runtimeState.ui_opacity);
       applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
-      persistRuntimeState();
       syncDrawerFromState();
       hydrateExistingMessages();
       loadWorldbook().catch(() => {
