@@ -214,7 +214,7 @@ uvicorn app:app --reload --host 127.0.0.1 --port 8000
 - 页面模板：`templates/`
 - 样式文件：`static/styles.css`
 
-## 免责声明
+## 开源协议
 
 本项目基于 GPL-3.0 许可证开源。
 
