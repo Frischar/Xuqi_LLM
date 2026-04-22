@@ -1495,8 +1495,7 @@
         worldbookDebugStatusEl.textContent = enforced ? "Hit + Boost" : "Hit";
         worldbookDebugStatusEl.classList.add("active");
         worldbookDebugCountEl.textContent = `${hits.length} items`;
-        worldbookDebugPromptEl.textContent = prompt || hits.map((item) => item.trigger).join("
-");
+        worldbookDebugPromptEl.textContent = prompt || hits.map((item) => item.trigger).join("\n");
         setWorldbookDebugCollapsed(worldbookDebugCollapsed);
       }
 
