@@ -150,23 +150,6 @@ if not logging.getLogger().handlers:
 _LAST_WORLDBOOK_DEBUG_SNAPSHOT: dict[str, Any] = {"query": "", "all_matches": [], "selected_ids": [], "dropped_ids": []}
 
 
-def _copy_worldbook_debug_snapshot(snapshot: dict[str, Any] | None = None) -> dict[str, Any]:
-    source = snapshot if isinstance(snapshot, dict) else _LAST_WORLDBOOK_DEBUG_SNAPSHOT
-    all_matches = source.get("all_matches", [])
-    selected_ids = source.get("selected_ids", [])
-    dropped_ids = source.get("dropped_ids", [])
-    return {
-        "query": str(source.get("query", "") or ""),
-        "all_matches": [dict(item) for item in all_matches if isinstance(item, dict)],
-        "selected_ids": [str(item) for item in selected_ids] if isinstance(selected_ids, list) else [],
-        "dropped_ids": [str(item) for item in dropped_ids] if isinstance(dropped_ids, list) else [],
-    }
-
-
-def get_worldbook_debug_snapshot() -> dict[str, Any]:
-    return _copy_worldbook_debug_snapshot()
-
-
 def bootstrap_runtime_layout() -> None:
     STATIC_DIR.mkdir(parents=True, exist_ok=True)
     if RESOURCE_STATIC_DIR.exists() and not (STATIC_DIR / "styles.css").exists():
@@ -2384,12 +2367,12 @@ def _worldbook_position_priority(item: dict[str, Any]) -> int:
     return 2
 
 
-def _worldbook_global_selection_sort_key(item: dict[str, Any]) -> tuple[int, int, str]:
+def _worldbook_global_selection_sort_key(item: dict[str, Any]) -> tuple[int, int, int, str]:
     order = clamp_int(item.get("order", item.get("priority", 100)), 0, 999999, 100)
     source_rank_map = {"constant": 0, "sticky": 1, "keyword": 2}
     source_rank = source_rank_map.get(str(item.get("source", "keyword")), 2)
     title = str(item.get("title", "")).strip() or str(item.get("trigger", "")).strip()
-    return (order, source_rank, title)
+    return (_worldbook_position_priority(item), order, source_rank, title)
 
 
 def _worldbook_bucket_sort_key(item: dict[str, Any]) -> tuple[int, int, str]:
@@ -3074,7 +3057,6 @@ def build_worldbook_debug_payload(
     worldbook_matches: list[dict[str, str]],
     *,
     reply_result: dict[str, Any] | None = None,
-    debug_snapshot: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if not get_worldbook_settings().get("debug_enabled", False):
         return {}
@@ -3083,8 +3065,7 @@ def build_worldbook_debug_payload(
     all_entries = get_worldbook_entries()
     runtime_entries = runtime_state.get("entries", {}) if isinstance(runtime_state.get("entries"), dict) else {}
 
-    snapshot = _copy_worldbook_debug_snapshot(debug_snapshot)
-    snapshot_matches = snapshot.get("all_matches", [])
+    snapshot_matches = _LAST_WORLDBOOK_DEBUG_SNAPSHOT.get("all_matches", [])
     selected_snapshot = [item for item in snapshot_matches if item.get("selected_for_prompt")]
     dropped_snapshot = [item for item in snapshot_matches if not item.get("selected_for_prompt")]
 
@@ -3273,11 +3254,10 @@ async def stream_model_reply(
 async def generate_reply(
     user_message: str,
     runtime_overrides: dict[str, Any] | None = None,
-) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]], dict[str, Any], dict[str, Any]]:
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]], dict[str, Any]]:
     llm_config = get_runtime_chat_config(runtime_overrides)
     retrieved = await retrieve_memories(user_message, runtime_overrides)
     worldbook_matches = match_worldbook_entries(user_message)
-    worldbook_debug_snapshot = get_worldbook_debug_snapshot()
     prompt_package = build_prompt_package(
         user_message,
         retrieved,
@@ -3291,7 +3271,7 @@ async def generate_reply(
                 status_code=400,
                 detail="Please configure the chat model API URL and model name first, or enable demo mode.",
             )
-        return {"reply": "", "sprite_tag": ""}, retrieved, worldbook_matches, prompt_package, worldbook_debug_snapshot
+        return {"reply": "", "sprite_tag": ""}, retrieved, worldbook_matches, prompt_package
 
     reply = await request_model_reply(
         user_message,
@@ -3300,7 +3280,7 @@ async def generate_reply(
         worldbook_matches=worldbook_matches,
         prompt_package=prompt_package,
     )
-    return reply, retrieved, worldbook_matches, prompt_package, worldbook_debug_snapshot
+    return reply, retrieved, worldbook_matches, prompt_package
 
 
 def fallback_memory_from_conversation(history: list[dict[str, Any]]) -> dict[str, Any]:
@@ -3674,7 +3654,6 @@ route_ctx = SimpleNamespace(
     get_workshop_stage_label=get_workshop_stage_label,
     get_workshop_state=get_workshop_state,
     get_worldbook_entries=get_worldbook_entries,
-    get_worldbook_debug_snapshot=get_worldbook_debug_snapshot,
     get_worldbook_settings=get_worldbook_settings,
     get_worldbook_store=get_worldbook_store,
     list_mods=lambda: [mod.to_dict() for mod in registered_mods],

@@ -20,25 +20,14 @@ def register_chat_api_routes(app: FastAPI, *, ctx: Any) -> None:
             raise HTTPException(status_code=400, detail="Message cannot be empty.")
 
         runtime_overrides = payload.runtime_config or {}
-        (
-            reply_result,
-            retrieved_items,
-            worldbook_matches,
-            prompt_package,
-            worldbook_debug_snapshot,
-        ) = await ctx.generate_reply(message, runtime_overrides)
+        reply_result, retrieved_items, worldbook_matches, prompt_package = await ctx.generate_reply(message, runtime_overrides)
         reply = str(reply_result.get("reply", ""))
         entries = [("user", message)]
         if reply.strip():
             entries.append(("assistant", reply))
         ctx.append_messages(entries)
 
-        worldbook_debug = ctx.build_worldbook_debug_payload(
-            message,
-            worldbook_matches,
-            reply_result=reply_result,
-            debug_snapshot=worldbook_debug_snapshot,
-        )
+        worldbook_debug = ctx.build_worldbook_debug_payload(message, worldbook_matches, reply_result=reply_result)
         preset_debug = ctx.build_preset_debug_payload()
 
         return {
@@ -61,7 +50,6 @@ def register_chat_api_routes(app: FastAPI, *, ctx: Any) -> None:
         runtime_overrides = payload.runtime_config or {}
         retrieved_items = await ctx.retrieve_memories(message, runtime_overrides)
         worldbook_matches = ctx.match_worldbook_entries(message)
-        worldbook_debug_snapshot = ctx.get_worldbook_debug_snapshot()
         prompt_package = ctx.build_prompt_package(
             message,
             retrieved_items,
@@ -71,11 +59,7 @@ def register_chat_api_routes(app: FastAPI, *, ctx: Any) -> None:
         return {
             "retrieved_items": retrieved_items,
             "worldbook_hits": worldbook_matches,
-            "worldbook_debug": ctx.build_worldbook_debug_payload(
-                message,
-                worldbook_matches,
-                debug_snapshot=worldbook_debug_snapshot,
-            ),
+            "worldbook_debug": ctx.build_worldbook_debug_payload(message, worldbook_matches),
             "preset_debug": ctx.build_preset_debug_payload(),
             "prompt_package": prompt_package,
         }
@@ -90,12 +74,7 @@ def register_chat_api_routes(app: FastAPI, *, ctx: Any) -> None:
         llm_config = ctx.get_runtime_chat_config(runtime_overrides)
         retrieved_items = await ctx.retrieve_memories(message, runtime_overrides)
         worldbook_matches = ctx.match_worldbook_entries(message)
-        worldbook_debug_snapshot = ctx.get_worldbook_debug_snapshot()
-        worldbook_debug = ctx.build_worldbook_debug_payload(
-            message,
-            worldbook_matches,
-            debug_snapshot=worldbook_debug_snapshot,
-        )
+        worldbook_debug = ctx.build_worldbook_debug_payload(message, worldbook_matches)
         preset_debug = ctx.build_preset_debug_payload()
         prompt_package = ctx.build_prompt_package(
             message,

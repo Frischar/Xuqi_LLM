@@ -253,21 +253,19 @@ def build_prompt_package(
         if not bucket:
             return
 
-        role_groups: list[tuple[str, list[dict[str, Any]]]] = []
+        system_items: list[dict[str, Any]] = []
         for item in bucket:
             role = normalize_worldbook_injection_role(item.get("injection_role", "system"), "system")
-            if not role_groups or role_groups[-1][0] != role:
-                role_groups.append((role, [item]))
-            else:
-                role_groups[-1][1].append(item)
+            if role == "system":
+                system_items.append(item)
 
-        for role, role_items in role_groups:
+        if system_items:
             content = build_worldbook_prompt(
-                role_items,
+                system_items,
                 heading=f"The following are in-chat worldbook notes at depth {depth}.",
             )
             if content:
-                messages.append({"role": role, "content": content})
+                messages.append({"role": "system", "content": content})
 
     history_count = len(recent_history)
     for index, item in enumerate(recent_history):
