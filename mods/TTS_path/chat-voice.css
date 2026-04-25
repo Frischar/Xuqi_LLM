@@ -1,0 +1,127 @@
+.tts-chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.message.assistant .tts-chat-actions,
+.message.system .tts-chat-actions {
+  justify-content: flex-start;
+}
+
+.tts-chat-speak {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-strong) 84%, transparent);
+  color: var(--muted);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.tts-chat-speak:hover,
+.tts-chat-speak:focus-visible {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 54%, var(--line));
+  background: color-mix(in srgb, var(--assistant) 72%, var(--panel-strong));
+  transform: translateY(-1px);
+}
+
+.tts-chat-speak:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 52%, transparent);
+  outline-offset: 2px;
+}
+
+.tts-chat-speak svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+  pointer-events: none;
+}
+
+.tts-chat-speak.is-loading svg {
+  animation: tts-chat-spin 0.82s linear infinite;
+}
+
+.tts-chat-speak.is-playing {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 72%, var(--line));
+  background: color-mix(in srgb, var(--accent) 18%, var(--assistant));
+}
+
+.tts-chat-speak.is-paused {
+  color: color-mix(in srgb, var(--accent) 72%, var(--muted));
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
+  background: color-mix(in srgb, var(--assistant) 82%, var(--panel-strong));
+}
+
+.tts-chat-speak.has-error {
+  color: #d85f5f;
+  border-color: color-mix(in srgb, #d85f5f 64%, var(--line));
+}
+
+@keyframes tts-chat-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.tts-voice-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 4px;
+  padding: 1px 7px;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  color: var(--muted);
+  box-shadow: none;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.tts-voice-card-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.73rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.tts-voice-card-icon {
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.tts-voice-card-speaker {
+  color: var(--accent);
+}
+
+.tts-voice-card-emotion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  color: color-mix(in srgb, var(--accent) 70%, var(--muted));
+  font-size: 0.68rem;
+}
+
+.tts-voice-card-line {
+  display: none !important;
+}
