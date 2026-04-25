@@ -1,0 +1,2926 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ settings.theme }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xuqi LLM Chat</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    {% for mod in registered_mods or [] %}
+      {% for href in mod.hooks.chat_styles or [] %}
+    <link rel="stylesheet" href="{{ href }}{% if '?' in href %}&{% else %}?{% endif %}v=ttsvoice-chip-v1" data-mod-hook="{{ mod.slug }}" />
+      {% endfor %}
+    {% endfor %}
+
+    <style>
+      .message {
+        align-items: flex-start;
+      }
+      .message .bubble-wrap {
+        display: flex;
+        flex-direction: column;
+        max-width: min(78%, 920px);
+      }
+      .message.user .bubble-wrap {
+        align-items: flex-end;
+      }
+      .message.assistant .bubble-wrap,
+      .message.system .bubble-wrap {
+        align-items: flex-start;
+      }
+      .message-avatar {
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
+        border-radius: 0.85rem;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        align-self: flex-start;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid var(--border);
+        background: var(--panel-strong);
+      }
+      .message-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .message-avatar .avatar-text {
+        font-weight: 700;
+        font-size: 1rem;
+      }
+      .message.user .message-avatar {
+        order: 2;
+        margin-left: 0.65rem;
+      }
+      .message.assistant .message-avatar,
+      .message.system .message-avatar {
+        order: 0;
+        margin-right: 0.65rem;
+      }
+      @media (max-width: 768px) {
+        .message-avatar {
+          width: 38px;
+          height: 38px;
+          min-width: 38px;
+        }
+      }
+    </style>
+  
+    <style>
+      .preset-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.95rem 1rem;
+        border-radius: 1rem;
+        border: 1px solid var(--border);
+        background: var(--panel-strong);
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 1rem;
+      }
+      .preset-toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        min-width: 0;
+      }
+      .preset-pill-label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.38rem 0.75rem;
+        border-radius: 999px;
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+      .preset-current-meta {
+        min-width: 0;
+      }
+      .preset-current-meta strong {
+        display: block;
+        font-size: 0.98rem;
+        line-height: 1.2;
+      }
+      .preset-current-meta p {
+        margin: 0.18rem 0 0;
+        font-size: 0.84rem;
+        line-height: 1.3;
+      }
+      .preset-toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .preset-combo {
+        position: relative;
+      }
+      .preset-pill-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 2.55rem;
+        padding: 0.7rem 1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, var(--panel), var(--panel-strong));
+        color: var(--text);
+        box-shadow: var(--shadow-soft);
+        cursor: pointer;
+        transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      }
+      .preset-pill-button:hover {
+        transform: translateY(-1px);
+        border-color: var(--accent, var(--border));
+      }
+      .preset-pill-arrow {
+        font-size: 0.85rem;
+        opacity: 0.75;
+      }
+      .preset-manage-link {
+        text-decoration: none;
+      }
+      .preset-menu {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        min-width: 18rem;
+        max-width: min(26rem, 80vw);
+        max-height: 20rem;
+        overflow-y: auto;
+        padding: 0.45rem;
+        border-radius: 1rem;
+        border: 1px solid var(--border);
+        background: var(--panel-strong);
+        box-shadow: var(--shadow-soft);
+        z-index: 50;
+      }
+      .preset-menu-item {
+        width: 100%;
+        border: none;
+        background: transparent;
+        color: var(--text);
+        text-align: left;
+        padding: 0.75rem 0.85rem;
+        border-radius: 0.8rem;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      .preset-menu-item:hover {
+        background: var(--input-bg);
+      }
+      .preset-menu-item.active {
+        background: var(--input-bg);
+        border: 1px solid var(--border);
+      }
+      .preset-menu-title {
+        display: block;
+        font-weight: 700;
+        font-size: 0.95rem;
+        line-height: 1.2;
+      }
+      .preset-menu-meta {
+        display: block;
+        margin-top: 0.22rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+        line-height: 1.3;
+      }
+      .drawer-preset-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.85rem;
+      }
+      .drawer-preset-current {
+        padding: 0.85rem 0.95rem;
+        border: 1px solid var(--border);
+        border-radius: 0.9rem;
+        background: var(--panel);
+        margin-bottom: 0.85rem;
+      }
+      .drawer-preset-current strong {
+        display: block;
+        font-size: 0.95rem;
+        margin-bottom: 0.18rem;
+      }
+      .drawer-preset-current p {
+        margin: 0;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .drawer-debug-panel {
+        border: 1px solid var(--border);
+        border-radius: 0.9rem;
+        background: var(--panel);
+        padding: 0.85rem 0.95rem;
+      }
+      .drawer-debug-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .drawer-debug-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        flex-wrap: wrap;
+      }
+      .drawer-debug-title {
+        font-weight: 700;
+      }
+      .drawer-debug-body {
+        margin-top: 0.8rem;
+      }
+      .preset-debug-panel {
+        margin-bottom: 1rem;
+      }
+      .preset-debug-status-row {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.6rem;
+      }
+      .preset-debug-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--input-bg);
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+      .preset-debug-chip.active {
+        border-color: var(--accent, var(--border));
+      }
+      .preset-module-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin: 0.5rem 0 0.8rem;
+      }
+      .preset-module-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.28rem 0.68rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        font-size: 0.78rem;
+      }
+      #preset-debug-body[hidden] {
+        display: none !important;
+      }
+      .prompt-package-tools {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 0.85rem;
+      }
+      .prompt-package-summary {
+        font-size: 0.82rem;
+      }
+      .prompt-layer-list {
+        display: grid;
+        gap: 0.7rem;
+        margin-bottom: 0.85rem;
+      }
+      .prompt-layer-card {
+        border: 1px solid var(--border);
+        border-radius: 0.85rem;
+        background: var(--input-bg);
+        padding: 0.75rem 0.85rem;
+      }
+      .prompt-layer-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.4rem;
+        flex-wrap: wrap;
+      }
+      .prompt-layer-title {
+        font-size: 0.9rem;
+      }
+      .prompt-layer-meta {
+        font-size: 0.76rem;
+        color: var(--muted);
+      }
+      .prompt-layer-snippet {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 0.8rem;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+      @media (max-width: 768px) {
+        .preset-toolbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .preset-toolbar-right {
+          justify-content: stretch;
+        }
+        .preset-combo,
+        .preset-pill-button,
+        .preset-manage-link {
+          width: 100%;
+        }
+        .preset-menu {
+          left: 0;
+          right: 0;
+          max-width: 100%;
+        }
+      }
+
+      .worldbook-debug-panel {
+        padding: 0.9rem 1rem;
+      }
+      .worldbook-debug-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+      .worldbook-debug-toggle-main {
+        min-width: 0;
+        flex: 1;
+      }
+      .worldbook-debug-toggle .debug-status-row {
+        margin-top: 0.45rem;
+      }
+      .worldbook-debug-arrow {
+        flex: 0 0 auto;
+        width: 2rem;
+        height: 2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--input-bg);
+        font-size: 0.9rem;
+        line-height: 1;
+        transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+      }
+      .worldbook-debug-toggle:hover .worldbook-debug-arrow {
+        border-color: var(--accent, var(--border));
+        background: var(--panel);
+      }
+      .worldbook-debug-panel.expanded .worldbook-debug-arrow {
+        transform: rotate(180deg);
+      }
+      .worldbook-debug-body {
+        margin-top: 0.75rem;
+      }
+      .worldbook-debug-body[hidden] {
+        display: none !important;
+      }
+      .worldbook-debug-body .debug-code-block {
+        margin: 0;
+        max-height: 16rem;
+        overflow: auto;
+      }
+      .worldbook-debug-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+      .worldbook-debug-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--input-bg);
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+      .worldbook-debug-chip.active {
+        border-color: var(--accent, var(--border));
+      }
+      .worldbook-debug-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.85rem;
+      }
+      .worldbook-debug-filters[hidden] {
+        display: none !important;
+      }
+      .worldbook-debug-filters .secondary.compact.active {
+        border-color: var(--accent, var(--border));
+        background: var(--panel);
+      }
+      .worldbook-debug-groups {
+        display: grid;
+        gap: 0.85rem;
+      }
+      .worldbook-debug-group {
+        border: 1px solid var(--border);
+        border-radius: 0.9rem;
+        background: var(--panel);
+        padding: 0.8rem 0.9rem;
+      }
+      .worldbook-debug-group-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.7rem;
+        flex-wrap: wrap;
+      }
+      .worldbook-debug-group-title {
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .worldbook-debug-group-meta {
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+      .worldbook-debug-empty {
+        border: 1px dashed var(--border);
+        border-radius: 0.85rem;
+        padding: 0.85rem 0.95rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+        background: var(--panel);
+      }
+      .worldbook-debug-item-list {
+        display: grid;
+        gap: 0.65rem;
+      }
+      .worldbook-debug-item {
+        border: 1px solid var(--border);
+        border-radius: 0.8rem;
+        background: var(--input-bg);
+        padding: 0.75rem 0.85rem;
+      }
+      .worldbook-debug-item-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+      }
+      .worldbook-debug-item-title {
+        font-weight: 700;
+        font-size: 0.88rem;
+      }
+      .worldbook-debug-tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+      .worldbook-debug-tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.22rem 0.58rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        font-size: 0.75rem;
+      }
+      .worldbook-debug-tag.selected {
+        border-color: var(--accent, var(--border));
+      }
+      .worldbook-debug-tag.dropped {
+        color: var(--muted);
+      }
+      .worldbook-debug-item-meta {
+        display: grid;
+        gap: 0.28rem;
+        margin-bottom: 0.55rem;
+        font-size: 0.79rem;
+      }
+      .worldbook-debug-label {
+        color: var(--muted);
+      }
+      .worldbook-debug-item-preview {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 0.78rem;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+      .worldbook-debug-raw-wrap {
+        margin-top: 0.85rem;
+      }
+      .worldbook-debug-raw-wrap summary {
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      @media (max-width: 768px) {
+        .worldbook-debug-toggle {
+          gap: 0.75rem;
+        }
+        .worldbook-debug-arrow {
+          width: 1.8rem;
+          height: 1.8rem;
+        }
+      }
+    </style>
+
+  </head>
+  <body>
+    <div class="topbar topbar-chat">
+      <div class="topbar-left">
+        <button id="open-drawer" class="menu-button" type="button">Config</button>
+        <a class="brand" href="/chat">Xuqi LLM Chat</a>
+      </div>
+      {% include "_grouped_nav.html" %}
+      </div>
+
+          <div class="slot-toolbar">
+        <div class="slot-toolbar-left">
+          <span class="slot-badge">Global</span>
+          <div class="slot-meta">
+            <strong>当前为全局对话</strong>
+            <p class="slot-hint">聊天会持续读取当前全局记忆、世界书、预设和环境设置；角色卡可以随时热插拔。</p>
+          </div>
+        </div>
+      </div>
+    <div class="chat-shell">
+      <div class="chat-layout">
+        <aside class="sprite-stage panel">
+          <div class="section-head">
+            <p class="eyebrow">Sprite</p>
+            <h2>差分立绘</h2>
+            <p id="sprite-tag-label" class="muted">当前表情：未命中</p>
+          </div>
+          <div class="sprite-frame">
+            <img id="sprite-image" class="sprite-image" alt="当前立绘" hidden />
+            <div id="sprite-placeholder" class="sprite-placeholder">
+              这里会显示 `{{ settings.sprite_base_path }}/标签.png`
+            </div>
+          </div>
+        </aside>
+
+        <main class="chat-area standalone">
+          <div class="chat-header">
+            <div>
+              <p class="eyebrow">陪伴模式</p>
+              <h2 id="chat-title">{{ persona.name }}</h2>
+              <p id="chat-subtitle" class="chat-greeting-scroll">{{ persona.greeting }}</p>
+            </div>
+            <div class="header-actions">
+              <div class="theme-pill" id="theme-pill">{{ "暗色模式" if settings.theme == "dark" else "浅色模式" }}</div>
+              <button id="open-drawer-secondary" type="button" class="secondary compact">打开侧栏</button>
+            </div>
+          </div>
+
+
+          <div class="preset-toolbar">
+            <div class="preset-toolbar-left">
+              <span class="preset-pill-label">Preset</span>
+              <div class="preset-current-meta">
+                <strong id="chat-preset-name">未选择预设</strong>
+                <p id="chat-preset-modules" class="muted">当前无激活模块</p>
+              </div>
+            </div>
+
+            <div class="preset-toolbar-right">
+              <div class="preset-combo">
+                <button id="toggle-preset-menu" type="button" class="preset-pill-button">
+                  <span id="preset-pill-text">切换预设</span>
+                  <span class="preset-pill-arrow">▾</span>
+                </button>
+                <div id="preset-menu" class="preset-menu" hidden></div>
+              </div>
+              </div>
+          </div>
+
+          <div class="retrieval-bar" id="retrieval-bar" hidden>
+            <div class="retrieval-title">记忆命中</div>
+            <div class="retrieval-items" id="retrieval-items"></div>
+          </div>
+
+          <div class="retrieval-bar worldbook-bar" id="worldbook-bar" hidden>
+            <div class="retrieval-title">Worldbook Hits</div>
+            <div class="retrieval-items" id="worldbook-items"></div>
+          </div>
+
+          <div class="retrieval-bar worldbook-debug-panel" id="worldbook-debug-panel" {% if not worldbook_settings.debug_enabled %}hidden{% endif %}>
+            <button id="worldbook-debug-toggle" class="worldbook-debug-toggle" type="button" aria-expanded="false">
+              <div class="worldbook-debug-toggle-main">
+                <div class="retrieval-title">Worldbook Debug</div>
+                <div class="debug-status-row">
+                  <span id="worldbook-debug-status" class="debug-status-chip">No Hit</span>
+                  <span id="worldbook-debug-count" class="muted">暂无命中</span>
+                </div>
+              </div>
+              <span id="worldbook-debug-arrow" class="worldbook-debug-arrow" aria-hidden="true">▾</span>
+            </button>
+            <div id="worldbook-debug-body" class="worldbook-debug-body" hidden>
+              <div id="worldbook-debug-summary" class="worldbook-debug-summary"></div>
+
+              <div id="worldbook-debug-filters" class="worldbook-debug-filters" hidden>
+                <button type="button" class="secondary compact active" data-debug-filter="all">全部</button>
+                <button type="button" class="secondary compact" data-debug-filter="selected">只看已注入</button>
+                <button type="button" class="secondary compact" data-debug-filter="dropped">只看未注入</button>
+                <button type="button" class="secondary compact" data-debug-filter="recursive">只看递归链</button>
+              </div>
+
+              <div id="worldbook-debug-groups" class="worldbook-debug-groups"></div>
+
+              <details class="worldbook-debug-raw-wrap">
+                <summary>查看原始调试文本</summary>
+                <pre id="worldbook-debug-prompt" class="debug-code-block">点击上方箭头展开后，可查看本轮 Worldbook 调试文本。</pre>
+              </details>
+            </div>
+          </div>
+
+          <div id="messages" class="messages">
+            {% for item in history %}
+            <div class="message {{ item.role }}">
+              {% if item.role == "user" %}
+              <div class="bubble-wrap">
+                <div class="bubble">{{ item.content }}</div>
+                <div class="message-meta">{{ item.created_at or "" }}</div>
+              </div>
+              <div class="message-avatar user-avatar" aria-hidden="true">
+                {% if user_profile.avatar_url %}
+                <img src="{{ user_profile.avatar_url }}" alt="{{ user_profile.display_name or "我" }}" />
+                {% else %}
+                <span class="avatar-text">{{ (user_profile.display_name or "我")[:1] }}</span>
+                {% endif %}
+              </div>
+              {% else %}
+              <div class="message-avatar assistant-avatar" aria-hidden="true">
+                <img src="{{ role_avatar_url or (settings.sprite_base_path ~ '/avatar.png') }}" alt="{{ persona.name or "AI" }}" onerror="this.outerHTML='<span class=&quot;avatar-text&quot;>{{ (persona.name or "AI")[:1] }}</span>';" />
+              </div>
+              <div class="bubble-wrap">
+                <div class="bubble">{{ item.content }}</div>
+                <div class="message-meta">{{ item.created_at or "" }}</div>
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+
+          <form id="chat-form" class="composer">
+            <textarea id="message-input" placeholder="输入你想说的话..." rows="3"></textarea>
+            <div class="composer-actions">
+              <span id="status-text" class="muted">就绪</span>
+              <div class="action-group">
+                <button type="button" id="end-conversation" class="secondary compact">结束当前对话</button>
+                <button type="button" id="export-history" class="secondary compact">导出记录</button>
+                <button type="submit">发送</button>
+              </div>
+            </div>
+          </form>
+        </main>
+      </div>
+    </div>
+
+    <div id="workshop-modal" class="workshop-modal hidden" aria-hidden="true">
+      <div class="workshop-modal-backdrop"></div>
+      <div class="panel workshop-modal-card">
+        <div class="drawer-head">
+          <div>
+            <p class="eyebrow">创意工坊</p>
+            <h2 id="workshop-modal-title">图片弹窗</h2>
+          </div>
+          <button id="workshop-modal-close" class="secondary compact" type="button">关闭</button>
+        </div>
+        <div class="workshop-modal-stage" id="workshop-modal-stage">触发阶段：A 阶段</div>
+        <div class="workshop-modal-body">
+          <img id="workshop-modal-image" class="workshop-modal-image" loading="lazy" decoding="async" alt="创意工坊图片" />
+          <p id="workshop-modal-text" class="workshop-modal-text">这里会显示图片说明。</p>
+        </div>
+        <div class="workshop-modal-actions">
+          <button id="workshop-modal-confirm" class="secondary compact" type="button">我知道了</button>
+        </div>
+      </div>
+    </div>
+    <audio id="workshop-audio-player" preload="auto"></audio>
+
+    <div id="drawer-overlay" class="drawer-overlay" hidden></div>
+    <aside id="config-drawer" class="config-drawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div>
+          <p class="eyebrow">Sidebar</p>
+          <h2>运行时配置</h2>
+          <p class="muted">这里的 API Key、模型参数和界面设置只保存在浏览器本地。</p>
+        </div>
+        <button id="close-drawer" class="secondary compact" type="button">关闭</button>
+      </div>
+
+      <div class="drawer-body">
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Preset</p>
+            <h3>预设侧栏</h3>
+            <p class="muted">这里集中放预设管理与调试，不占聊天主区域。</p>
+          </div>
+          <div class="drawer-preset-tools">
+            <a href="/config/preset" class="secondary compact preset-manage-link">管理预设</a>
+            <button id="toggle-preset-debug" type="button" class="secondary compact">展开 Debug</button>
+          </div>
+          <div class="drawer-preset-current">
+            <strong id="drawer-preset-name">未选择预设</strong>
+            <p id="drawer-preset-modules">当前无激活模块</p>
+          </div>
+          <div id="preset-debug-panel" class="drawer-debug-panel" hidden>
+            <div class="drawer-debug-head">
+              <div class="drawer-debug-meta">
+                <span class="drawer-debug-title">Preset Debug</span>
+                <span id="preset-debug-status" class="preset-debug-chip">启用</span>
+                <span id="preset-debug-name" class="muted">当前预设：未选择预设</span>
+              </div>
+            </div>
+            <div id="preset-debug-body" class="drawer-debug-body">
+              <div id="preset-debug-modules" class="preset-module-chip-row"></div>
+              <pre id="preset-debug-prompt" class="debug-code-block"></pre>
+            </div>
+          </div>
+        </section>
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Prompt</p>
+            <h3>本轮打包预览</h3>
+            <p class="muted">可以直接看到系统提示、人设、记忆、世界书、最近聊天和这一轮输入是怎样一起发给模型的。</p>
+          </div>
+          <div class="prompt-package-tools">
+            <button id="preview-prompt-package" type="button" class="secondary compact">预览当前轮 Prompt</button>
+          </div>
+          <div id="prompt-package-panel" class="drawer-debug-panel" hidden>
+            <div class="drawer-debug-head">
+              <div class="drawer-debug-meta">
+                <span class="drawer-debug-title">Prompt Package</span>
+                <span id="prompt-package-summary" class="prompt-package-summary muted">尚未生成</span>
+              </div>
+            </div>
+            <div class="drawer-debug-body">
+              <div id="prompt-package-layers" class="prompt-layer-list"></div>
+              <pre id="prompt-package-preview" class="debug-code-block"></pre>
+            </div>
+          </div>
+        </section>
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">LLM</p>
+            <h3>聊天模型</h3>
+          </div>
+          <label for="drawer-llm-base-url">API URL</label>
+          <input id="drawer-llm-base-url" placeholder="例如 https://api.deepseek.com/v1" />
+          <label for="drawer-llm-api-key">API Key</label>
+          <input id="drawer-llm-api-key" type="password" placeholder="保存到当前全局配置的服务端参数" />
+          <label for="drawer-llm-model">模型名</label>
+          <input id="drawer-llm-model" placeholder="例如 deepseek-chat" />
+          <div class="grid-two">
+            <div>
+              <label for="drawer-temperature">Temperature</label>
+              <input id="drawer-temperature" type="number" min="0" max="2" step="0.05" />
+            </div>
+            <div>
+              <label for="drawer-request-timeout">超时秒数</label>
+              <input id="drawer-request-timeout" type="number" min="10" max="600" step="1" />
+            </div>
+          </div>
+          <div class="grid-two">
+            <div>
+              <label for="drawer-history-limit">上下文条数</label>
+              <input id="drawer-history-limit" type="number" min="1" max="100" step="1" />
+            </div>
+            <div>
+              <label class="checkbox-row offset-top">
+                <input id="drawer-demo-mode" type="checkbox" />
+                <span>未配置模型时允许演示模式</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Retrieval</p>
+            <h3>嵌入与重排序</h3>
+          </div>
+          <label for="drawer-embedding-base-url">嵌入 API URL</label>
+          <input id="drawer-embedding-base-url" placeholder="例如 http://127.0.0.1:8000/v1" />
+          <label for="drawer-embedding-api-key">嵌入 API Key</label>
+          <input id="drawer-embedding-api-key" type="password" placeholder="本地服务可留空" />
+          <label for="drawer-embedding-model">嵌入模型名</label>
+          <input id="drawer-embedding-model" placeholder="例如 text-embedding-3-small" />
+          <label>嵌入时读取字段</label>
+          <div class="field-chip-row">
+            <label class="check-chip"><input class="drawer-embedding-field" type="checkbox" value="title" /><span>标题</span></label>
+            <label class="check-chip"><input class="drawer-embedding-field" type="checkbox" value="content" /><span>正文</span></label>
+            <label class="check-chip"><input class="drawer-embedding-field" type="checkbox" value="tags" /><span>标签</span></label>
+            <label class="check-chip"><input class="drawer-embedding-field" type="checkbox" value="notes" /><span>备注</span></label>
+          </div>
+          <div class="grid-two">
+            <div>
+              <label for="drawer-retrieval-top-k">召回条数</label>
+              <input id="drawer-retrieval-top-k" type="number" min="1" max="12" step="1" />
+            </div>
+            <div>
+              <label class="checkbox-row offset-top">
+                <input id="drawer-rerank-enabled" type="checkbox" />
+                <span>启用重排序</span>
+              </label>
+            </div>
+          </div>
+          <label for="drawer-rerank-base-url">重排序 API URL</label>
+          <input id="drawer-rerank-base-url" placeholder="例如 http://127.0.0.1:8000/v1" />
+          <label for="drawer-rerank-api-key">重排序 API Key</label>
+          <input id="drawer-rerank-api-key" type="password" placeholder="本地服务可留空" />
+          <div class="grid-two">
+            <div>
+              <label for="drawer-rerank-model">重排序模型名</label>
+              <input id="drawer-rerank-model" placeholder="例如 jina-reranker-v2-base-multilingual" />
+            </div>
+            <div>
+              <label for="drawer-rerank-top-n">保留条数</label>
+              <input id="drawer-rerank-top-n" type="number" min="1" max="12" step="1" />
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Appearance</p>
+            <h3>背景与透明度</h3>
+          </div>
+          <label for="drawer-theme">界面主题</label>
+          <select id="drawer-theme">
+            <option value="light">浅色</option>
+            <option value="dark">暗色</option>
+          </select>
+          <label for="drawer-ui-opacity">UI 透明度</label>
+          <input id="drawer-ui-opacity" type="range" min="0.2" max="1" step="0.01" />
+          <div class="range-value"><span>当前值</span><strong id="drawer-ui-opacity-value">0.84</strong></div>
+          <label for="drawer-background-url">背景图 URL</label>
+          <input id="drawer-background-url" placeholder="远程地址或上传后的本地地址" />
+          <label for="drawer-background-overlay">背景遮罩</label>
+          <input id="drawer-background-overlay" type="range" min="0" max="0.85" step="0.01" />
+          <div class="range-value"><span>当前值</span><strong id="drawer-background-overlay-value">0.42</strong></div>
+          <label for="drawer-background-file">上传背景图</label>
+          <div class="inline-field">
+            <input id="drawer-background-file" type="file" accept="image/*" />
+            <button id="upload-background" class="secondary compact" type="button">上传</button>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Sprite</p>
+            <h3>表情驱动立绘</h3>
+          </div>
+          <label class="checkbox-row">
+            <input id="drawer-sprite-enabled" type="checkbox" />
+            <span>强制模型输出 `[表情:标签]`</span>
+          </label>
+          <label for="drawer-sprite-base-path">立绘目录</label>
+          <input id="drawer-sprite-base-path" placeholder="{{ settings.sprite_base_path }}" />
+          <p class="muted">默认会按当前全局立绘目录读取，例如 `{{ settings.sprite_base_path }}/害羞.png`。</p>
+        </section>
+
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Worldbook</p>
+            <h3>世界书</h3>
+            <p class="muted">命中触发词后会把对应设定文本临时拼进本轮 Prompt。</p>
+          </div>
+          <div id="worldbook-list" class="worldbook-list"></div>
+          <div class="button-row">
+            <button id="add-worldbook" type="button" class="secondary">新增词条</button>
+            <button id="save-worldbook" type="button">保存世界书</button>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Quick Links</p>
+            <h3>更多页面</h3>
+          </div>
+          <div class="button-row">
+            <a class="ghost-link button-link" href="/config/user">User Settings</a>
+            <a class="ghost-link button-link" href="/config/card">Card Editor</a>
+            <a class="ghost-link button-link" href="/config/sprite">Sprite Manager</a>
+            <a class="ghost-link button-link" href="/config/memory">Memory Manager</a>
+            <a class="ghost-link button-link" href="/config/worldbook">Worldbook Settings</a>
+            <a class="ghost-link button-link" href="/config/worldbook/entries">Worldbook Entries</a>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <script>
+      const rootEl = document.documentElement;
+      const bodyEl = document.body;
+      const messagesEl = document.getElementById("messages");
+      const chatForm = document.getElementById("chat-form");
+      const inputEl = document.getElementById("message-input");
+      const statusEl = document.getElementById("status-text");
+      const themePillEl = document.getElementById("theme-pill");
+      const retrievalBarEl = document.getElementById("retrieval-bar");
+      const retrievalItemsEl = document.getElementById("retrieval-items");
+      const worldbookBarEl = document.getElementById("worldbook-bar");
+      const worldbookItemsEl = document.getElementById("worldbook-items");
+      const worldbookDebugPanelEl = document.getElementById("worldbook-debug-panel");
+      const worldbookDebugToggleEl = document.getElementById("worldbook-debug-toggle");
+      const worldbookDebugArrowEl = document.getElementById("worldbook-debug-arrow");
+      const worldbookDebugBodyEl = document.getElementById("worldbook-debug-body");
+      const worldbookDebugStatusEl = document.getElementById("worldbook-debug-status");
+      const worldbookDebugCountEl = document.getElementById("worldbook-debug-count");
+      const worldbookDebugPromptEl = document.getElementById("worldbook-debug-prompt");
+      const worldbookDebugSummaryEl = document.getElementById("worldbook-debug-summary");
+      const worldbookDebugGroupsEl = document.getElementById("worldbook-debug-groups");
+      const worldbookDebugFiltersEl = document.getElementById("worldbook-debug-filters");
+      const worldbookDebugEnabled = {{ worldbook_settings.debug_enabled | tojson }};
+      const presetNameEl = document.getElementById("chat-preset-name");
+      const presetModulesEl = document.getElementById("chat-preset-modules");
+      const drawerPresetNameEl = document.getElementById("drawer-preset-name");
+      const drawerPresetModulesEl = document.getElementById("drawer-preset-modules");
+      const presetMenuEl = document.getElementById("preset-menu");
+      const togglePresetMenuBtn = document.getElementById("toggle-preset-menu");
+      const presetPillTextEl = document.getElementById("preset-pill-text");
+      const presetDebugPanelEl = document.getElementById("preset-debug-panel");
+      const presetDebugStatusEl = document.getElementById("preset-debug-status");
+      const presetDebugNameEl = document.getElementById("preset-debug-name");
+      const presetDebugModulesEl = document.getElementById("preset-debug-modules");
+      const presetDebugPromptEl = document.getElementById("preset-debug-prompt");
+      const presetDebugBodyEl = document.getElementById("preset-debug-body");
+      const togglePresetDebugBtn = document.getElementById("toggle-preset-debug");
+      const previewPromptPackageBtn = document.getElementById("preview-prompt-package");
+      const promptPackagePanelEl = document.getElementById("prompt-package-panel");
+      const promptPackageSummaryEl = document.getElementById("prompt-package-summary");
+      const promptPackageLayersEl = document.getElementById("prompt-package-layers");
+      const promptPackagePreviewEl = document.getElementById("prompt-package-preview");
+      let presetDebugCollapsed = true;
+      const workshopModalEl = document.getElementById("workshop-modal");
+      const workshopModalTitleEl = document.getElementById("workshop-modal-title");
+      const workshopModalStageEl = document.getElementById("workshop-modal-stage");
+      const workshopModalImageEl = document.getElementById("workshop-modal-image");
+      const workshopModalTextEl = document.getElementById("workshop-modal-text");
+      const workshopModalCloseEl = document.getElementById("workshop-modal-close");
+      const workshopModalConfirmEl = document.getElementById("workshop-modal-confirm");
+      const workshopAudioEl = document.getElementById("workshop-audio-player");
+      const WORKSHOP_MUSIC_PRESETS = [
+        { id: "off", label: "关闭", url: "" },
+        { id: "coffee", label: "咖啡馆氛围", url: "https://cdn.pixabay.com/download/audio/2022/10/25/audio_9d60d4f2e7.mp3?filename=coffee-shop-ambience-124008.mp3" },
+        { id: "night", label: "夜晚钢琴", url: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8a0e95371.mp3?filename=soft-piano-ambient-11157.mp3" },
+        { id: "rain", label: "雨声氛围", url: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_c3f39d79a8.mp3?filename=rain-110495.mp3" },
+      ];
+      let workshopStatusCache = null;
+      const drawerEl = document.getElementById("config-drawer");
+      const drawerOverlayEl = document.getElementById("drawer-overlay");
+      const spriteImageEl = document.getElementById("sprite-image");
+      const spritePlaceholderEl = document.getElementById("sprite-placeholder");
+      const spriteTagLabelEl = document.getElementById("sprite-tag-label");
+      const worldbookListEl = document.getElementById("worldbook-list");
+      const userAvatarUrl = {{ user_profile.avatar_url | tojson }};
+      const userAvatarLabel = {{ ((user_profile.display_name or "我")[:1]) | tojson }};
+      const assistantAvatarLabel = {{ ((persona.name or "AI")[:1]) | tojson }};
+
+      function getAssistantAvatarUrl() {
+        const basePath = (runtimeState?.sprite_base_path || DEFAULT_SLOT_SPRITE_BASE_PATH || "").trim();
+        return basePath ? `${basePath}/avatar.png` : "";
+      }
+
+      function buildAvatar(role) {
+        const avatar = document.createElement("div");
+        avatar.className = `message-avatar ${role === "user" ? "user-avatar" : "assistant-avatar"}`;
+        avatar.setAttribute("aria-hidden", "true");
+
+        if (role === "user") {
+          if (userAvatarUrl) {
+            const img = document.createElement("img");
+            img.alt = userAvatarLabel;
+            img.src = userAvatarUrl;
+            avatar.appendChild(img);
+          } else {
+            const label = document.createElement("span");
+            label.className = "avatar-text";
+            label.textContent = userAvatarLabel;
+            avatar.appendChild(label);
+          }
+          return avatar;
+        }
+
+        const img = document.createElement("img");
+        img.alt = assistantAvatarLabel;
+        img.src = getAssistantAvatarUrl();
+        img.addEventListener("error", () => {
+          img.remove();
+        });
+
+        const label = document.createElement("span");
+        label.className = "avatar-text";
+        label.textContent = assistantAvatarLabel;
+
+        avatar.appendChild(img);
+        avatar.appendChild(label);
+        return avatar;
+      }
+      const DEFAULT_SLOT_SPRITE_BASE_PATH = {{ settings.sprite_base_path | tojson }};
+      const DRAWER_SERVER_INPUT_IDS = new Set([
+        "drawer-llm-base-url",
+        "drawer-llm-api-key",
+        "drawer-llm-model",
+        "drawer-temperature",
+        "drawer-history-limit",
+        "drawer-request-timeout",
+        "drawer-demo-mode",
+        "drawer-embedding-base-url",
+        "drawer-embedding-api-key",
+        "drawer-embedding-model",
+        "drawer-retrieval-top-k",
+        "drawer-rerank-enabled",
+        "drawer-rerank-base-url",
+        "drawer-rerank-api-key",
+        "drawer-rerank-model",
+        "drawer-rerank-top-n",
+        "drawer-theme",
+        "drawer-ui-opacity",
+        "drawer-background-url",
+        "drawer-background-overlay",
+        "drawer-sprite-enabled",
+        "drawer-sprite-base-path",
+      ]);
+      const initialState = {
+        llm_base_url: {{ settings.llm_base_url | tojson }},
+        llm_api_key: {{ settings.llm_api_key | tojson }},
+        llm_model: {{ settings.llm_model | tojson }},
+        temperature: {{ settings.temperature | tojson }},
+        history_limit: {{ settings.history_limit | tojson }},
+        request_timeout: {{ settings.request_timeout | tojson }},
+        demo_mode: {{ settings.demo_mode | tojson }},
+        embedding_base_url: {{ settings.embedding_base_url | tojson }},
+        embedding_api_key: {{ settings.embedding_api_key | tojson }},
+        embedding_model: {{ settings.embedding_model | tojson }},
+        embedding_fields: {{ settings.embedding_fields | tojson }},
+        retrieval_top_k: {{ settings.retrieval_top_k | tojson }},
+        rerank_enabled: {{ settings.rerank_enabled | tojson }},
+        rerank_base_url: {{ settings.rerank_base_url | tojson }},
+        rerank_api_key: {{ settings.rerank_api_key | tojson }},
+        rerank_model: {{ settings.rerank_model | tojson }},
+        rerank_top_n: {{ settings.rerank_top_n | tojson }},
+        theme: {{ settings.theme | tojson }},
+        ui_opacity: {{ settings.ui_opacity | tojson }},
+        background_image_url: {{ settings.background_image_url | tojson }},
+        background_overlay: {{ settings.background_overlay | tojson }},
+        sprite_enabled: {{ settings.sprite_enabled | tojson }},
+        sprite_base_path: DEFAULT_SLOT_SPRITE_BASE_PATH
+      };
+
+      let worldbookDebugCollapsed = true;
+      let worldbookDebugFilter = "all";
+      let lastWorldbookDebugPayload = null;
+      let serverState = normalizeRuntimeState(initialState);
+      let runtimeState = { ...serverState };
+      let worldbookEntries = [];
+      const streamingEntries = new Set();
+      let drawerSettingsSaveTimer = null;
+
+      function normalizeRuntimeState(state) {
+        const normalized = { ...(state || {}) };
+        normalized.embedding_fields = Array.isArray(normalized.embedding_fields) ? normalized.embedding_fields : [];
+        if (!normalized.sprite_base_path || normalized.sprite_base_path === "/static/sprites") {
+          normalized.sprite_base_path = DEFAULT_SLOT_SPRITE_BASE_PATH;
+        }
+        return normalized;
+      }
+
+      async function saveRuntimeStateToServer(statusText = "") {
+        const data = await postJson("/api/settings", runtimeState);
+        serverState = normalizeRuntimeState(data.settings || {});
+        runtimeState = { ...serverState };
+        applyTheme(runtimeState.theme);
+        applyUiOpacity(runtimeState.ui_opacity);
+        applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
+        syncDrawerFromState();
+        if (statusText) {
+          setStatus(statusText);
+        }
+      }
+
+      function scheduleRuntimeStateSave() {
+        window.clearTimeout(drawerSettingsSaveTimer);
+        drawerSettingsSaveTimer = window.setTimeout(() => {
+          saveRuntimeStateToServer().catch((error) => {
+            setStatus(`侧边栏配置保存失败：${error.message}`);
+          });
+        }, 250);
+      }
+
+      function scheduleVisualSettingsSave() {
+        scheduleRuntimeStateSave();
+        return;
+        window.clearTimeout(visualSettingsSaveTimer);
+        visualSettingsSaveTimer = window.setTimeout(() => {
+          saveVisualSettingsToServer().catch((error) => {
+            setStatus(`界面设置保存失败：${error.message}`);
+          });
+        }, 250);
+      }
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function drawerInput(id) {
+        return document.getElementById(id);
+      }
+
+      function syncDrawerFromState() {
+        drawerInput("drawer-llm-base-url").value = runtimeState.llm_base_url || "";
+        drawerInput("drawer-llm-api-key").value = runtimeState.llm_api_key || "";
+        drawerInput("drawer-llm-model").value = runtimeState.llm_model || "";
+        drawerInput("drawer-temperature").value = runtimeState.temperature ?? 0.85;
+        drawerInput("drawer-history-limit").value = runtimeState.history_limit ?? 20;
+        drawerInput("drawer-request-timeout").value = runtimeState.request_timeout ?? 120;
+        drawerInput("drawer-demo-mode").checked = !!runtimeState.demo_mode;
+        drawerInput("drawer-embedding-base-url").value = runtimeState.embedding_base_url || "";
+        drawerInput("drawer-embedding-api-key").value = runtimeState.embedding_api_key || "";
+        drawerInput("drawer-embedding-model").value = runtimeState.embedding_model || "";
+        drawerInput("drawer-retrieval-top-k").value = runtimeState.retrieval_top_k ?? 4;
+        drawerInput("drawer-rerank-enabled").checked = !!runtimeState.rerank_enabled;
+        drawerInput("drawer-rerank-base-url").value = runtimeState.rerank_base_url || "";
+        drawerInput("drawer-rerank-api-key").value = runtimeState.rerank_api_key || "";
+        drawerInput("drawer-rerank-model").value = runtimeState.rerank_model || "";
+        drawerInput("drawer-rerank-top-n").value = runtimeState.rerank_top_n ?? 3;
+        drawerInput("drawer-theme").value = runtimeState.theme || "light";
+        drawerInput("drawer-ui-opacity").value = runtimeState.ui_opacity ?? 0.84;
+        drawerInput("drawer-background-url").value = runtimeState.background_image_url || "";
+        drawerInput("drawer-background-overlay").value = runtimeState.background_overlay ?? 0.42;
+        drawerInput("drawer-sprite-enabled").checked = runtimeState.sprite_enabled !== false;
+        drawerInput("drawer-sprite-base-path").value = runtimeState.sprite_base_path || {{ settings.sprite_base_path | tojson }};
+
+        document.querySelectorAll(".drawer-embedding-field").forEach((el) => {
+          el.checked = (runtimeState.embedding_fields || []).includes(el.value);
+        });
+
+        document.getElementById("drawer-ui-opacity-value").textContent = Number(runtimeState.ui_opacity || 0.84).toFixed(2);
+        document.getElementById("drawer-background-overlay-value").textContent = Number(runtimeState.background_overlay || 0.42).toFixed(2);
+      }
+
+      function syncStateFromDrawer(event) {
+        runtimeState = {
+          ...runtimeState,
+          llm_base_url: drawerInput("drawer-llm-base-url").value.trim(),
+          llm_api_key: drawerInput("drawer-llm-api-key").value.trim(),
+          llm_model: drawerInput("drawer-llm-model").value.trim(),
+          temperature: Number(drawerInput("drawer-temperature").value || 0.85),
+          history_limit: Number(drawerInput("drawer-history-limit").value || 20),
+          request_timeout: Number(drawerInput("drawer-request-timeout").value || 120),
+          demo_mode: drawerInput("drawer-demo-mode").checked,
+          embedding_base_url: drawerInput("drawer-embedding-base-url").value.trim(),
+          embedding_api_key: drawerInput("drawer-embedding-api-key").value.trim(),
+          embedding_model: drawerInput("drawer-embedding-model").value.trim(),
+          embedding_fields: [...document.querySelectorAll(".drawer-embedding-field:checked")].map((el) => el.value),
+          retrieval_top_k: Number(drawerInput("drawer-retrieval-top-k").value || 4),
+          rerank_enabled: drawerInput("drawer-rerank-enabled").checked,
+          rerank_base_url: drawerInput("drawer-rerank-base-url").value.trim(),
+          rerank_api_key: drawerInput("drawer-rerank-api-key").value.trim(),
+          rerank_model: drawerInput("drawer-rerank-model").value.trim(),
+          rerank_top_n: Number(drawerInput("drawer-rerank-top-n").value || 3),
+          theme: drawerInput("drawer-theme").value,
+          ui_opacity: Number(drawerInput("drawer-ui-opacity").value || 0.84),
+          background_image_url: drawerInput("drawer-background-url").value.trim(),
+          background_overlay: Number(drawerInput("drawer-background-overlay").value || 0.42),
+          sprite_enabled: drawerInput("drawer-sprite-enabled").checked,
+          sprite_base_path: drawerInput("drawer-sprite-base-path").value.trim() || {{ settings.sprite_base_path | tojson }},
+        };
+
+        applyTheme(runtimeState.theme);
+        applyUiOpacity(runtimeState.ui_opacity);
+        applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
+
+        const shouldSyncServer = DRAWER_SERVER_INPUT_IDS.has(event?.target?.id || "")
+          || !!event?.target?.classList?.contains("drawer-embedding-field");
+        if (shouldSyncServer) {
+          scheduleRuntimeStateSave();
+        }
+      }
+
+      function openDrawer() {
+        drawerEl.classList.add("open");
+        drawerEl.setAttribute("aria-hidden", "false");
+        drawerOverlayEl.hidden = false;
+      }
+
+      function closeDrawer() {
+        drawerEl.classList.remove("open");
+        drawerEl.setAttribute("aria-hidden", "true");
+        drawerOverlayEl.hidden = true;
+      }
+
+      function updateThemeBadge() {
+        const theme = rootEl.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        themePillEl.textContent = theme === "dark" ? "暗色模式" : "浅色模式";
+      }
+
+      function applyTheme(theme) {
+        rootEl.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+        updateThemeBadge();
+      }
+
+      function applyUiOpacity(value) {
+        const opacity = Math.min(Math.max(Number(value || 0.84), 0.2), 1);
+        document.getElementById("drawer-ui-opacity-value").textContent = opacity.toFixed(2);
+        const theme = rootEl.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const palette = theme === "dark"
+          ? { panel: "18, 27, 37", strong: "20, 30, 41", input: "11, 18, 26", user: "34, 52, 70", assistant: "23, 33, 46" }
+          : { panel: "255, 250, 244", strong: "255, 250, 244", input: "255, 255, 255", user: "239, 220, 206", assistant: "255, 248, 242" };
+
+        rootEl.style.setProperty("--panel", `rgba(${palette.panel}, ${opacity.toFixed(2)})`);
+        rootEl.style.setProperty("--panel-strong", `rgba(${palette.strong}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--input-bg", `rgba(${palette.input}, ${Math.max(opacity - 0.1, 0.16).toFixed(2)})`);
+        rootEl.style.setProperty("--user", `rgba(${palette.user}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--assistant", `rgba(${palette.assistant}, ${Math.min(opacity + 0.12, 0.99).toFixed(2)})`);
+      }
+
+      function applyBackground(url, overlay) {
+        const normalizedOverlay = Math.min(Math.max(Number(overlay || 0), 0), 0.85);
+        document.getElementById("drawer-background-overlay-value").textContent = normalizedOverlay.toFixed(2);
+        bodyEl.style.setProperty("--background-overlay-opacity", String(normalizedOverlay));
+        if (url) {
+          bodyEl.style.setProperty("--background-image", `url("${url}")`);
+        } else {
+          bodyEl.style.setProperty("--background-image", "none");
+        }
+      }
+
+      function spriteUrlFor(tag) {
+        const cleanBase = (runtimeState.sprite_base_path || {{ settings.sprite_base_path | tojson }}).replace(/\/+$/, "");
+        return `${cleanBase}/${encodeURIComponent(tag)}.png`;
+      }
+
+      function updateSprite(tag) {
+        if (!tag || runtimeState.sprite_enabled === false) {
+          spriteImageEl.hidden = true;
+          spritePlaceholderEl.hidden = false;
+          spriteTagLabelEl.textContent = "当前表情：未命中";
+          return;
+        }
+
+        spriteTagLabelEl.textContent = `当前表情：${tag}`;
+        spriteImageEl.src = spriteUrlFor(tag);
+        spriteImageEl.hidden = false;
+        spritePlaceholderEl.hidden = true;
+      }
+
+      spriteImageEl.addEventListener("error", () => {
+        spriteImageEl.hidden = true;
+        spritePlaceholderEl.hidden = false;
+        spritePlaceholderEl.textContent = `没有找到对应立绘，请在 ${runtimeState.sprite_base_path || {{ settings.sprite_base_path | tojson }}} 里放入同名 PNG。`;
+      });
+
+      function parseThoughtSections(content) {
+        const text = String(content || "");
+        if (!text) {
+          return { visible: "", think: "" };
+        }
+
+        const thinkParts = [];
+        const visibleParts = [];
+        const openTagPattern = /<think\b[^>]*>/gi;
+        let cursor = 0;
+        let match;
+
+        while ((match = openTagPattern.exec(text)) !== null) {
+          const start = match.index;
+          const openEnd = openTagPattern.lastIndex;
+
+          if (start > cursor) {
+            visibleParts.push(text.slice(cursor, start));
+          }
+
+          const closeIndex = text.toLowerCase().indexOf("</think>", openEnd);
+          if (closeIndex === -1) {
+            const trailingThink = text.slice(openEnd).trim();
+            if (trailingThink) {
+              thinkParts.push(trailingThink);
+            }
+            cursor = text.length;
+            break;
+          }
+
+          const inner = text.slice(openEnd, closeIndex).trim();
+          if (inner) {
+            thinkParts.push(inner);
+          }
+          cursor = closeIndex + "</think>".length;
+          openTagPattern.lastIndex = cursor;
+        }
+
+        if (cursor < text.length) {
+          visibleParts.push(text.slice(cursor));
+        }
+
+        return {
+          visible: visibleParts.join("").replace(/\n{3,}/g, "\n\n").trim(),
+          think: thinkParts.join("\n\n").trim(),
+        };
+      }
+
+      function ensureBubbleNodes(bubble) {
+        if (!bubble._bodyNode) {
+          bubble.replaceChildren();
+          const body = document.createElement("div");
+          body.className = "bubble-body";
+          bubble.appendChild(body);
+          bubble._bodyNode = body;
+        }
+        return {
+          body: bubble._bodyNode,
+          thinkDetails: bubble._thinkDetails || null,
+          thinkSummary: bubble._thinkSummary || null,
+          thinkContent: bubble._thinkContent || null,
+        };
+      }
+
+      function ensureThinkNodes(bubble) {
+        if (bubble._thinkDetails && bubble._thinkSummary && bubble._thinkContent) {
+          return {
+            details: bubble._thinkDetails,
+            summary: bubble._thinkSummary,
+            content: bubble._thinkContent,
+          };
+        }
+
+        const details = document.createElement("details");
+        details.className = "bubble-think";
+
+        const summary = document.createElement("summary");
+        summary.className = "bubble-think-toggle";
+
+        const content = document.createElement("div");
+        content.className = "bubble-think-content";
+
+        details.appendChild(summary);
+        details.appendChild(content);
+        bubble.insertBefore(details, bubble.firstChild || null);
+
+        bubble._thinkDetails = details;
+        bubble._thinkSummary = summary;
+        bubble._thinkContent = content;
+        return { details, summary, content };
+      }
+
+      function removeThinkNodes(bubble) {
+        if (bubble._thinkDetails) {
+          bubble._thinkDetails.remove();
+        }
+        bubble._thinkDetails = null;
+        bubble._thinkSummary = null;
+        bubble._thinkContent = null;
+      }
+
+      function compactTtsText(value) {
+        return String(value || "").replace(/\s+/g, " ").trim();
+      }
+
+      function normalizeTtsCompare(value) {
+        return compactTtsText(value)
+          .replace(/[“”"'‘’「」『』（）()\[\]【】]/g, "")
+          .replace(/[，。！？、,.!?~～—\-…\s]/g, "")
+          .toLowerCase();
+      }
+
+      function findTtsDelimiter(value, start = 0) {
+        const text = String(value || "");
+        for (let index = start; index < text.length; index += 1) {
+          const char = text[index];
+          if (char === ":" || char === "：") return index;
+        }
+        return -1;
+      }
+
+      function parseTtsVoiceFields(payload, raw = "") {
+        const text = String(payload || "");
+        const first = findTtsDelimiter(text, 0);
+        if (first < 0) return null;
+        const second = findTtsDelimiter(text, first + 1);
+        if (second < 0) return null;
+
+        const speaker = compactTtsText(text.slice(0, first));
+        const emotion = compactTtsText(text.slice(first + 1, second)).toLowerCase();
+        const speech = compactTtsText(text.slice(second + 1));
+        if (!speech) return null;
+
+        return {
+          speaker: speaker || "角色",
+          emotion,
+          speech,
+          raw: raw || `[TTSVoice:${text}]`,
+        };
+      }
+
+      function trimTrailingTtsPlaceholder(value) {
+        let text = String(value || "").replace(/[ \t\u3000]+$/g, "");
+        if (!text) return { text: value, removedPlaceholder: false };
+
+        const closeToOpen = {
+          "”": "“",
+          "\"": "\"",
+          "」": "「",
+          "』": "『",
+        };
+        const close = text[text.length - 1];
+        const open = closeToOpen[close];
+        if (!open) return { text: value, removedPlaceholder: false };
+
+        const openIndex = text.lastIndexOf(open, text.length - 2);
+        if (openIndex < 0) return { text: value, removedPlaceholder: false };
+
+        const quoteText = text.slice(openIndex + 1, text.length - 1);
+        const isPlaceholder = normalizeTtsCompare(quoteText) === normalizeTtsCompare("语音内容");
+        if (!isPlaceholder) {
+          return { text: value, removedPlaceholder: false };
+        }
+
+        return {
+          text: text.slice(0, openIndex).replace(/[ \t\u3000]+$/g, ""),
+          removedPlaceholder: true,
+        };
+      }
+
+      function parseTtsVoiceRichText(value) {
+        const text = String(value || "");
+        const pattern = /[\[【]TTSVoice[:：]([\s\S]*?)[\]】]/g;
+        const pieces = [];
+        const voices = [];
+        let cursor = 0;
+        let match;
+
+        while ((match = pattern.exec(text)) !== null) {
+          const raw = match[0];
+          const fields = parseTtsVoiceFields(match[1], raw);
+          if (!fields) continue;
+
+          const beforeResult = trimTrailingTtsPlaceholder(text.slice(cursor, match.index));
+          if (beforeResult.text) {
+            pieces.push({ type: "text", text: beforeResult.text });
+          }
+          pieces.push({ type: "voice", ...fields, showSpeech: beforeResult.removedPlaceholder });
+          voices.push(fields);
+          cursor = pattern.lastIndex;
+        }
+
+        const tail = text.slice(cursor);
+        if (tail) {
+          pieces.push({ type: "text", text: tail });
+        }
+
+        return { pieces, voices };
+      }
+
+      function createTtsVoiceCard(voice) {
+        const card = document.createElement("span");
+        card.className = "tts-voice-card";
+        card.dataset.ttsSpeaker = voice.speaker || "角色";
+        card.dataset.ttsEmotion = voice.emotion || "";
+        card.dataset.ttsText = voice.speech || "";
+        card.dataset.ttsRaw = voice.raw || "";
+        card.title = voice.speech ? `TTS：${voice.speech}` : "TTSVoice";
+
+        const header = document.createElement("span");
+        header.className = "tts-voice-card-head";
+
+        const icon = document.createElement("span");
+        icon.className = "tts-voice-card-icon";
+        icon.textContent = "🔊";
+        header.appendChild(icon);
+
+        const speaker = document.createElement("span");
+        speaker.className = "tts-voice-card-speaker";
+        speaker.textContent = voice.speaker || "角色";
+        header.appendChild(speaker);
+
+        if (voice.emotion) {
+          const emotion = document.createElement("span");
+          emotion.className = "tts-voice-card-emotion";
+          emotion.textContent = voice.emotion;
+          header.appendChild(emotion);
+        }
+
+        card.appendChild(header);
+
+        // Compact visual mode: keep the real speech in data-tts-text for playback,
+        // but do not repeat the full dialogue in the visible chip.
+
+        return card;
+      }
+
+      function renderTtsVoiceBody(body, sourceText) {
+        const source = String(sourceText || "");
+        if (body._ttsVoiceSource === source) return;
+        body._ttsVoiceSource = source;
+        body.replaceChildren();
+
+        const parsed = parseTtsVoiceRichText(source);
+        const ttsSpeech = parsed.voices.map((voice) => voice.speech).filter(Boolean).join("\n");
+        const ttsRaw = parsed.voices.map((voice) => voice.raw).filter(Boolean).join("\n");
+        body.dataset.ttsSpeech = ttsSpeech;
+        body.dataset.ttsRaw = ttsRaw;
+        body.classList.toggle("has-ttsvoice", parsed.voices.length > 0);
+
+        // Mirror TTS data onto the parent bubble. The chat voice hook reads these first,
+        // so visible text and speech text can stay separate.
+        const bubble = body.closest?.(".bubble") || body.parentElement;
+        if (bubble) {
+          bubble.dataset.ttsSpeech = ttsSpeech;
+          bubble.dataset.ttsRaw = ttsRaw;
+          bubble.classList.toggle("has-ttsvoice", parsed.voices.length > 0);
+        }
+
+        if (!parsed.pieces.length) {
+          body.textContent = "";
+          return;
+        }
+
+        for (const piece of parsed.pieces) {
+          if (piece.type === "voice") {
+            body.appendChild(createTtsVoiceCard(piece));
+          } else if (piece.text) {
+            body.appendChild(document.createTextNode(piece.text));
+          }
+        }
+      }
+
+      function renderBubbleContent(bubble, content) {
+        if (!bubble) return;
+        const state = typeof content === "object" && content !== null
+          ? {
+              visible: String(content.visible || ""),
+              think: String(content.think || ""),
+              thinking: Boolean(content.thinking),
+            }
+          : (() => {
+              const parts = parseThoughtSections(content);
+              return { visible: parts.visible, think: parts.think, thinking: false };
+            })();
+
+        const nodes = ensureBubbleNodes(bubble);
+
+        if (state.think) {
+          const thinkNodes = ensureThinkNodes(bubble);
+          thinkNodes.details.open = state.thinking;
+          thinkNodes.summary.textContent = state.thinking ? "思考中..." : "查看思考链";
+          if (thinkNodes.content.textContent !== state.think) {
+            thinkNodes.content.textContent = state.think;
+          }
+        } else {
+          removeThinkNodes(bubble);
+        }
+
+        const nextBodyText = state.visible || (state.think && state.thinking ? "" : "");
+        renderTtsVoiceBody(nodes.body, nextBodyText);
+      }
+
+      function hydrateExistingMessages() {
+        messagesEl.querySelectorAll(".bubble").forEach((bubble) => {
+          renderBubbleContent(bubble, bubble.textContent || "");
+        });
+      }
+
+      function createMessage(role, content, createdAt = new Date().toLocaleString()) {
+        const wrapper = document.createElement("div");
+        wrapper.className = `message ${role}`;
+
+        const bubbleWrap = document.createElement("div");
+        bubbleWrap.className = "bubble-wrap";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        renderBubbleContent(bubble, content);
+
+        const meta = document.createElement("div");
+        meta.className = "message-meta";
+        meta.textContent = createdAt;
+
+        const avatar = buildAvatar(role);
+
+        bubbleWrap.appendChild(bubble);
+        bubbleWrap.appendChild(meta);
+
+        if (role === "user") {
+          wrapper.appendChild(bubbleWrap);
+          wrapper.appendChild(avatar);
+        } else {
+          wrapper.appendChild(avatar);
+          wrapper.appendChild(bubbleWrap);
+        }
+
+        messagesEl.appendChild(wrapper);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        return {
+          wrapper,
+          bubble,
+          meta,
+          framePending: false,
+          pendingVisibleChars: [],
+          typewriterActive: false,
+          state: {
+            visible: "",
+            think: "",
+            thinking: false,
+          },
+        };
+      }
+
+      function addMessage(role, content, createdAt = new Date().toLocaleString()) {
+        return createMessage(role, content, createdAt);
+      }
+
+      function updateMessage(entry, content, createdAt = "") {
+        if (!entry) return;
+        renderBubbleContent(entry.bubble, content);
+        if (createdAt) {
+          entry.meta.textContent = createdAt;
+        }
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      function requestUiFrame(callback) {
+        if (document.hidden) {
+          setTimeout(callback, 0);
+          return;
+        }
+        requestAnimationFrame(callback);
+      }
+
+      function scheduleBubbleRender(entry) {
+        if (!entry || entry.framePending) return;
+        entry.framePending = true;
+        requestUiFrame(() => {
+          entry.framePending = false;
+          renderBubbleContent(entry.bubble, entry.state);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        });
+      }
+
+      function flushPendingVisible(entry) {
+        if (!entry) return;
+        if (entry.pendingVisibleChars.length) {
+          entry.state.visible += entry.pendingVisibleChars.join("");
+          entry.pendingVisibleChars = [];
+        }
+        entry.typewriterActive = false;
+        scheduleBubbleRender(entry);
+      }
+
+      function scheduleTypewriterTick(entry) {
+        if (!entry || entry.typewriterActive) return;
+        if (document.hidden) {
+          flushPendingVisible(entry);
+          return;
+        }
+        entry.typewriterActive = true;
+
+        const tick = () => {
+          if (!entry.pendingVisibleChars.length) {
+            entry.typewriterActive = false;
+            return;
+          }
+          if (document.hidden) {
+            flushPendingVisible(entry);
+            return;
+          }
+          entry.state.visible += entry.pendingVisibleChars.shift();
+          scheduleBubbleRender(entry);
+          requestUiFrame(tick);
+        };
+
+        requestUiFrame(tick);
+      }
+
+      function appendVisibleDelta(entry, delta) {
+        if (!entry) return;
+        const chars = Array.from(String(delta || ""));
+        if (!chars.length) return;
+        if (document.hidden) {
+          entry.state.visible += chars.join("");
+          scheduleBubbleRender(entry);
+          return;
+        }
+        entry.pendingVisibleChars.push(...chars);
+        scheduleTypewriterTick(entry);
+      }
+
+      function ensureFinalVisible(entry, fullText) {
+        if (!entry) return;
+        const target = String(fullText || "");
+        const buffered = entry.state.visible + entry.pendingVisibleChars.join("");
+        if (target === buffered) {
+          scheduleTypewriterTick(entry);
+          return;
+        }
+        if (target.startsWith(buffered)) {
+          entry.pendingVisibleChars.push(...Array.from(target.slice(buffered.length)));
+          scheduleTypewriterTick(entry);
+          return;
+        }
+        if (target.startsWith(entry.state.visible)) {
+          entry.pendingVisibleChars = Array.from(target.slice(entry.state.visible.length));
+          scheduleTypewriterTick(entry);
+          return;
+        }
+        entry.pendingVisibleChars = [];
+        entry.state.visible = target;
+        scheduleBubbleRender(entry);
+      }
+
+      function renderRetrievedItems(items) {
+        if (!Array.isArray(items) || items.length === 0) {
+          retrievalItemsEl.innerHTML = "";
+          retrievalBarEl.hidden = true;
+          return;
+        }
+        retrievalItemsEl.innerHTML = "";
+        for (const item of items) {
+          const chip = document.createElement("div");
+          chip.className = "retrieval-chip";
+          const title = item.title || "未命名记忆";
+          const score = typeof item.score === "number" ? ` · ${item.score.toFixed(3)}` : "";
+          chip.textContent = `${title}${score}`;
+          retrievalItemsEl.appendChild(chip);
+        }
+        retrievalBarEl.hidden = false;
+      }
+
+      function renderWorldbookHits(items) {
+        if (!Array.isArray(items) || items.length === 0) {
+          worldbookItemsEl.innerHTML = "";
+          worldbookBarEl.hidden = true;
+          return;
+        }
+        worldbookItemsEl.innerHTML = "";
+        for (const item of items) {
+          const chip = document.createElement("div");
+          chip.className = "retrieval-chip";
+          chip.textContent = item.trigger;
+          worldbookItemsEl.appendChild(chip);
+        }
+        worldbookBarEl.hidden = false;
+      }
+
+      function setWorldbookDebugCollapsed(collapsed) {
+        worldbookDebugCollapsed = !!collapsed;
+        if (worldbookDebugBodyEl) {
+          worldbookDebugBodyEl.hidden = worldbookDebugCollapsed;
+        }
+        if (worldbookDebugToggleEl) {
+          worldbookDebugToggleEl.setAttribute("aria-expanded", String(!worldbookDebugCollapsed));
+          worldbookDebugToggleEl.title = worldbookDebugCollapsed ? "展开 Worldbook Debug" : "收起 Worldbook Debug";
+        }
+        if (worldbookDebugArrowEl) {
+          worldbookDebugArrowEl.textContent = worldbookDebugCollapsed ? "▾" : "▴";
+        }
+        if (worldbookDebugPanelEl) {
+          worldbookDebugPanelEl.classList.toggle("expanded", !worldbookDebugCollapsed);
+        }
+      }
+
+      function normalizeWorldbookDebug(debug) {
+        const rawItems = Array.isArray(debug?.items) ? debug.items : [];
+        const rawAll = Array.isArray(debug?.matched_all) ? debug.matched_all : [];
+        const rawMatched = Array.isArray(debug?.matched) ? debug.matched : [];
+        const rawSelected = Array.isArray(debug?.selected) ? debug.selected : [];
+        const rawDropped = Array.isArray(debug?.dropped) ? debug.dropped : [];
+        const sourceItems = rawItems.length ? rawItems : (rawAll.length ? rawAll : (rawMatched.length ? rawMatched : []));
+
+        const selectedIds = new Set(rawSelected.map((item) => String(item?.id || "").trim()).filter(Boolean));
+        const droppedIds = new Set(rawDropped.map((item) => String(item?.id || "").trim()).filter(Boolean));
+
+        const items = sourceItems.map((item, index) => {
+          const entryId = String(item?.id || "").trim();
+          const insertionPosition = String(item?.insertion_position || item?.insertionPosition || "after_char_defs").trim() || "after_char_defs";
+          const injectionDepth = Number.isFinite(Number(item?.injection_depth)) ? Number(item.injection_depth) : (Number.isFinite(Number(item?.injectionDepth)) ? Number(item.injectionDepth) : 0);
+          const selectedFlag = item?.selected_for_prompt !== undefined ? item.selected_for_prompt : item?.selectedForPrompt;
+          const selectedForPrompt = entryId
+            ? selectedIds.has(entryId) || (!droppedIds.has(entryId) && selectedFlag !== false)
+            : selectedFlag !== false;
+          const droppedReason = String(item?.dropped_reason || item?.droppedReason || "").trim();
+          const matchedDepth = Number.isFinite(Number(item?.matched_depth)) ? Number(item.matched_depth) : (Number.isFinite(Number(item?.matchedDepth)) ? Number(item.matchedDepth) : 0);
+
+          let bucketKey = insertionPosition;
+          let bucketLabel = "世界书（未分类）";
+          if (insertionPosition === "before_char_defs") {
+            bucketKey = "before_char_defs";
+            bucketLabel = "世界书（角色定义前）";
+          } else if (insertionPosition === "after_char_defs") {
+            bucketKey = "after_char_defs";
+            bucketLabel = "世界书（角色定义后）";
+          } else if (insertionPosition === "in_chat") {
+            bucketKey = `in_chat_${injectionDepth}`;
+            bucketLabel = `世界书（聊天深度 ${injectionDepth}）`;
+          }
+
+          return {
+            index,
+            id: entryId,
+            title: String(item?.title || item?.trigger || `未命名词条 ${index + 1}`).trim(),
+            trigger: String(item?.trigger || "").trim(),
+            matched: String(item?.matched || item?.trigger || "").trim(),
+            contentPreview: String(item?.content_preview || item?.content || "").trim(),
+            insertionPosition,
+            injectionDepth,
+            injectionOrder: Number.isFinite(Number(item?.injection_order)) ? Number(item.injection_order) : (Number.isFinite(Number(item?.injectionOrder)) ? Number(item.injectionOrder) : null),
+            injectionRole: String(item?.injection_role || item?.injectionRole || "").trim(),
+            matchedDepth,
+            matchedFrom: String(item?.matched_from || item?.matchedFrom || "").trim(),
+            selectedForPrompt,
+            droppedReason,
+            source: String(item?.source || "").trim(),
+            group: String(item?.group || "").trim(),
+            bucketKey,
+            bucketLabel,
+          };
+        });
+
+        return {
+          items,
+          prompt: typeof debug?.prompt === "string" ? debug.prompt.trim() : "",
+          enforced: !!debug?.enforced,
+          recursiveEnabled: debug?.recursive_enabled !== undefined ? !!debug.recursive_enabled : !!debug?.recursiveEnabled,
+          recursionMaxDepth: Number.isFinite(Number(debug?.recursion_max_depth)) ? Number(debug.recursion_max_depth) : (Number.isFinite(Number(debug?.recursionMaxDepth)) ? Number(debug.recursionMaxDepth) : null),
+        };
+      }
+
+      function getWorldbookDebugVisibleItems(items) {
+        if (worldbookDebugFilter === "selected") {
+          return items.filter((item) => item.selectedForPrompt);
+        }
+        if (worldbookDebugFilter === "dropped") {
+          return items.filter((item) => !item.selectedForPrompt);
+        }
+        if (worldbookDebugFilter === "recursive") {
+          return items.filter((item) => item.matchedDepth > 0 || item.matchedFrom);
+        }
+        return items;
+      }
+
+      function refreshWorldbookDebugFilterButtons() {
+        if (!worldbookDebugFiltersEl) return;
+        worldbookDebugFiltersEl.querySelectorAll("[data-debug-filter]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.debugFilter === worldbookDebugFilter);
+        });
+      }
+
+      function makeWorldbookDebugChip(text, isActive = false) {
+        const chip = document.createElement("span");
+        chip.className = "worldbook-debug-chip";
+        if (isActive) {
+          chip.classList.add("active");
+        }
+        chip.textContent = text;
+        return chip;
+      }
+
+      function makeWorldbookDebugTag(text, extraClass = "") {
+        const tag = document.createElement("span");
+        tag.className = `worldbook-debug-tag${extraClass ? ` ${extraClass}` : ""}`;
+        tag.textContent = text;
+        return tag;
+      }
+
+      function formatWorldbookPositionLabel(item) {
+        if (item.insertionPosition === "before_char_defs") {
+          return "角色定义前";
+        }
+        if (item.insertionPosition === "after_char_defs") {
+          return "角色定义后";
+        }
+        if (item.insertionPosition === "in_chat") {
+          return `聊天深度 ${item.injectionDepth}`;
+        }
+        return "未分类";
+      }
+
+      function formatWorldbookStateText(item) {
+        if (item.selectedForPrompt) {
+          return "已注入到当前轮 Prompt";
+        }
+        if (item.droppedReason === "max_hits") {
+          return "命中但未注入：被 max_hits 截断";
+        }
+        if (item.droppedReason) {
+          return `命中但未注入：${item.droppedReason}`;
+        }
+        return "命中但未注入";
+      }
+
+      function renderWorldbookDebugSummary(debugState) {
+        if (!worldbookDebugSummaryEl) return;
+
+        const allItems = Array.isArray(debugState?.items) ? debugState.items : [];
+        const selectedCount = allItems.filter((item) => item.selectedForPrompt).length;
+        const droppedCount = allItems.length - selectedCount;
+        const recursiveCount = allItems.filter((item) => item.matchedDepth > 0 || item.matchedFrom).length;
+
+        worldbookDebugSummaryEl.innerHTML = "";
+        worldbookDebugSummaryEl.appendChild(makeWorldbookDebugChip(`命中 ${allItems.length}`));
+        worldbookDebugSummaryEl.appendChild(makeWorldbookDebugChip(`已注入 ${selectedCount}`, selectedCount > 0));
+        worldbookDebugSummaryEl.appendChild(makeWorldbookDebugChip(`未注入 ${droppedCount}`));
+        worldbookDebugSummaryEl.appendChild(makeWorldbookDebugChip(`递归 ${debugState?.recursiveEnabled ? "开" : "关"}`, !!debugState?.recursiveEnabled));
+        if (debugState?.recursionMaxDepth !== null && debugState?.recursionMaxDepth !== undefined) {
+          worldbookDebugSummaryEl.appendChild(makeWorldbookDebugChip(`最大层级 ${debugState.recursionMaxDepth}`));
+        }
+        if (recursiveCount > 0) {
+          worldbookDebugSummaryEl.appendChild(makeWorldbookDebugChip(`递归命中 ${recursiveCount}`));
+        }
+      }
+
+      function renderWorldbookDebugGroups(debugState) {
+        if (!worldbookDebugGroupsEl) return;
+
+        const visibleItems = getWorldbookDebugVisibleItems(Array.isArray(debugState?.items) ? debugState.items : []);
+        const groupOrder = [
+          "before_char_defs",
+          "after_char_defs",
+          "in_chat_0",
+          "in_chat_1",
+          "in_chat_2",
+          "in_chat_3",
+          "unknown",
+        ];
+        const grouped = new Map();
+        visibleItems.forEach((item) => {
+          if (!grouped.has(item.bucketKey)) {
+            grouped.set(item.bucketKey, []);
+          }
+          grouped.get(item.bucketKey).push(item);
+        });
+
+        worldbookDebugGroupsEl.innerHTML = "";
+
+        if (!visibleItems.length) {
+          const empty = document.createElement("div");
+          empty.className = "worldbook-debug-empty";
+          empty.textContent = worldbookDebugFilter === "recursive"
+            ? "当前轮没有递归链可展示。你可以切回“全部”查看完整 Worldbook Debug。"
+            : "当前过滤条件下没有 Worldbook 条目可展示。你可以切回“全部”查看完整 Worldbook Debug。";
+          worldbookDebugGroupsEl.appendChild(empty);
+          return;
+        }
+
+        groupOrder.forEach((groupKey) => {
+          const entries = grouped.get(groupKey);
+          if (!entries || !entries.length) return;
+
+          const group = document.createElement("section");
+          group.className = "worldbook-debug-group";
+
+          const head = document.createElement("div");
+          head.className = "worldbook-debug-group-head";
+
+          const title = document.createElement("strong");
+          title.className = "worldbook-debug-group-title";
+          title.textContent = entries[0].bucketLabel;
+
+          const meta = document.createElement("span");
+          meta.className = "worldbook-debug-group-meta";
+          meta.textContent = `${entries.length} 条`;
+
+          head.appendChild(title);
+          head.appendChild(meta);
+          group.appendChild(head);
+
+          const list = document.createElement("div");
+          list.className = "worldbook-debug-item-list";
+
+          entries.forEach((item) => {
+            const card = document.createElement("article");
+            card.className = "worldbook-debug-item";
+
+            const cardHead = document.createElement("div");
+            cardHead.className = "worldbook-debug-item-head";
+
+            const titleWrap = document.createElement("div");
+            const cardTitle = document.createElement("div");
+            cardTitle.className = "worldbook-debug-item-title";
+            cardTitle.textContent = item.title;
+            titleWrap.appendChild(cardTitle);
+
+            const tagRow = document.createElement("div");
+            tagRow.className = "worldbook-debug-tag-row";
+            tagRow.appendChild(makeWorldbookDebugTag(item.selectedForPrompt ? "已注入" : "未注入", item.selectedForPrompt ? "selected" : "dropped"));
+            tagRow.appendChild(makeWorldbookDebugTag(formatWorldbookPositionLabel(item)));
+            if (item.matchedDepth > 0 || item.matchedFrom) {
+              tagRow.appendChild(makeWorldbookDebugTag(`递归层级 ${item.matchedDepth}`));
+            } else {
+              tagRow.appendChild(makeWorldbookDebugTag("直接命中"));
+            }
+
+            cardHead.appendChild(titleWrap);
+            cardHead.appendChild(tagRow);
+            card.appendChild(cardHead);
+
+            const metaBlock = document.createElement("div");
+            metaBlock.className = "worldbook-debug-item-meta";
+
+            const lines = [
+              ["Trigger", item.trigger || "—"],
+              ["Matched", item.matched || "—"],
+            ];
+
+            if (item.matchedFrom) {
+              lines.push(["来源", item.matchedFrom]);
+            }
+            if (item.injectionOrder !== null) {
+              lines.push(["注入顺序", String(item.injectionOrder)]);
+            }
+            if (item.injectionRole) {
+              lines.push(["角色", item.injectionRole]);
+            }
+            if (item.group) {
+              lines.push(["组别", item.group]);
+            }
+            if (item.source) {
+              lines.push(["来源类型", item.source]);
+            }
+            lines.push(["状态", formatWorldbookStateText(item)]);
+
+            lines.forEach(([labelText, valueText]) => {
+              const line = document.createElement("div");
+              const label = document.createElement("span");
+              label.className = "worldbook-debug-label";
+              label.textContent = `${labelText}: `;
+              const value = document.createElement("span");
+              value.textContent = valueText;
+              line.appendChild(label);
+              line.appendChild(value);
+              metaBlock.appendChild(line);
+            });
+
+            card.appendChild(metaBlock);
+
+            if (item.contentPreview) {
+              const preview = document.createElement("p");
+              preview.className = "worldbook-debug-item-preview";
+              const trimmed = item.contentPreview.length > 220
+                ? `${item.contentPreview.slice(0, 220).trimEnd()}...`
+                : item.contentPreview;
+              preview.textContent = trimmed;
+              card.appendChild(preview);
+            }
+
+            list.appendChild(card);
+          });
+
+          group.appendChild(list);
+          worldbookDebugGroupsEl.appendChild(group);
+        });
+      }
+
+      function renderWorldbookDebug(debug) {
+        if (!worldbookDebugEnabled) {
+          if (worldbookDebugPanelEl) {
+            worldbookDebugPanelEl.hidden = true;
+          }
+          return;
+        }
+
+        if (worldbookDebugPanelEl) {
+          worldbookDebugPanelEl.hidden = false;
+        }
+
+        const normalized = normalizeWorldbookDebug(debug || {});
+        lastWorldbookDebugPayload = normalized;
+
+        const allItems = normalized.items;
+        const hasDebug = allItems.length > 0 || !!normalized.prompt;
+
+        if (!hasDebug) {
+          worldbookDebugStatusEl.textContent = "No Hit";
+          worldbookDebugStatusEl.classList.remove("active");
+          worldbookDebugCountEl.textContent = "暂无命中";
+          worldbookDebugPromptEl.textContent = "当前轮没有可展示的 Worldbook 调试文本。点击上方箭头后，这里会显示命中详情和拼接进 Prompt 的内容。";
+          if (worldbookDebugSummaryEl) worldbookDebugSummaryEl.innerHTML = "";
+          if (worldbookDebugGroupsEl) worldbookDebugGroupsEl.innerHTML = '<div class="worldbook-debug-empty">当前轮没有可展示的 Worldbook 调试信息。</div>';
+          if (worldbookDebugFiltersEl) worldbookDebugFiltersEl.hidden = true;
+          setWorldbookDebugCollapsed(true);
+          return;
+        }
+
+        worldbookDebugStatusEl.textContent = normalized.enforced ? "Hit + Boost" : "Hit";
+        worldbookDebugStatusEl.classList.add("active");
+        worldbookDebugCountEl.textContent = `${allItems.length} items`;
+
+        renderWorldbookDebugSummary(normalized);
+        renderWorldbookDebugGroups(normalized);
+
+        if (worldbookDebugFiltersEl) {
+          worldbookDebugFiltersEl.hidden = false;
+          refreshWorldbookDebugFilterButtons();
+        }
+
+        const rawPrompt = normalized.prompt || allItems.map((item) => item.trigger || item.title).join("\n");
+        worldbookDebugPromptEl.textContent = rawPrompt;
+        setWorldbookDebugCollapsed(worldbookDebugCollapsed);
+      }
+
+
+      let presetStoreCache = null;
+
+      function getPresetStorePayload(data) {
+        if (data && typeof data === "object") {
+          if (data.preset_store && typeof data.preset_store === "object") {
+            return data.preset_store;
+          }
+          if (data.preset && typeof data.preset === "object") {
+            return data.preset;
+          }
+          if (data.store && typeof data.store === "object") {
+            return data.store;
+          }
+          if (Array.isArray(data.presets) || typeof data.active_preset_id === "string") {
+            return data;
+          }
+        }
+        return null;
+      }
+
+      function getPresetDebugPayload(data) {
+        if (data && typeof data === "object" && data.preset_debug && typeof data.preset_debug === "object") {
+          return data.preset_debug;
+        }
+        return null;
+      }
+
+      function getEnabledModuleLabels(modules) {
+        const labels = {
+          no_user_speaking: "防抢话",
+          short_paragraph: "短段落",
+          long_paragraph: "长段落",
+          second_person: "第二人称",
+          third_person: "第三人称",
+          anti_repeat: "抗重复",
+          no_closing_feel: "弱收尾",
+        };
+        return Object.entries(modules || {})
+          .filter(([key, value]) => Boolean(value) && labels[key])
+          .map(([key]) => labels[key]);
+      }
+
+      function getActivePresetFromStore(store) {
+        if (!store || !Array.isArray(store.presets)) return null;
+        return store.presets.find((item) => item.id === store.active_preset_id) || store.presets[0] || null;
+      }
+
+      function renderPresetSummaryFromStore(store) {
+        if (!store) {
+          presetNameEl.textContent = "未选择预设";
+          presetModulesEl.textContent = "当前无激活模块";
+          presetPillTextEl.textContent = "切换预设";
+          return;
+        }
+        const active = getActivePresetFromStore(store);
+        if (!active) {
+          presetNameEl.textContent = "未选择预设";
+          presetModulesEl.textContent = "当前无激活模块";
+          presetPillTextEl.textContent = "切换预设";
+          return;
+        }
+        presetNameEl.textContent = active.name || "未命名预设";
+        presetPillTextEl.textContent = active.name || "切换预设";
+        const enabledModules = getEnabledModuleLabels(active.modules);
+        presetModulesEl.textContent = enabledModules.length
+          ? `激活模块：${enabledModules.join(" / ")}`
+          : "当前无激活模块";
+      }
+
+      function renderPresetDebug(debug, store = presetStoreCache) {
+        const active = getActivePresetFromStore(store);
+        const activeName = debug?.active_preset_name || active?.name || "未选择预设";
+        const enabledModules = Array.isArray(debug?.active_modules)
+          ? debug.active_modules
+          : getEnabledModuleLabels(active?.modules || {});
+        const promptText = typeof debug?.prompt === "string"
+          ? debug.prompt.trim()
+          : String(active?.base_system_prompt || "").trim();
+
+        if (!active && !promptText && !enabledModules.length) {
+          presetDebugPanelEl.hidden = true;
+          presetDebugPromptEl.textContent = "";
+          presetDebugModulesEl.innerHTML = "";
+          presetDebugStatusEl.classList.remove("active");
+          return;
+        }
+
+        presetDebugStatusEl.textContent = active?.enabled === false ? "停用" : "启用";
+        presetDebugStatusEl.classList.toggle("active", active?.enabled !== false);
+        presetDebugNameEl.textContent = `当前预设：${activeName}`;
+
+        presetDebugModulesEl.innerHTML = "";
+        if (enabledModules.length) {
+          enabledModules.forEach((label) => {
+            const chip = document.createElement("span");
+            chip.className = "preset-module-chip";
+            chip.textContent = label;
+            presetDebugModulesEl.appendChild(chip);
+          });
+        }
+
+        presetDebugPromptEl.textContent = promptText || "当前没有可预览的 preset prompt。";
+        presetDebugPanelEl.hidden = false;
+        setPresetDebugCollapsed(true);
+      }
+
+      function formatPromptLayerMeta(meta) {
+        if (!meta || typeof meta !== "object") {
+          return "";
+        }
+        const labels = {
+          character_name: "角色",
+          stored_memory_count: "记忆库",
+          recalled_memory_count: "召回",
+          hit_count: "命中",
+          turn_count: "历史",
+          char_count: "字数",
+          sprite_enabled: "立绘约束",
+          section_count: "段数",
+        };
+        return Object.entries(meta)
+          .filter(([, value]) => value !== "" && value !== null && value !== undefined)
+          .map(([key, value]) => `${labels[key] || key}: ${value === true ? "开" : value === false ? "关" : value}`)
+          .join(" · ");
+      }
+
+      function renderPromptPackage(pkg) {
+        const layers = Array.isArray(pkg?.layers) ? pkg.layers : [];
+        const previewText = typeof pkg?.preview_text === "string" ? pkg.preview_text.trim() : "";
+        if (!layers.length && !previewText) {
+          promptPackagePanelEl.hidden = true;
+          promptPackageLayersEl.innerHTML = "";
+          promptPackagePreviewEl.textContent = "";
+          return;
+        }
+
+        const summaryBits = [];
+        if (typeof pkg?.system_section_count === "number") {
+          summaryBits.push(`system ${pkg.system_section_count} 段`);
+        }
+        if (typeof pkg?.recent_history_turns === "number") {
+          summaryBits.push(`历史 ${pkg.recent_history_turns} 条`);
+        }
+        if (typeof pkg?.message_count === "number") {
+          summaryBits.push(`messages ${pkg.message_count} 条`);
+        }
+        promptPackageSummaryEl.textContent = summaryBits.join(" · ") || `共 ${layers.length} 层`;
+
+        promptPackageLayersEl.innerHTML = "";
+        layers.forEach((layer, index) => {
+          const card = document.createElement("div");
+          card.className = "prompt-layer-card";
+
+          const head = document.createElement("div");
+          head.className = "prompt-layer-head";
+
+          const title = document.createElement("strong");
+          title.className = "prompt-layer-title";
+          title.textContent = `${index + 1}. ${layer.title || "未命名层"}`;
+
+          const meta = document.createElement("span");
+          meta.className = "prompt-layer-meta";
+          meta.textContent = formatPromptLayerMeta(layer.meta);
+
+          const snippet = document.createElement("p");
+          snippet.className = "prompt-layer-snippet";
+          const content = typeof layer.content === "string" ? layer.content.trim() : "";
+          snippet.textContent = content.length > 220 ? `${content.slice(0, 220).trimEnd()}...` : content;
+
+          head.appendChild(title);
+          if (meta.textContent) {
+            head.appendChild(meta);
+          }
+          card.appendChild(head);
+          if (snippet.textContent) {
+            card.appendChild(snippet);
+          }
+          promptPackageLayersEl.appendChild(card);
+        });
+
+        promptPackagePreviewEl.textContent = previewText || layers
+          .map((layer, index) => `[${index + 1}. ${layer.title || "未命名层"}]\n${String(layer.content || "").trim()}`)
+          .join("\n\n");
+        promptPackagePanelEl.hidden = false;
+      }
+
+      async function previewPromptPackage() {
+        const text = inputEl.value.trim();
+        if (!text) {
+          inputEl.focus();
+          setStatus("先输入一条消息，再预览本轮 Prompt。");
+          return;
+        }
+        setStatus("正在生成本轮 Prompt 预览...");
+        try {
+          const data = await postJson("/api/chat/prompt-preview", {
+            message: text,
+            runtime_config: buildChatRuntimeConfig(),
+          });
+          renderRetrievedItems(data.retrieved_items || []);
+          renderWorldbookHits(data.worldbook_hits || []);
+          renderWorldbookDebug(data.worldbook_debug || {});
+          renderPresetDebug(data.preset_debug || {}, presetStoreCache);
+          renderPromptPackage(data.prompt_package || {});
+          openDrawer();
+          setStatus("已生成本轮 Prompt 预览");
+        } catch (error) {
+          setStatus(`Prompt 预览失败：${error.message}`);
+        }
+      }
+
+      function renderPresetMenu(store) {
+        if (!presetMenuEl) return;
+        presetMenuEl.innerHTML = "";
+        const activeId = store?.active_preset_id;
+        const presets = Array.isArray(store?.presets) ? store.presets : [];
+
+        if (!presets.length) {
+          const empty = document.createElement("div");
+          empty.className = "preset-menu-item";
+          empty.textContent = "当前没有可用预设";
+          presetMenuEl.appendChild(empty);
+          return;
+        }
+
+        for (const preset of presets) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "preset-menu-item" + (preset.id === activeId ? " active" : "");
+          const enabledModules = getEnabledModuleLabels(preset.modules);
+          btn.innerHTML = `
+            <span class="preset-menu-title">${preset.name || "未命名预设"}</span>
+            <span class="preset-menu-meta">${preset.enabled ? "启用" : "停用"} · ${enabledModules.length ? enabledModules.join(" / ") : "无激活模块"}</span>
+          `;
+          btn.addEventListener("click", async () => {
+            try {
+              const response = await fetch("/api/preset/activate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ preset_id: preset.id }),
+              });
+              if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.detail || "切换预设失败");
+              }
+              const data = await response.json();
+              const storePayload = getPresetStorePayload(data);
+              const debugPayload = getPresetDebugPayload(data);
+              presetStoreCache = storePayload;
+              renderPresetSummaryFromStore(storePayload);
+              renderPresetMenu(storePayload);
+              renderPresetDebug(debugPayload, storePayload);
+              presetMenuEl.hidden = true;
+              setStatus(`已切换预设：${getActivePresetFromStore(storePayload)?.name || "完成"}`);
+            } catch (error) {
+              console.error(error);
+              setStatus(`切换预设失败：${error.message}`);
+            }
+          });
+          presetMenuEl.appendChild(btn);
+        }
+      }
+
+
+      function setPresetDebugCollapsed(collapsed) {
+        presetDebugCollapsed = !!collapsed;
+        if (presetDebugBodyEl) {
+          presetDebugBodyEl.hidden = presetDebugCollapsed;
+        }
+        if (togglePresetDebugBtn) {
+          togglePresetDebugBtn.textContent = presetDebugCollapsed ? "展开 Debug" : "折叠 Debug";
+        }
+      }
+
+      if (togglePresetDebugBtn) {
+        togglePresetDebugBtn.addEventListener("click", () => {
+          setPresetDebugCollapsed(!presetDebugCollapsed);
+        });
+      }
+
+      if (worldbookDebugToggleEl) {
+        worldbookDebugToggleEl.addEventListener("click", () => {
+          if (worldbookDebugPanelEl.hidden) {
+            return;
+          }
+          setWorldbookDebugCollapsed(!worldbookDebugCollapsed);
+        });
+      }
+
+      if (worldbookDebugFiltersEl) {
+        worldbookDebugFiltersEl.addEventListener("click", (event) => {
+          const button = event.target.closest("[data-debug-filter]");
+          if (!button) {
+            return;
+          }
+          worldbookDebugFilter = button.dataset.debugFilter || "all";
+          refreshWorldbookDebugFilterButtons();
+          if (lastWorldbookDebugPayload) {
+            renderWorldbookDebug(lastWorldbookDebugPayload);
+          }
+        });
+        refreshWorldbookDebugFilterButtons();
+      }
+
+      async function loadPresetStoreForChat() {
+        try {
+          const response = await fetch("/api/preset");
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.detail || "读取预设失败");
+          }
+          const data = await response.json();
+          const storePayload = getPresetStorePayload(data);
+          const debugPayload = getPresetDebugPayload(data);
+          presetStoreCache = storePayload;
+          renderPresetSummaryFromStore(storePayload);
+          renderPresetMenu(storePayload);
+          renderPresetDebug(debugPayload, storePayload);
+        } catch (error) {
+          console.error(error);
+          presetNameEl.textContent = "读取预设失败";
+          presetModulesEl.textContent = "请检查 preset 接口";
+          presetDebugPanelEl.hidden = true;
+        }
+      }
+
+      function getWorkshopStageLabel(stage) {
+        const mapping = {
+          A: "A 阶段",
+          B: "B 阶段",
+          C: "C 阶段",
+        };
+        return mapping[stage] || stage || "A 阶段";
+      }
+
+      function resolveWorkshopMusicUrl(action) {
+        const customUrl = String(action?.music_url || "").trim();
+        if (customUrl) return customUrl;
+        const preset = WORKSHOP_MUSIC_PRESETS.find((entry) => entry.id === action?.music_preset);
+        return preset?.url || "";
+      }
+
+      function hideWorkshopImagePopup() {
+        if (workshopModalEl) {
+          workshopModalEl.classList.add("hidden");
+          workshopModalEl.setAttribute("aria-hidden", "true");
+        }
+        if (workshopAudioEl) {
+          workshopAudioEl.pause();
+          workshopAudioEl.removeAttribute("src");
+          workshopAudioEl.load();
+        }
+        if (workshopModalImageEl) {
+          workshopModalImageEl.src = "";
+          workshopModalImageEl.hidden = true;
+        }
+      }
+
+      function showWorkshopImagePopup(action) {
+        if (!workshopModalEl || !workshopModalTitleEl || !workshopModalStageEl || !workshopModalTextEl || !workshopModalImageEl) return;
+        workshopModalTitleEl.textContent = String(action?.popup_title || action?.name || "创意工坊弹窗").trim();
+        workshopModalStageEl.textContent = `触发阶段：${action?.stage_label || getWorkshopStageLabel(action?.stage)}`;
+        workshopModalTextEl.textContent = String(action?.note || "这里会显示图片说明。").trim() || "这里会显示图片说明。";
+        const imageUrl = String(action?.image_url || "").trim();
+        workshopModalImageEl.src = imageUrl;
+        workshopModalImageEl.alt = String(action?.image_alt || action?.name || "创意工坊图片").trim();
+        workshopModalImageEl.hidden = !imageUrl;
+        workshopModalEl.classList.remove("hidden");
+        workshopModalEl.setAttribute("aria-hidden", "false");
+      }
+
+      function playWorkshopMusic(action) {
+        if (!workshopAudioEl) return;
+        const nextUrl = resolveWorkshopMusicUrl(action);
+        if (!nextUrl) return;
+        workshopAudioEl.loop = action?.loop !== false;
+        workshopAudioEl.volume = Math.min(Math.max(Number(action?.volume ?? 0.85) || 0.85, 0), 1);
+        if (workshopAudioEl.src !== nextUrl) {
+          workshopAudioEl.src = nextUrl;
+          workshopAudioEl.load();
+        }
+        workshopAudioEl.currentTime = 0;
+        if (action?.autoplay !== false) {
+          workshopAudioEl.play().catch(() => {
+            setStatus("创意工坊音乐播放失败，请点击页面后重试。");
+          });
+        }
+      }
+
+      function handleWorkshopOutcome(workshop) {
+        workshopStatusCache = workshop || null;
+        hideWorkshopImagePopup();
+        if (!workshop?.triggered || !workshop?.action) {
+          return "";
+        }
+        const action = workshop.action;
+        if (action.action_type === "image") {
+          showWorkshopImagePopup(action);
+        } else {
+          playWorkshopMusic(action);
+        }
+        return `创意工坊已触发：${action.name || action.stage_label || getWorkshopStageLabel(action.stage)}`;
+      }
+
+      async function triggerWorkshopEvaluation(reason = "load") {
+        const response = await postJson("/api/workshop/evaluate", {
+          reason,
+          advance_temp: false,
+        });
+        handleWorkshopOutcome(response.workshop);
+        return response;
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "请求失败");
+        }
+        return response.json();
+      }
+
+      async function streamChat(payload, handlers = {}) {
+        const response = await fetch("/api/chat/stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "请求失败");
+        }
+        if (!response.body) {
+          throw new Error("Streaming is not supported in this browser.");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { value, done } = await reader.read();
+          buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+
+          let boundary = buffer.indexOf("\n\n");
+          while (boundary !== -1) {
+            const block = buffer.slice(0, boundary).trim();
+            buffer = buffer.slice(boundary + 2);
+            if (block.startsWith("data:")) {
+              const jsonText = block.slice(5).trim();
+              if (jsonText) {
+                const event = JSON.parse(jsonText);
+                if (event.type === "meta" && handlers.onMeta) handlers.onMeta(event);
+                if (event.type === "think_start" && handlers.onThinkStart) handlers.onThinkStart(event);
+                if (event.type === "think_chunk" && handlers.onThinkChunk) handlers.onThinkChunk(event);
+                if (event.type === "think_end" && handlers.onThinkEnd) handlers.onThinkEnd(event);
+                if (event.type === "chunk" && handlers.onChunk) handlers.onChunk(event);
+                if (event.type === "done" && handlers.onDone) handlers.onDone(event);
+                if (event.type === "error" && handlers.onError) handlers.onError(event);
+              }
+            }
+            boundary = buffer.indexOf("\n\n");
+          }
+
+          if (done) break;
+        }
+      }
+
+      function renderWorldbookEditor() {
+        worldbookListEl.innerHTML = "";
+        if (worldbookEntries.length === 0) {
+          worldbookEntries.push({ trigger: "", content: "" });
+        }
+        worldbookEntries.forEach((item, index) => {
+          const card = document.createElement("div");
+          card.className = "worldbook-card";
+          const head = document.createElement("div");
+          head.className = "memory-card-head";
+          head.innerHTML = `<strong>词条 ${index + 1}</strong>`;
+          const removeBtn = document.createElement("button");
+          removeBtn.type = "button";
+          removeBtn.className = "secondary compact";
+          removeBtn.textContent = "删除";
+          removeBtn.addEventListener("click", () => {
+            worldbookEntries.splice(index, 1);
+            renderWorldbookEditor();
+          });
+          head.appendChild(removeBtn);
+          const triggerLabel = document.createElement("label");
+          triggerLabel.textContent = "触发词";
+          const triggerInput = document.createElement("input");
+          triggerInput.value = item.trigger || "";
+          triggerInput.placeholder = "例如 魔杖，古木，莉莉丝";
+          triggerInput.addEventListener("input", (event) => {
+            worldbookEntries[index].trigger = event.target.value;
+          });
+          const contentLabel = document.createElement("label");
+          contentLabel.textContent = "设定文本";
+          const contentInput = document.createElement("textarea");
+          contentInput.rows = 4;
+          contentInput.value = item.content || "";
+          contentInput.placeholder = "命中触发词后，会把这里的内容作为设定补丁拼入 Prompt";
+          contentInput.addEventListener("input", (event) => {
+            worldbookEntries[index].content = event.target.value;
+          });
+          card.appendChild(head);
+          card.appendChild(triggerLabel);
+          card.appendChild(triggerInput);
+          card.appendChild(contentLabel);
+          card.appendChild(contentInput);
+          worldbookListEl.appendChild(card);
+        });
+      }
+
+      async function loadWorldbook() {
+        const data = await fetch("/api/worldbook").then((response) => response.json());
+        worldbookEntries = Array.isArray(data.items) ? data.items : [];
+        renderWorldbookEditor();
+      }
+
+      async function saveWorldbook() {
+        const payload = {
+          items: worldbookEntries
+            .map((item) => ({
+              trigger: String(item.trigger || "").trim(),
+              content: String(item.content || "").trim(),
+            }))
+            .filter((item) => item.trigger && item.content),
+        };
+        const data = await postJson("/api/worldbook", payload);
+        worldbookEntries = data.items || [];
+        renderWorldbookEditor();
+        setStatus("世界书已保存");
+      }
+
+      async function uploadBackground() {
+        const fileInput = document.getElementById("drawer-background-file");
+        const file = fileInput.files[0];
+        if (!file) {
+          throw new Error("请先选择一张背景图");
+        }
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch("/api/background", { method: "POST", body: formData });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "上传失败");
+        }
+        const data = await response.json();
+        runtimeState.background_image_url = data.url || "";
+        drawerInput("drawer-background-url").value = runtimeState.background_image_url;
+        applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
+        await saveRuntimeStateToServer("背景图已上传并同步到服务端配置");
+      }
+
+      function buildChatRuntimeConfig() {
+        return {
+          llm_base_url: runtimeState.llm_base_url,
+          llm_api_key: runtimeState.llm_api_key,
+          llm_model: runtimeState.llm_model,
+          temperature: runtimeState.temperature,
+          history_limit: runtimeState.history_limit,
+          request_timeout: runtimeState.request_timeout,
+          demo_mode: runtimeState.demo_mode,
+          embedding_base_url: runtimeState.embedding_base_url,
+          embedding_api_key: runtimeState.embedding_api_key,
+          embedding_model: runtimeState.embedding_model,
+          embedding_fields: runtimeState.embedding_fields,
+          retrieval_top_k: runtimeState.retrieval_top_k,
+          rerank_enabled: runtimeState.rerank_enabled,
+          rerank_base_url: runtimeState.rerank_base_url,
+          rerank_api_key: runtimeState.rerank_api_key,
+          rerank_model: runtimeState.rerank_model,
+          rerank_top_n: runtimeState.rerank_top_n,
+          sprite_enabled: runtimeState.sprite_enabled,
+          sprite_base_path: runtimeState.sprite_base_path,
+        };
+      }
+
+      inputEl.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          chatForm.requestSubmit();
+        }
+      });
+
+      chatForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const text = inputEl.value.trim();
+        if (!text) return;
+        addMessage("user", text);
+        inputEl.value = "";
+        setStatus("正在回复...");
+        const assistantEntry = createMessage("assistant", "");
+        streamingEntries.add(assistantEntry);
+        let finalReply = "";
+        try {
+          try {
+            const workshopResult = await triggerWorkshopEvaluation("chat_round_start");
+            if (workshopResult?.workshop) {
+              handleWorkshopOutcome(workshopResult.workshop);
+            }
+          } catch (workshopError) {
+            console.warn("Workshop evaluation skipped:", workshopError);
+          }
+          await streamChat({
+            message: text,
+            runtime_config: buildChatRuntimeConfig(),
+          }, {
+            onMeta(data) {
+              renderRetrievedItems(data.retrieved_items || []);
+              renderWorldbookHits(data.worldbook_hits || []);
+              renderWorldbookDebug(data.worldbook_debug || {});
+              renderPresetDebug(data.preset_debug || {}, presetStoreCache);
+              renderPromptPackage(data.prompt_package || {});
+            },
+            onThinkStart() {
+              assistantEntry.state.thinking = true;
+              scheduleBubbleRender(assistantEntry);
+            },
+            onThinkChunk(data) {
+              assistantEntry.state.think += data.delta || "";
+              assistantEntry.state.thinking = true;
+              scheduleBubbleRender(assistantEntry);
+            },
+            onThinkEnd() {
+              assistantEntry.state.thinking = false;
+              scheduleBubbleRender(assistantEntry);
+            },
+            onChunk(data) {
+              finalReply += data.delta || "";
+              appendVisibleDelta(assistantEntry, data.delta || "");
+            },
+            onDone(data) {
+              finalReply = typeof data.reply === "string" ? data.reply : finalReply;
+              ensureFinalVisible(assistantEntry, finalReply);
+              if (typeof data.think === "string") {
+                assistantEntry.state.think = data.think;
+              }
+              assistantEntry.state.thinking = false;
+              if (
+                assistantEntry.state.visible.trim()
+                || assistantEntry.pendingVisibleChars.length
+                || assistantEntry.state.think.trim()
+              ) {
+                renderBubbleContent(assistantEntry.bubble, assistantEntry.state);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+              } else {
+                assistantEntry.wrapper.remove();
+              }
+              updateSprite(data.sprite_tag || "");
+              streamingEntries.delete(assistantEntry);
+            },
+            onError(data) {
+              throw new Error(data.detail || "流式请求失败");
+            },
+          });
+          setStatus("就绪");
+        } catch (error) {
+          streamingEntries.delete(assistantEntry);
+          assistantEntry.wrapper.remove();
+          addMessage("assistant", `出错了：${error.message}`);
+          renderRetrievedItems([]);
+          renderWorldbookHits([]);
+          renderWorldbookDebug({});
+          setStatus("回复失败");
+        }
+      });
+
+      document.getElementById("end-conversation").addEventListener("click", async () => {
+        setStatus("正在整理当前对话...");
+        try {
+          const data = await postJson("/api/conversation/end", {});
+          messagesEl.innerHTML = "";
+          renderRetrievedItems([]);
+          renderWorldbookHits([]);
+          setStatus(
+            "已写入长期记忆：" + (data.memory_item?.title || "完成")
+            + "；当前工坊阶段：" + (data.workshop_stage || "未知")
+          );
+        } catch (error) {
+          setStatus("结束失败：" + error.message);
+        }
+      });
+
+      document.getElementById("export-history").addEventListener("click", () => {
+        window.location.href = "/api/export/history";
+      });
+
+      document.getElementById("open-drawer").addEventListener("click", openDrawer);
+      document.getElementById("open-drawer-secondary").addEventListener("click", openDrawer);
+      document.getElementById("close-drawer").addEventListener("click", closeDrawer);
+      drawerOverlayEl.addEventListener("click", closeDrawer);
+
+      document.querySelectorAll("#config-drawer input, #config-drawer select").forEach((element) => {
+        element.addEventListener("input", syncStateFromDrawer);
+        element.addEventListener("change", syncStateFromDrawer);
+      });
+
+      document.getElementById("upload-background").addEventListener("click", async () => {
+        try {
+          await uploadBackground();
+        } catch (error) {
+          setStatus(`上传失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("add-worldbook").addEventListener("click", () => {
+        worldbookEntries.push({ trigger: "", content: "" });
+        renderWorldbookEditor();
+      });
+
+      document.getElementById("save-worldbook").addEventListener("click", async () => {
+        try {
+          await saveWorldbook();
+        } catch (error) {
+          setStatus(`世界书保存失败：${error.message}`);
+        }
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          streamingEntries.forEach((entry) => flushPendingVisible(entry));
+        }
+      });
+
+      if (togglePresetMenuBtn && presetMenuEl) {
+        togglePresetMenuBtn.addEventListener("click", () => {
+          presetMenuEl.hidden = !presetMenuEl.hidden;
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!presetMenuEl.hidden && !presetMenuEl.contains(event.target) && !togglePresetMenuBtn.contains(event.target)) {
+            presetMenuEl.hidden = true;
+          }
+        });
+      }
+
+      previewPromptPackageBtn?.addEventListener("click", () => {
+        previewPromptPackage().catch((error) => {
+          setStatus(`Prompt 预览失败：${error.message}`);
+        });
+      });
+
+      workshopModalCloseEl?.addEventListener("click", hideWorkshopImagePopup);
+      workshopModalConfirmEl?.addEventListener("click", hideWorkshopImagePopup);
+      workshopModalEl?.addEventListener("click", (event) => {
+        if (event.target === workshopModalEl || event.target.classList.contains("workshop-modal-backdrop")) {
+          hideWorkshopImagePopup();
+        }
+      });
+
+      applyTheme(runtimeState.theme);
+      applyUiOpacity(runtimeState.ui_opacity);
+      applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
+      syncDrawerFromState();
+      setWorldbookDebugCollapsed(true);
+      hydrateExistingMessages();
+      loadPresetStoreForChat().catch(() => {
+        presetDebugPanelEl.hidden = true;
+      });
+      loadWorldbook().catch(() => {
+        worldbookEntries = [];
+        renderWorldbookEditor();
+      });
+    </script>
+    {% for mod in registered_mods or [] %}
+      {% for src in mod.hooks.chat_scripts or [] %}
+    <script src="{{ src }}{% if '?' in src %}&{% else %}?{% endif %}v=ttsvoice-chip-v1" data-mod-hook="{{ mod.slug }}"></script>
+      {% endfor %}
+    {% endfor %}
+  </body>
+</html>
