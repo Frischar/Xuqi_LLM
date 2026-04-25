@@ -1,8 +1,10 @@
 import json
 import re
+from io import BytesIO
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 from zipfile import ZIP_DEFLATED, ZipFile
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -474,6 +476,167 @@ def register_config_api_routes(app: FastAPI, *, ctx: Any) -> None:
             detail="Memory outline export failed. Please check disk space or file permissions.",
         )
         return FileResponse(path=target, filename=filename, media_type="application/json")
+
+
+    @app.get("/api/memories/export-bundle")
+    async def api_export_memory_bundle() -> FileResponse:
+        active_slot = ctx.get_active_slot_id()
+        ctx.EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"memory_bundle_{timestamp}.zip"
+        target = ctx.EXPORT_DIR / filename
+
+        memories_payload = {"items": ctx.get_memories(active_slot)}
+        merged_payload = {"items": get_merged_memories(ctx, active_slot)}
+        outline_payload = {"items": get_memory_outline(ctx, active_slot)}
+        manifest_lines = [
+            "记忆完整导出包",
+            "",
+            "1. memories.json：原记忆区条目",
+            "2. merged_memories.json：合并后的记忆",
+            "3. memory_outline.json：大纲表",
+            "",
+            f"导出时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"活动存档：{active_slot}",
+        ]
+
+        try:
+            with ZipFile(target, "w", compression=ZIP_DEFLATED) as archive:
+                archive.writestr("memories.json", json.dumps(memories_payload, ensure_ascii=False, indent=2))
+                archive.writestr("merged_memories.json", json.dumps(merged_payload, ensure_ascii=False, indent=2))
+                archive.writestr("memory_outline.json", json.dumps(outline_payload, ensure_ascii=False, indent=2))
+                archive.writestr("导出说明.txt", "\n".join(manifest_lines))
+        except OSError as exc:
+            ctx.logger.exception("Memory bundle export failed: %s", target)
+            raise HTTPException(
+                status_code=500,
+                detail="Memory bundle export failed. Please check disk space or file permissions.",
+            ) from exc
+
+        return FileResponse(path=target, filename=filename, media_type="application/zip")
+
+    @app.post("/api/memories/import-bundle")
+    async def api_import_memory_bundle(file: UploadFile = File(...)) -> dict[str, Any]:
+        active_slot = ctx.get_active_slot_id()
+        filename = Path(file.filename or "").name.lower()
+        if not filename.endswith(".zip"):
+            raise HTTPException(status_code=400, detail="完整记忆包必须是 .zip 文件。")
+
+        raw_bytes = await file.read()
+        if not raw_bytes:
+            raise HTTPException(status_code=400, detail="完整记忆包不能为空。")
+
+        def payload_items(payload: Any) -> list[Any]:
+            if isinstance(payload, dict):
+                if isinstance(payload.get("items"), list):
+                    return payload["items"]
+                if isinstance(payload.get("memories"), list):
+                    return payload["memories"]
+                if isinstance(payload.get("merged_memories"), list):
+                    return payload["merged_memories"]
+                if isinstance(payload.get("memory_outline"), list):
+                    return payload["memory_outline"]
+            if isinstance(payload, list):
+                return payload
+            return []
+
+        def read_bundle_json(archive: ZipFile, entry_name: str) -> list[Any]:
+            candidates = [name for name in archive.namelist() if Path(name).name == entry_name]
+            if not candidates:
+                return []
+            try:
+                with archive.open(candidates[0]) as handle:
+                    payload = json.loads(handle.read().decode("utf-8-sig"))
+            except (OSError, UnicodeDecodeError, ValueError) as exc:
+                raise HTTPException(status_code=400, detail=f"完整记忆包中的 {entry_name} 读取失败。") from exc
+            return payload_items(payload)
+
+        def clone_rows(rows: list[Any]) -> list[dict[str, Any]]:
+            cloned: list[dict[str, Any]] = []
+            for row in rows:
+                if isinstance(row, dict):
+                    cloned.append(json.loads(json.dumps(row, ensure_ascii=False)))
+            return cloned
+
+        def ensure_unique_ids(
+            rows: list[dict[str, Any]],
+            existing_ids: set[str],
+            *,
+            prefix: str,
+        ) -> tuple[list[dict[str, Any]], dict[str, str]]:
+            id_map: dict[str, str] = {}
+            normalized: list[dict[str, Any]] = []
+            for row in rows:
+                item = dict(row)
+                old_id = str(item.get("id", "") or "").strip()
+                new_id = old_id
+                if not new_id or new_id in existing_ids:
+                    new_id = f"{prefix}-{uuid4().hex[:10]}"
+                item["id"] = new_id
+                existing_ids.add(new_id)
+                if old_id:
+                    id_map[old_id] = new_id
+                normalized.append(item)
+            return normalized, id_map
+
+        try:
+            with ZipFile(BytesIO(raw_bytes), "r") as archive:
+                imported_memories_raw = read_bundle_json(archive, "memories.json")
+                imported_merged_raw = read_bundle_json(archive, "merged_memories.json")
+                imported_outline_raw = read_bundle_json(archive, "memory_outline.json")
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail="完整记忆包 ZIP 读取失败，请确认文件格式正确。") from exc
+
+        if not any([imported_memories_raw, imported_merged_raw, imported_outline_raw]):
+            raise HTTPException(status_code=400, detail="完整记忆包中没有可导入的记忆数据。")
+
+        current_memories = clone_rows(ctx.get_memories(active_slot))
+        current_merged = clone_rows(get_merged_memories(ctx, active_slot))
+        current_outline = clone_rows(get_memory_outline(ctx, active_slot))
+
+        imported_memories, memory_id_map = ensure_unique_ids(
+            clone_rows(imported_memories_raw),
+            {str(item.get("id", "")) for item in current_memories if isinstance(item, dict)},
+            prefix="memory-import",
+        )
+        imported_merged, _ = ensure_unique_ids(
+            clone_rows(imported_merged_raw),
+            {str(item.get("id", "")) for item in current_merged if isinstance(item, dict)},
+            prefix="merged-import",
+        )
+        imported_outline, _ = ensure_unique_ids(
+            clone_rows(imported_outline_raw),
+            {str(item.get("id", "")) for item in current_outline if isinstance(item, dict)},
+            prefix="outline-import",
+        )
+
+        def remap_source_ids(rows: list[dict[str, Any]]) -> None:
+            for row in rows:
+                source_ids = row.get("source_memory_ids")
+                if isinstance(source_ids, list):
+                    row["source_memory_ids"] = [memory_id_map.get(str(item), str(item)) for item in source_ids]
+
+        remap_source_ids(imported_merged)
+        remap_source_ids(imported_outline)
+
+        memories = ctx.save_memories(current_memories + imported_memories, active_slot)
+        merged_items = save_merged_memories(ctx, current_merged + imported_merged, active_slot)
+        outline_items = save_memory_outline(ctx, current_outline + imported_outline, active_slot)
+
+        return {
+            "ok": True,
+            "active_slot": active_slot,
+            "imported": {
+                "memories": len(imported_memories),
+                "merged_memories": len(imported_merged),
+                "memory_outline": len(imported_outline),
+            },
+            "items": memories,
+            "merged_items": merged_items,
+            "outline_items": outline_items,
+        }
 
     @app.post("/api/memories/merge")
     async def api_merge_memories(payload: MemoryMergePayload) -> dict[str, Any]:

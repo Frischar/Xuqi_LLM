@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="/static/styles.css" />
     <style>
       .config-shell.compact.memory-wide {
-        max-width: 1180px;
+        width: min(1760px, calc(100vw - 32px));
+        max-width: min(1760px, calc(100vw - 32px));
         margin: 0 auto;
         padding-left: 24px;
         padding-right: 24px;
@@ -16,11 +17,190 @@
       .memory-wide .panel {
         border-radius: 24px;
       }
+      .memory-overview-strip {
+        display: flex;
+        align-items: stretch;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: color-mix(in srgb, var(--panel-strong) 88%, transparent 12%);
+      }
+
+      .memory-overview-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .memory-overview-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 34px;
+        padding: 6px 11px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--input-bg) 88%, transparent 12%);
+        color: var(--muted);
+        white-space: nowrap;
+        font-size: 0.86rem;
+      }
+
+      .memory-overview-pill strong {
+        color: var(--text);
+        font-size: 0.98rem;
+      }
+
+      .memory-overview-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: min(460px, 100%);
+        padding: 6px 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--input-bg) 88%, transparent 12%);
+      }
+
+      .memory-overview-status span {
+        flex: 0 0 auto;
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .memory-overview-status strong {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--text);
+        font-size: 0.9rem;
+      }
+
+
+      .memory-wide .stats-row {
+        gap: 8px;
+        align-items: stretch;
+      }
+
+      .memory-wide .stat-box {
+        min-height: auto;
+        padding: 10px 12px;
+        border-radius: 16px;
+      }
+
+      .memory-wide .stat-box .stat-label {
+        font-size: 0.74rem;
+        letter-spacing: 0.03em;
+      }
+
+      .memory-wide .stat-box strong {
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .memory-status-box {
+        min-width: min(280px, 100%);
+      }
 
       .memory-actions,
       .merge-toolbar,
       .selection-row {
-        margin-bottom: 14px;
+        margin-bottom: 0;
+      }
+
+      .memory-status-box strong {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .memory-tool-stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .memory-tool-block {
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 14px;
+        background: color-mix(in srgb, var(--panel-strong) 92%, transparent 8%);
+      }
+
+      .memory-tool-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .memory-tool-head h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .memory-tool-head .muted {
+        margin: 3px 0 0;
+      }
+
+      .memory-action-row,
+      .memory-search-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .memory-action-row button,
+      .memory-action-row select,
+      .selection-row button,
+      .memory-search-actions button {
+        width: auto;
+        flex: 0 0 auto;
+        white-space: nowrap;
+      }
+
+      .memory-transfer-select {
+        min-width: 118px;
+        max-width: 180px;
+        min-height: 38px;
+        padding: 7px 34px 7px 13px;
+        border-radius: 999px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .memory-transfer-select.is-primary {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(94, 194, 168, 0.12);
+      }
+
+      .memory-list-toolbar {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) auto;
+        gap: 14px;
+        align-items: end;
+        margin: 14px 0 16px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: color-mix(in srgb, var(--panel-strong) 90%, transparent 10%);
+      }
+
+      .memory-list-toolbar label {
+        margin-top: 0;
+      }
+
+      .memory-list-toolbar .memory-search-actions {
+        justify-content: flex-end;
       }
 
       .merge-toolbar {
@@ -50,16 +230,61 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 12px;
+        min-height: 38px;
+        box-sizing: border-box;
+        padding: 7px 13px;
         border-radius: 999px;
         border: 1px solid var(--line);
         background: color-mix(in srgb, var(--panel-strong) 88%, transparent 12%);
         color: var(--text);
         font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .selection-chip input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        position: relative;
+        width: 20px;
+        height: 20px;
+        border-radius: 7px;
+        border: 2px solid var(--border);
+        background: var(--input-bg);
+        cursor: pointer;
+        flex: 0 0 auto;
+        transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+      }
+
+      .selection-chip input[type="checkbox"]:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.16);
+      }
+
+      .selection-chip input[type="checkbox"]:checked::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 10px;
+        height: 6px;
+        border-left: 3px solid #fff;
+        border-bottom: 3px solid #fff;
+        border-radius: 1.5px;
+        transform: translate(-50%, -58%) rotate(-45deg);
       }
 
       .memory-card.selectable {
         position: relative;
+      }
+
+      .memory-card.selectable .memory-card-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: auto auto;
+        gap: 8px 12px;
+        align-items: center;
       }
 
       .memory-card-head-main {
@@ -75,10 +300,226 @@
         white-space: nowrap;
       }
 
+      .memory-card.selectable .memory-card-head .button-row {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+      }
+
+      .memory-card-summary {
+        grid-column: 1 / 3;
+        grid-row: 2;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding-left: 38px;
+        min-width: 0;
+      }
+
+      .memory-summary-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        max-width: 320px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: color-mix(in srgb, var(--input-bg) 90%, transparent 10%);
+        color: var(--muted);
+        font-size: 0.82rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .memory-summary-chip.strong {
+        color: var(--text);
+        font-weight: 700;
+      }
+
       .memory-select {
-        width: 18px;
-        height: 18px;
+        appearance: none;
+        -webkit-appearance: none;
+        position: relative;
+        width: 26px;
+        height: 26px;
+        border-radius: 9px;
+        border: 2px solid var(--border);
+        background: var(--input-bg);
+        cursor: pointer;
         flex: 0 0 auto;
+        transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+      }
+
+      .memory-select:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.12);
+      }
+
+      .memory-select:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+        transform: scale(1.04);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.16);
+      }
+
+      .memory-select:checked::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 12px;
+        height: 7px;
+        border-left: 3.2px solid #fff;
+        border-bottom: 3.2px solid #fff;
+        border-radius: 1.5px;
+        transform: translate(-50%, -58%) rotate(-45deg);
+      }
+
+      html:not([data-theme="dark"]) .memory-tool-block,
+      html:not([data-theme="dark"]) .outline-table-wrap,
+      html:not([data-theme="dark"]) .outline-detail-shell,
+      html:not([data-theme="dark"]) .merged-card {
+        border-color: rgba(160, 116, 84, 0.32);
+        background: rgba(249, 243, 236, 0.94);
+        box-shadow: 0 6px 18px rgba(96, 63, 35, 0.06);
+      }
+
+      html:not([data-theme="dark"]) .memory-select {
+        background: rgba(233, 220, 206, 0.98);
+        border-color: rgba(136, 95, 65, 0.70);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 1px 3px rgba(96,63,35,0.12);
+      }
+
+      html:not([data-theme="dark"]) .memory-select:hover {
+        background: rgba(227, 213, 198, 0.99);
+        border-color: rgba(128, 83, 54, 0.82);
+        box-shadow: 0 0 0 3px rgba(128, 83, 54, 0.12), 0 1px 3px rgba(96,63,35,0.14);
+      }
+
+      html:not([data-theme="dark"]) .memory-summary-chip,
+      html:not([data-theme="dark"]) .selection-chip,
+      html:not([data-theme="dark"]) .merged-badge,
+      html:not([data-theme="dark"]) .outline-detail-time,
+      html:not([data-theme="dark"]) .merged-card-time {
+        border-color: rgba(152, 110, 78, 0.34);
+        background: rgba(238, 228, 216, 0.86);
+        color: #4d382a;
+      }
+
+      html:not([data-theme="dark"]) .selection-chip input[type="checkbox"] {
+        background: rgba(233, 220, 206, 0.98);
+        border-color: rgba(136, 95, 65, 0.70);
+      }
+
+      html:not([data-theme="dark"]) .selection-chip input[type="checkbox"]:checked,
+      html:not([data-theme="dark"]) .memory-select:checked {
+        background: var(--accent);
+        border-color: rgba(86, 148, 128, 0.96);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.22), 0 1px 3px rgba(56, 96, 84, 0.18);
+      }
+
+      html:not([data-theme="dark"]) .memory-overview-strip,
+      html:not([data-theme="dark"]) .memory-overview-pill,
+      html:not([data-theme="dark"]) .memory-overview-status,
+      html:not([data-theme="dark"]) .memory-list-toolbar {
+        border-color: rgba(152, 110, 78, 0.34);
+        background: rgba(238, 228, 216, 0.78);
+      }
+
+      html:not([data-theme="dark"]) .memory-transfer-select {
+        background-color: rgba(236, 225, 212, 0.98);
+        border-color: rgba(144, 101, 70, 0.54);
+        color: #4d382a;
+      }
+
+      html:not([data-theme="dark"]) .selection-chip input[type="checkbox"]:checked::after,
+      html:not([data-theme="dark"]) .memory-select:checked::after {
+        width: 13px;
+        height: 8px;
+        border-left-width: 3.6px;
+        border-bottom-width: 3.6px;
+        filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.20));
+      }
+
+      html:not([data-theme="dark"]) .selection-chip input[type="checkbox"]:not(:checked),
+      html:not([data-theme="dark"]) .memory-select:not(:checked) {
+        border-color: rgba(108, 72, 46, 0.82);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 0 0 2px rgba(128, 83, 54, 0.08), 0 1px 3px rgba(96,63,35,0.12);
+      }
+
+      html:not([data-theme="dark"]) .memory-icon-button {
+        background: linear-gradient(180deg, rgba(224, 211, 197, 0.98), rgba(214, 199, 183, 0.98));
+        border-color: rgba(144, 101, 70, 0.50);
+        color: #4d382a;
+      }
+
+      html:not([data-theme="dark"]) .outline-brief-summary {
+        border-color: rgba(152, 110, 78, 0.24);
+        background: rgba(252, 247, 241, 0.62);
+      }
+
+      html:not([data-theme="dark"]) .memory-card.selectable {
+        background: rgba(249, 243, 236, 0.96);
+        border-color: rgba(160, 116, 84, 0.30);
+      }
+
+      html[data-theme="dark"] .memory-tool-block,
+      html[data-theme="dark"] .outline-table-wrap,
+      html[data-theme="dark"] .outline-detail-shell,
+      html[data-theme="dark"] .merged-card {
+        border-color: rgba(126, 149, 169, 0.30);
+        background: rgba(20, 30, 42, 0.90);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.16);
+      }
+
+      html[data-theme="dark"] .memory-select {
+        background: rgba(32, 45, 60, 0.96);
+        border-color: rgba(146, 168, 188, 0.62);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 4px rgba(0,0,0,0.22);
+      }
+
+      html[data-theme="dark"] .memory-select:hover {
+        background: rgba(40, 55, 72, 0.98);
+        border-color: rgba(94, 194, 168, 0.70);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.13), 0 1px 4px rgba(0,0,0,0.22);
+      }
+
+      html[data-theme="dark"] .selection-chip input[type="checkbox"] {
+        background: rgba(32, 45, 60, 0.96);
+        border-color: rgba(146, 168, 188, 0.62);
+      }
+
+      html[data-theme="dark"] .selection-chip input[type="checkbox"]:checked,
+      html[data-theme="dark"] .memory-select:checked {
+        background: var(--accent);
+        border-color: rgba(131, 222, 198, 0.96);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.22), 0 1px 4px rgba(0,0,0,0.26);
+      }
+
+      html[data-theme="dark"] .memory-overview-strip,
+      html[data-theme="dark"] .memory-overview-pill,
+      html[data-theme="dark"] .memory-overview-status,
+      html[data-theme="dark"] .memory-list-toolbar {
+        border-color: rgba(126, 149, 169, 0.30);
+        background: rgba(20, 30, 42, 0.78);
+      }
+
+      html[data-theme="dark"] .memory-transfer-select {
+        background-color: rgba(42, 55, 70, 0.98);
+        border-color: rgba(126, 149, 169, 0.42);
+        color: var(--text);
+      }
+
+      html[data-theme="dark"] .memory-icon-button {
+        background: linear-gradient(180deg, rgba(42, 55, 70, 0.98), rgba(32, 43, 56, 0.98));
+        border-color: rgba(126, 149, 169, 0.38);
+        color: var(--text);
+      }
+
+      html[data-theme="dark"] .outline-brief-summary {
+        border-color: rgba(126, 149, 169, 0.20);
+        background: rgba(16, 25, 36, 0.56);
       }
 
       .outline-overview-shell {
@@ -263,8 +704,167 @@
       }
 
       .merged-card h3 {
-        margin: 0 0 8px;
+        margin: 0;
         font-size: 17px;
+      }
+
+      .merged-card.is-collapsed .merged-card-body {
+        display: none;
+      }
+
+      .merged-card-head {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .merged-card-time {
+        white-space: nowrap;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: color-mix(in srgb, var(--panel) 84%, transparent 16%);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .merged-card-title {
+        min-width: 0;
+      }
+
+      .merged-card-title h3 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .merged-card-subline {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .memory-icon-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .memory-icon-button {
+        min-width: 30px;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .memory-icon-button.memory-danger {
+        border-color: rgba(220, 84, 84, 0.45);
+      }
+
+      .memory-icon-button.memory-danger:hover {
+        border-color: rgba(220, 84, 84, 0.85);
+        background: rgba(220, 84, 84, 0.12);
+      }
+
+      .memory-card.selectable .button-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .memory-card.selectable .toggle-memory,
+      .memory-card.selectable .remove-memory {
+        min-width: 30px;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .memory-card.selectable .remove-memory {
+        border-color: rgba(220, 84, 84, 0.45);
+      }
+
+      .memory-card.selectable .remove-memory:hover {
+        border-color: rgba(220, 84, 84, 0.85);
+        background: rgba(220, 84, 84, 0.12);
+      }
+
+      .outline-brief-line {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        line-height: 1.72;
+      }
+
+      .outline-brief-line strong {
+        flex: 0 0 auto;
+        color: var(--text);
+      }
+
+      .outline-brief-line span {
+        min-width: 0;
+        color: var(--text);
+      }
+
+      .merged-card-body {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px dashed var(--line);
+      }
+
+      .outline-brief-card {
+        display: grid;
+        gap: 12px;
+      }
+
+      .outline-brief-summary {
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: color-mix(in srgb, var(--panel) 84%, transparent 16%);
+        line-height: 1.75;
+      }
+
+      .outline-brief-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .outline-detail-side {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+        flex: 0 0 auto;
+      }
+
+      .outline-detail-actions {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .outline-detail-toggle {
+        width: auto;
+        min-width: 112px;
+        white-space: nowrap;
+        padding-inline: 14px;
       }
 
       .merged-meta {
@@ -272,6 +872,13 @@
         flex-wrap: wrap;
         gap: 8px;
         margin-bottom: 10px;
+      }
+
+      @media (max-width: 720px) {
+        .outline-detail-side {
+          align-items: flex-start;
+          width: 100%;
+        }
       }
 
       .merged-badge {
@@ -334,19 +941,49 @@
         }
       }
 
+      @media (max-width: 1100px) {
+        .memory-overview-strip {
+          flex-direction: column;
+        }
+
+        .memory-overview-status {
+          min-width: 0;
+          border-radius: 16px;
+        }
+      }
+
       @media (max-width: 1200px) {
         .merged-list-grid {
           grid-template-columns: 1fr;
         }
 
-        .outline-detail-grid {
+        .outline-detail-grid,
+        .outline-brief-meta {
           grid-template-columns: 1fr;
         }
       }
 
       @media (max-width: 900px) {
-        .merge-toolbar {
+        .merge-toolbar,
+        .memory-list-toolbar {
           grid-template-columns: 1fr;
+        }
+
+        .memory-list-toolbar .memory-search-actions {
+          justify-content: flex-start;
+        }
+
+        .memory-card.selectable .memory-card-head {
+          grid-template-columns: 1fr;
+        }
+
+        .memory-card.selectable .memory-card-head .button-row,
+        .memory-card-summary {
+          grid-column: 1;
+        }
+
+        .memory-card-summary {
+          padding-left: 0;
         }
 
         .config-shell.compact.memory-wide {
@@ -387,68 +1024,79 @@
             原记忆仍按原方式参与聊天。你可以勾选多条原记忆，批量合并为“合并后的记忆”，同时写入下方大纲表。
           </p>
         </div>
-        <div class="stats-row">
-          <div class="stat-box">
-            <span class="stat-label">原记忆</span>
-            <strong id="memory-count">{{ memory_count }}</strong>
+        <div class="memory-overview-strip">
+          <div class="memory-overview-metrics">
+            <span class="memory-overview-pill">原记忆 <strong id="memory-count">{{ memory_count }}</strong></span>
+            <span class="memory-overview-pill">合并记忆 <strong id="merged-count">0</strong></span>
+            <span class="memory-overview-pill">大纲表 <strong id="outline-count">0</strong></span>
+            <span class="memory-overview-pill">当前选中 <strong id="selected-count">0</strong></span>
           </div>
-          <div class="stat-box">
-            <span class="stat-label">合并记忆</span>
-            <strong id="merged-count">0</strong>
-          </div>
-          <div class="stat-box">
-            <span class="stat-label">大纲表</span>
-            <strong id="outline-count">0</strong>
-          </div>
-          <div class="stat-box">
-            <span class="stat-label">当前选中</span>
-            <strong id="selected-count">0</strong>
+          <div class="memory-overview-status">
+            <span>当前状态</span>
+            <strong id="status-text" class="status-line strong">就绪</strong>
           </div>
         </div>
       </section>
 
       <section class="panel config-panel full-span">
-        <div class="memory-actions">
-          <div class="button-row">
-            <button id="add-memory" type="button">新增记忆</button>
-            <button id="save-memories" type="button" class="secondary">保存全部记忆</button>
-            <button id="reload-all" type="button" class="secondary">重新读取全部</button>
-            <button id="import-memories" type="button" class="secondary">导入记忆</button>
-            <button id="export-memories" type="button" class="secondary">导出记忆</button>
-            <input id="import-memories-file" type="file" accept=".json,.jsonc,application/json,text/plain" hidden />
+        <div class="memory-tool-stack">
+          <div class="memory-tool-block">
+            <div class="memory-tool-head">
+              <div>
+                <h3>记忆操作</h3>
+                <p class="muted helper-text">管理原记忆和完整记忆包的导入导出。</p>
+              </div>
+            </div>
+            <div class="memory-actions">
+              <div class="button-row memory-action-row">
+                <button id="add-memory" type="button">新增记忆</button>
+                <button id="save-memories" type="button" class="secondary">保存全部记忆</button>
+                <button id="reload-all" type="button" class="secondary">重新读取全部</button>
+                <select id="memory-import-select" class="memory-transfer-select" aria-label="导入记忆">
+                  <option value="" selected>导入 ▾</option>
+                  <option value="original">导入原记忆 JSON</option>
+                  <option value="bundle">导入完整记忆包 ZIP</option>
+                </select>
+                <select id="memory-export-select" class="memory-transfer-select is-primary" aria-label="导出记忆">
+                  <option value="" selected>导出 ▾</option>
+                  <option value="original">导出原记忆 JSON</option>
+                  <option value="bundle">导出完整记忆包 ZIP</option>
+                </select>
+                <input id="import-memories-file" type="file" accept=".json,.jsonc,application/json,text/plain" hidden />
+                <input id="import-memory-bundle-file" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden />
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="merge-toolbar">
-          <div class="field-block">
-            <label for="merged-title-input">合并记忆标题（可空）</label>
-            <input id="merged-title-input" type="text" placeholder="例如：主角xxx阶段总结" />
-          </div>
-          <div class="field-block">
-            <label for="outline-title-input">大纲表标题（可空）</label>
-            <input id="outline-title-input" type="text" placeholder="例如：主角冒险线阶段大纲" />
-          </div>
-        </div>
+          <div class="memory-tool-block">
+            <div class="memory-tool-head">
+              <div>
+                <h3>合并到大纲表</h3>
+                <p class="muted helper-text">勾选两条以上原记忆后，生成合并记忆并写入大纲表。</p>
+              </div>
+            </div>
+            <div class="merge-toolbar">
+              <div class="field-block">
+                <label for="merged-title-input">合并记忆标题（可空）</label>
+                <input id="merged-title-input" type="text" placeholder="例如：主角xxx阶段总结" />
+              </div>
+              <div class="field-block">
+                <label for="outline-title-input">大纲表标题（可空）</label>
+                <input id="outline-title-input" type="text" placeholder="例如：主角冒险线阶段大纲" />
+              </div>
+            </div>
 
-        <div class="selection-row">
-          <label class="selection-chip">
-            <input id="delete-sources-toggle" type="checkbox" checked />
-            <span>合并成功后删除原记忆</span>
-          </label>
-          <button id="merge-selected" type="button">把选中记忆合并到大纲表</button>
-          <button id="select-all-visible" type="button" class="secondary">选中当前可见项</button>
-          <button id="clear-selection" type="button" class="secondary">清空勾选</button>
-        </div>
+            <div class="selection-row">
+              <label class="selection-chip">
+                <input id="delete-sources-toggle" type="checkbox" checked />
+                <span>合并成功后删除原记忆</span>
+              </label>
+              <button id="merge-selected" type="button">合并选中记忆</button>
+              <button id="select-all-visible" type="button" class="secondary">选中当前可见项</button>
+              <button id="clear-selection" type="button" class="secondary">清空勾选</button>
+            </div>
+          </div>
 
-        <div class="grid-two">
-          <div>
-            <label for="memory-search">搜索原记忆</label>
-            <input id="memory-search" type="text" placeholder="按标题、正文、标签、备注搜索" />
-          </div>
-          <div class="button-row offset-top">
-            <button id="collapse-all-memories" type="button" class="secondary">全部折叠</button>
-            <button id="expand-all-memories" type="button" class="secondary">全部展开</button>
-          </div>
         </div>
       </section>
 
@@ -458,6 +1106,16 @@
           <h2>原记忆区</h2>
           <p class="muted">这里保留原始长期记忆。可多选后进行批量合并。</p>
         </div>
+        <div class="memory-list-toolbar">
+          <div>
+            <label for="memory-search">搜索原记忆</label>
+            <input id="memory-search" type="text" placeholder="按标题、正文、标签、备注搜索" />
+          </div>
+          <div class="button-row memory-search-actions">
+            <button id="collapse-all-memories" type="button" class="secondary">全部折叠</button>
+            <button id="expand-all-memories" type="button" class="secondary">全部展开</button>
+          </div>
+        </div>
         <div id="memory-list" class="memory-list">
           {% for item in memories %}
           <article class="memory-card selectable" data-collapsed="false">
@@ -466,9 +1124,10 @@
                 <input class="memory-select" type="checkbox" />
                 <strong>{{ item.title or ("记忆 " ~ loop.index) }}</strong>
               </div>
+              <div class="memory-card-summary"></div>
               <div class="button-row">
-                <button type="button" class="secondary compact toggle-memory">折叠</button>
-                <button type="button" class="secondary compact remove-memory">删除</button>
+                <button type="button" class="secondary compact toggle-memory" title="展开">▾</button>
+                <button type="button" class="secondary compact remove-memory" title="删除">×</button>
               </div>
             </div>
 
@@ -535,14 +1194,6 @@
         </div>
         <div id="merged-list" class="merged-list-grid"></div>
       </section>
-
-      <section class="panel config-panel full-span">
-        <div class="section-head">
-          <p class="eyebrow">Status</p>
-          <h2>当前状态</h2>
-          <p id="status-text" class="muted status-line strong">就绪</p>
-        </div>
-      </section>
     </div>
 
     <template id="memory-card-template">
@@ -552,9 +1203,10 @@
             <input class="memory-select" type="checkbox" />
             <strong>新记忆</strong>
           </div>
+          <div class="memory-card-summary"></div>
           <div class="button-row">
-            <button type="button" class="secondary compact toggle-memory">折叠</button>
-            <button type="button" class="secondary compact remove-memory">删除</button>
+            <button type="button" class="secondary compact toggle-memory" title="展开">▾</button>
+            <button type="button" class="secondary compact remove-memory" title="删除">×</button>
           </div>
         </div>
 
@@ -596,7 +1248,9 @@
       const currentOverlay = {{ settings.background_overlay | tojson }};
 
       let currentOutlineItems = [];
+      let currentMergedItems = [];
       let currentActiveOutlineId = "";
+      let outlineDetailExpanded = false;
       let isMerging = false;
       const DELETE_SOURCES_PREF_KEY = "xuqi_memory_delete_sources_toggle";
 
@@ -680,12 +1334,38 @@
         ].join("\n").toLowerCase();
       }
 
+      function createMemorySummaryChip(text, className = "") {
+        const chip = document.createElement("span");
+        chip.className = "memory-summary-chip" + (className ? " " + className : "");
+        chip.textContent = text;
+        return chip;
+      }
+
+      function updateMemorySummary(card) {
+        const summary = card.querySelector(".memory-card-summary");
+        if (!summary) return;
+        const content = String(card.querySelector(".memory-content")?.value || "").trim();
+        const tags = String(card.querySelector(".memory-tags")?.value || "")
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean);
+        const notes = String(card.querySelector(".memory-notes")?.value || "").trim();
+        summary.innerHTML = "";
+        summary.appendChild(createMemorySummaryChip("正文 " + content.length + " 字", "strong"));
+        summary.appendChild(createMemorySummaryChip(tags.length ? "标签 " + tags.length + " 个" : "无标签"));
+        summary.appendChild(createMemorySummaryChip(notes ? "有备注" : "无备注"));
+      }
+
       function setMemoryCollapsed(card, collapsed) {
         const body = card.querySelector(".memory-card-body");
         const toggleBtn = card.querySelector(".toggle-memory");
         card.dataset.collapsed = collapsed ? "true" : "false";
         if (body) body.style.display = collapsed ? "none" : "";
-        if (toggleBtn) toggleBtn.textContent = collapsed ? "展开" : "折叠";
+        if (toggleBtn) {
+          toggleBtn.textContent = collapsed ? "▾" : "▴";
+          toggleBtn.title = collapsed ? "展开" : "收起";
+        }
+        updateMemorySummary(card);
       }
 
       function updateSelectionCount() {
@@ -726,6 +1406,12 @@
         return text.length >= 16 ? text.slice(0, 16) : text;
       }
 
+      function compactText(value, maxLength = 110) {
+        const text = String(value || "").replace(/\s+/g, " ").trim();
+        if (!text) return "—";
+        return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
+      }
+
       function attachRemoveHandler(card) {
         card.querySelector(".remove-memory").addEventListener("click", () => {
           card.remove();
@@ -753,17 +1439,16 @@
       function initExistingMemoryCards() {
         [...memoryListEl.querySelectorAll(".memory-card")].forEach((card) => {
           attachRemoveHandler(card);
-          if (!card.dataset.collapsed) {
-            card.dataset.collapsed = "false";
+          if (!card.dataset.collapsed || card.dataset.collapsed === "false") {
+            card.dataset.collapsed = "true";
           }
-          const collapsed = card.dataset.collapsed === "true";
-          setMemoryCollapsed(card, collapsed);
+          setMemoryCollapsed(card, true);
           const title = card.querySelector(".memory-title")?.value?.trim() || card.querySelector(".memory-card-head strong")?.textContent || "新记忆";
           card.querySelector(".memory-card-head strong").textContent = title;
         });
       }
 
-      function createMemoryCard(item = {}) {
+      function createMemoryCard(item = {}, defaultCollapsed = false) {
         const fragment = templateEl.content.cloneNode(true);
         const card = fragment.querySelector(".memory-card");
         card.querySelector(".memory-title").value = item.title || "";
@@ -773,6 +1458,8 @@
         card.querySelector(".memory-id").value = item.id || "";
         card.querySelector(".memory-card-head strong").textContent = item.title ? item.title : "新记忆";
         attachRemoveHandler(card);
+        setMemoryCollapsed(card, Boolean(defaultCollapsed));
+        updateMemorySummary(card);
         return card;
       }
 
@@ -835,48 +1522,124 @@
         URL.revokeObjectURL(objectUrl);
       }
 
-      function renderMergedList(items = []) {
-        mergedListEl.innerHTML = "";
-        mergedCountEl.textContent = String(items.length);
+      async function saveMergedMemoryItems(items) {
+        const data = await postJson("/api/memories/merged", { items });
+        const savedItems = data.items || items || [];
+        renderMergedList(savedItems);
+        return savedItems;
+      }
 
-        if (!items.length) {
+      function renderMergedList(items = []) {
+        currentMergedItems = Array.isArray(items) ? items : [];
+        mergedListEl.innerHTML = "";
+        mergedCountEl.textContent = String(currentMergedItems.length);
+
+        if (!currentMergedItems.length) {
           mergedListEl.innerHTML = '<div class="empty-tip">还没有合并后的记忆。先在上方原记忆区勾选两条以上，再执行合并。</div>';
           return;
         }
 
-        for (const item of items) {
+        for (const item of currentMergedItems) {
           const tags = Array.isArray(item.tags) ? item.tags : [];
           const sourceIds = Array.isArray(item.source_memory_ids) ? item.source_memory_ids : [];
+          const createdAt = formatMinuteTime(item.created_at || "");
           const article = document.createElement("article");
-          article.className = "merged-card";
+          article.className = "merged-card is-collapsed";
+          article.dataset.mergedId = item.id || "";
           article.innerHTML = `
-            <h3>${escapeHtml(item.title || "未命名合并记忆")}</h3>
-            <div class="merged-meta">
-              <span class="merged-badge">${escapeHtml(formatMinuteTime(item.created_at || ""))}</span>
-              <span class="merged-badge">来源 ${sourceIds.length} 条</span>
-              ${tags.map((tag) => `<span class="merged-badge">${escapeHtml(tag)}</span>`).join("")}
+            <div class="merged-card-head">
+              <span class="merged-card-time">${escapeHtml(createdAt || "无时间")}</span>
+              <div class="merged-card-title">
+                <h3>${escapeHtml(item.title || "未命名合并记忆")}</h3>
+                <div class="merged-card-subline">来源 ${sourceIds.length} 条</div>
+              </div>
+              <div class="memory-icon-actions">
+                <button type="button" class="secondary compact memory-icon-button toggle-merged-card" title="展开">▾</button>
+                <button type="button" class="secondary compact memory-icon-button memory-danger remove-merged-card" title="删除">×</button>
+              </div>
             </div>
-            <div class="merged-content">${escapeHtml(item.content || "")}</div>
-            ${item.notes ? `<div class="merged-notes">${escapeHtml(item.notes)}</div>` : ""}
+            <div class="merged-card-body">
+              <div class="merged-meta">
+                <span class="merged-badge">${escapeHtml(createdAt || "无时间")}</span>
+                <span class="merged-badge">来源 ${sourceIds.length} 条</span>
+                ${tags.map((tag) => `<span class="merged-badge">${escapeHtml(tag)}</span>`).join("")}
+              </div>
+              <div class="merged-content">${escapeHtml(item.content || "")}</div>
+              ${item.notes ? `<div class="merged-notes">${escapeHtml(item.notes)}</div>` : ""}
+            </div>
           `;
+
+          const toggle = article.querySelector(".toggle-merged-card");
+          toggle?.addEventListener("click", () => {
+            const collapsed = article.classList.toggle("is-collapsed");
+            toggle.textContent = collapsed ? "▾" : "▴";
+            toggle.title = collapsed ? "展开" : "收起";
+          });
+
+          article.querySelector(".remove-merged-card")?.addEventListener("click", async () => {
+            const confirmed = window.confirm(`要删除合并记忆「${item.title || "未命名合并记忆"}」吗？`);
+            if (!confirmed) return;
+            try {
+              const nextItems = currentMergedItems.filter((row) => row !== item && String(row.id || "") !== String(item.id || ""));
+              await saveMergedMemoryItems(nextItems);
+              setStatus("已删除一条合并后的记忆。");
+            } catch (error) {
+              setStatus(`删除合并记忆失败：${error.message}`);
+            }
+          });
+
           mergedListEl.appendChild(article);
         }
       }
 
       function renderOutlineDetail(item) {
         if (!item) {
-          outlineDetailPanelEl.innerHTML = '<div class="outline-detail-empty">先点击上方某一行，这里会显示该大纲项的详细内容。</div>';
+          outlineDetailPanelEl.innerHTML = '<div class="outline-detail-empty">先点击上方某一行，这里会显示该大纲项的简要内容。</div>';
           return;
         }
 
         const keyEvents = Array.isArray(item.key_events) ? item.key_events : [];
+        const sourceCount = Array.isArray(item.source_memory_ids) ? item.source_memory_ids.length : 0;
+        const currentTime = formatMinuteTime(item.updated_at || "");
+
+        if (!outlineDetailExpanded) {
+          outlineDetailPanelEl.innerHTML = `
+            <div class="outline-brief-card">
+              <div class="outline-detail-head">
+                <div>
+                  <h3>${escapeHtml(item.title || "未命名大纲")}</h3>
+                  <div class="outline-submeta">来源 ${sourceCount} 条原记忆</div>
+                </div>
+                <div class="outline-detail-side">
+                  <div class="outline-detail-time">${escapeHtml(currentTime || "无时间")}</div>
+                  <button type="button" class="secondary compact outline-detail-toggle">展开完整详情</button>
+                </div>
+              </div>
+
+              <div class="outline-brief-summary">
+                <div class="outline-brief-line"><strong>摘要：</strong><span>${escapeHtml(compactText(item.summary || "—", 150))}</span></div>
+                <div class="outline-brief-line"><strong>角色：</strong><span>${escapeHtml(compactText(item.characters || "—", 90))}</span></div>
+                <div class="outline-brief-line"><strong>关系：</strong><span>${escapeHtml(compactText(item.relationship_progress || "—", 110))}</span></div>
+              </div>
+            </div>
+          `;
+          outlineDetailPanelEl.querySelector(".outline-detail-toggle")?.addEventListener("click", () => {
+            outlineDetailExpanded = true;
+            renderOutlineDetail(item);
+          });
+          return;
+        }
+
         outlineDetailPanelEl.innerHTML = `
           <div class="outline-detail-head">
             <div>
               <h3>${escapeHtml(item.title || "未命名大纲")}</h3>
-              <div class="outline-submeta">来源 ${Array.isArray(item.source_memory_ids) ? item.source_memory_ids.length : 0} 条原记忆</div>
+              <div class="outline-submeta">来源 ${sourceCount} 条原记忆</div>
             </div>
-            <div class="outline-detail-time">${escapeHtml(formatMinuteTime(item.updated_at || ""))}</div>
+            <div class="outline-detail-side">
+              <div class="outline-detail-time">${escapeHtml(currentTime || "无时间")}</div>
+              <button type="button" class="secondary compact outline-detail-toggle">收起详情</button>
+            </div>
           </div>
 
           <div class="outline-detail-grid">
@@ -920,10 +1683,15 @@
             </div>
           </div>
         `;
+        outlineDetailPanelEl.querySelector(".outline-detail-toggle")?.addEventListener("click", () => {
+          outlineDetailExpanded = false;
+          renderOutlineDetail(item);
+        });
       }
 
       function setActiveOutline(id) {
         currentActiveOutlineId = id || "";
+        outlineDetailExpanded = false;
         [...outlineTableBodyEl.querySelectorAll("tr")].forEach((row) => {
           row.classList.toggle("active", row.dataset.outlineId === currentActiveOutlineId);
         });
@@ -975,7 +1743,7 @@
         const items = await getJson("/api/memories");
         memoryListEl.innerHTML = "";
         for (const item of items) {
-          memoryListEl.appendChild(createMemoryCard(item));
+          memoryListEl.appendChild(createMemoryCard(item, true));
         }
         updateMemoryCount();
         applyMemorySearch();
@@ -1001,7 +1769,7 @@
         const data = await postJson("/api/memories", { items });
         memoryListEl.innerHTML = "";
         for (const item of data.items || []) {
-          memoryListEl.appendChild(createMemoryCard(item));
+          memoryListEl.appendChild(createMemoryCard(item, true));
         }
         updateMemoryCount();
         applyMemorySearch();
@@ -1014,11 +1782,30 @@
         const data = await postJson("/api/memories/import", { raw_json: rawJson });
         memoryListEl.innerHTML = "";
         for (const item of data.items || []) {
-          memoryListEl.appendChild(createMemoryCard(item));
+          memoryListEl.appendChild(createMemoryCard(item, true));
         }
         updateMemoryCount();
         applyMemorySearch();
         setStatus(`原记忆导入完成：${data.items?.length || 0} 条。`);
+      }
+
+      async function importMemoryBundleFile(file) {
+        if (!file) return;
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch("/api/memories/import-bundle", {
+          method: "POST",
+          body: formData,
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "完整记忆包导入失败");
+        }
+        const data = await response.json();
+        await loadAllPanels();
+        setStatus(
+          `完整记忆包导入完成：原记忆 +${data.imported?.memories || 0}，合并记忆 +${data.imported?.merged_memories || 0}，大纲表 +${data.imported?.memory_outline || 0}。`
+        );
       }
 
       async function mergeSelectedMemories() {
@@ -1044,7 +1831,7 @@
 
           memoryListEl.innerHTML = "";
           for (const item of data.remaining_items || []) {
-            memoryListEl.appendChild(createMemoryCard(item));
+            memoryListEl.appendChild(createMemoryCard(item, true));
           }
 
           renderMergedList(data.merged_items || []);
@@ -1094,8 +1881,33 @@
         }
       });
 
-      document.getElementById("import-memories").addEventListener("click", () => {
-        document.getElementById("import-memories-file").click();
+      document.getElementById("memory-import-select").addEventListener("change", (event) => {
+        const action = event.target.value;
+        event.target.value = "";
+        if (action === "original") {
+          document.getElementById("import-memories-file").click();
+        } else if (action === "bundle") {
+          const confirmed = window.confirm("完整记忆包会追加导入原记忆、合并记忆和大纲表，不会覆盖当前数据。确定继续？");
+          if (confirmed) {
+            document.getElementById("import-memory-bundle-file").click();
+          }
+        }
+      });
+
+      document.getElementById("memory-export-select").addEventListener("change", async (event) => {
+        const action = event.target.value;
+        event.target.value = "";
+        try {
+          if (action === "original") {
+            await downloadJson("/api/memories/export", "memories.json");
+            setStatus("原记忆已导出。");
+          } else if (action === "bundle") {
+            await downloadJson("/api/memories/export-bundle", "memory_bundle.zip");
+            setStatus("完整记忆包已导出，包含原记忆、合并记忆和大纲表。");
+          }
+        } catch (error) {
+          setStatus(`导出失败：${error.message}`);
+        }
       });
 
       document.getElementById("import-memories-file").addEventListener("change", async (event) => {
@@ -1104,18 +1916,21 @@
         try {
           await importMemoriesFile(file);
         } catch (error) {
-          setStatus(`导入失败：${error.message}`);
+          setStatus(`导入原记忆失败：${error.message}`);
         } finally {
           event.target.value = "";
         }
       });
 
-      document.getElementById("export-memories").addEventListener("click", async () => {
+      document.getElementById("import-memory-bundle-file").addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
         try {
-          await downloadJson("/api/memories/export", "memories.json");
-          setStatus("原记忆已导出。");
+          await importMemoryBundleFile(file);
         } catch (error) {
-          setStatus(`导出失败：${error.message}`);
+          setStatus(`导入完整记忆包失败：${error.message}`);
+        } finally {
+          event.target.value = "";
         }
       });
 
@@ -1158,6 +1973,7 @@
         if (!card) return;
         card.querySelector(".memory-card-head strong").textContent =
           card.querySelector(".memory-title").value.trim() || "新记忆";
+        updateMemorySummary(card);
         applyMemorySearch();
       });
 
@@ -1192,7 +2008,7 @@
 
       Promise.allSettled([loadMergedMemories(), loadOutlineItems()]).then(() => {
         setMergeButtonLoading(false);
-        setStatus("页面已就绪。大纲表现在采用宽版表格总览，可点行查看下方详情。");
+        setStatus("页面已就绪。");
       });
     </script>
   </body>

@@ -177,6 +177,24 @@ class PresetPromptPayload(BaseModel):
     name: str = ""
     enabled: bool = True
     content: str = ""
+    order: int = 100
+
+
+class PresetPromptGroupItemPayload(BaseModel):
+    id: str = ""
+    name: str = ""
+    enabled: bool = True
+    content: str = ""
+
+
+class PresetPromptGroupPayload(BaseModel):
+    id: str = ""
+    name: str = ""
+    enabled: bool = True
+    selection_mode: str = "single"
+    selected_ids: list[str] = Field(default_factory=list)
+    items: list[PresetPromptGroupItemPayload] = Field(default_factory=list)
+    order: int = 100
 
 
 class PresetItemPayload(BaseModel):
@@ -186,6 +204,7 @@ class PresetItemPayload(BaseModel):
     base_system_prompt: str = ""
     modules: dict[str, bool] = Field(default_factory=dict)
     extra_prompts: list[PresetPromptPayload] = Field(default_factory=list)
+    prompt_groups: list[PresetPromptGroupPayload] = Field(default_factory=list)
 
 
 class PresetStorePayload(BaseModel):

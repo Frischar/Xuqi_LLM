@@ -92,8 +92,30 @@ def parse_bool(value: Any, default: bool = False) -> bool:
         return default
     return bool(value)
 
+
+def parse_int(value: Any, default: int = 0, *, min_value: int | None = None, max_value: int | None = None) -> int:
+    try:
+        result = int(value)
+    except (TypeError, ValueError):
+        result = default
+    if min_value is not None:
+        result = max(min_value, result)
+    if max_value is not None:
+        result = min(max_value, result)
+    return result
+
+
 def generate_preset_id() -> str:
     return f"preset_{uuid4().hex[:10]}"
+
+
+def generate_prompt_group_id() -> str:
+    return f"preset_group_{uuid4().hex[:10]}"
+
+
+def generate_prompt_group_item_id() -> str:
+    return f"preset_group_item_{uuid4().hex[:10]}"
+
 
 def default_extra_prompts() -> list[dict[str, Any]]:
     return [
@@ -102,14 +124,21 @@ def default_extra_prompts() -> list[dict[str, Any]]:
             "name": "核心风格",
             "enabled": True,
             "content": "使用自然、流畅、地道的简体中文；优先直接描写行动、对白与场景，不要堆砌解释性总结。",
+            "order": 100,
         },
         {
             "id": "dialogue-core",
             "name": "对白节奏",
             "enabled": True,
             "content": "对白要贴合角色身份与当下情绪，避免空泛说教；在场景允许时，多用自然对话推动情节。",
+            "order": 200,
         },
     ]
+
+
+def default_prompt_groups() -> list[dict[str, Any]]:
+    return []
+
 
 def default_single_preset(preset_id: str = "preset_default", name: str = "默认预设") -> dict[str, Any]:
     return {
@@ -119,7 +148,9 @@ def default_single_preset(preset_id: str = "preset_default", name: str = "默认
         "base_system_prompt": "",
         "modules": dict(DEFAULT_PRESET_MODULES),
         "extra_prompts": default_extra_prompts(),
+        "prompt_groups": default_prompt_groups(),
     }
+
 
 def default_preset_store() -> dict[str, Any]:
     preset = default_single_preset()
@@ -127,6 +158,7 @@ def default_preset_store() -> dict[str, Any]:
         "active_preset_id": preset["id"],
         "presets": [preset],
     }
+
 
 def sanitize_prompt_item(raw: Any, index: int) -> dict[str, Any] | None:
     if not isinstance(raw, dict):
@@ -139,7 +171,79 @@ def sanitize_prompt_item(raw: Any, index: int) -> dict[str, Any] | None:
         "name": name,
         "enabled": parse_bool(raw.get("enabled"), True),
         "content": content,
+        "order": parse_int(raw.get("order"), index * 100, min_value=0, max_value=999999),
     }
+
+
+def normalize_selection_mode(value: Any) -> str:
+    text = str(value or "single").strip().lower()
+    if text in {"multi", "multiple", "checkbox", "checkboxes"}:
+        return "multiple"
+    return "single"
+
+
+def sanitize_prompt_group_item(raw: Any, index: int) -> dict[str, Any] | None:
+    if not isinstance(raw, dict):
+        return None
+    item_id = str(raw.get("id", "")).strip() or generate_prompt_group_item_id()
+    name = str(raw.get("name", "")).strip()[:64] or f"规则项 {index}"
+    content = str(raw.get("content", "")).strip()[:12000]
+    return {
+        "id": item_id,
+        "name": name,
+        "enabled": parse_bool(raw.get("enabled"), True),
+        "content": content,
+    }
+
+
+def sanitize_prompt_group(raw: Any, index: int) -> dict[str, Any] | None:
+    if not isinstance(raw, dict):
+        return None
+
+    group_id = str(raw.get("id", "")).strip() or generate_prompt_group_id()
+    selection_mode = normalize_selection_mode(raw.get("selection_mode"))
+
+    raw_items = raw.get("items", [])
+    items: list[dict[str, Any]] = []
+    seen_item_ids: set[str] = set()
+    if isinstance(raw_items, list):
+        for item_index, item in enumerate(raw_items, start=1):
+            cleaned = sanitize_prompt_group_item(item, item_index)
+            if not cleaned:
+                continue
+            if cleaned["id"] in seen_item_ids:
+                cleaned["id"] = generate_prompt_group_item_id()
+            seen_item_ids.add(cleaned["id"])
+            items.append(cleaned)
+
+    valid_ids = {item["id"] for item in items}
+    selected_ids_raw = raw.get("selected_ids", [])
+    selected_ids: list[str] = []
+    if isinstance(selected_ids_raw, list):
+        for value in selected_ids_raw:
+            item_id = str(value or "").strip()
+            if item_id in valid_ids and item_id not in selected_ids:
+                selected_ids.append(item_id)
+
+    if not selected_ids:
+        for item_raw, cleaned in zip(raw_items if isinstance(raw_items, list) else [], items):
+            if isinstance(item_raw, dict) and parse_bool(item_raw.get("selected") if "selected" in item_raw else item_raw.get("checked"), False):
+                if cleaned["id"] not in selected_ids:
+                    selected_ids.append(cleaned["id"])
+
+    if selection_mode == "single" and len(selected_ids) > 1:
+        selected_ids = selected_ids[:1]
+
+    return {
+        "id": group_id,
+        "name": str(raw.get("name", "")).strip()[:64] or f"规则组 {index}",
+        "enabled": parse_bool(raw.get("enabled"), True),
+        "selection_mode": selection_mode,
+        "selected_ids": selected_ids,
+        "items": items,
+        "order": parse_int(raw.get("order"), index * 100, min_value=0, max_value=999999),
+    }
+
 
 def apply_module_mutex(modules: dict[str, bool]) -> dict[str, bool]:
     normalized = dict(DEFAULT_PRESET_MODULES)
@@ -149,6 +253,7 @@ def apply_module_mutex(modules: dict[str, bool]) -> dict[str, bool]:
             for other in opposites:
                 normalized[other] = False
     return normalized
+
 
 def sanitize_single_preset(raw: Any, *, fallback_name: str = "默认预设", fallback_id: str | None = None) -> dict[str, Any]:
     base = default_single_preset(fallback_id or generate_preset_id(), fallback_name)
@@ -161,6 +266,7 @@ def sanitize_single_preset(raw: Any, *, fallback_name: str = "默认预设", fal
         "base_system_prompt": str(raw.get("base_system_prompt", "")).strip()[:16000],
         "modules": apply_module_mutex(raw.get("modules", {})) if isinstance(raw.get("modules", {}), dict) else dict(DEFAULT_PRESET_MODULES),
         "extra_prompts": [],
+        "prompt_groups": [],
     }
     raw_prompts = raw.get("extra_prompts", [])
     if isinstance(raw_prompts, list):
@@ -168,13 +274,29 @@ def sanitize_single_preset(raw: Any, *, fallback_name: str = "默认预设", fal
             cleaned = sanitize_prompt_item(item, index)
             if cleaned:
                 sanitized["extra_prompts"].append(cleaned)
-    if not sanitized["extra_prompts"]:
+    raw_groups = raw.get("prompt_groups", [])
+    seen_group_ids: set[str] = set()
+    if isinstance(raw_groups, list):
+        for index, item in enumerate(raw_groups, start=1):
+            cleaned = sanitize_prompt_group(item, index)
+            if not cleaned:
+                continue
+            if cleaned["id"] in seen_group_ids:
+                cleaned["id"] = generate_prompt_group_id()
+            seen_group_ids.add(cleaned["id"])
+            sanitized["prompt_groups"].append(cleaned)
+    has_explicit_extra = "extra_prompts" in raw
+    has_explicit_groups = "prompt_groups" in raw
+    if not sanitized["extra_prompts"] and not sanitized["prompt_groups"] and not has_explicit_extra and not has_explicit_groups:
         sanitized["extra_prompts"] = default_extra_prompts()
     return sanitized
 
+
 def sanitize_preset_store(raw: Any) -> dict[str, Any]:
     default_store = default_preset_store()
-    if isinstance(raw, dict) and "presets" not in raw and any(key in raw for key in ("name", "modules", "base_system_prompt", "extra_prompts")):
+    if isinstance(raw, dict) and "presets" not in raw and any(
+        key in raw for key in ("name", "modules", "base_system_prompt", "extra_prompts", "prompt_groups")
+    ):
         single = sanitize_single_preset(raw, fallback_name="默认预设", fallback_id="preset_default")
         return {"active_preset_id": single["id"], "presets": [single]}
     if not isinstance(raw, dict):
@@ -196,6 +318,7 @@ def sanitize_preset_store(raw: Any) -> dict[str, Any]:
         active_preset_id = presets[0]["id"]
     return {"active_preset_id": active_preset_id, "presets": presets}
 
+
 def get_active_preset_from_store(store: dict[str, Any]) -> dict[str, Any]:
     sanitized = sanitize_preset_store(store)
     active_id = sanitized["active_preset_id"]
@@ -203,6 +326,37 @@ def get_active_preset_from_store(store: dict[str, Any]) -> dict[str, Any]:
         if item["id"] == active_id:
             return item
     return sanitized["presets"][0]
+
+
+def build_selected_prompt_group_blocks(groups: list[dict[str, Any]]) -> list[tuple[int, str]]:
+    blocks: list[tuple[int, str]] = []
+    for group_index, group in enumerate(groups, start=1):
+        if not isinstance(group, dict) or not parse_bool(group.get("enabled"), True):
+            continue
+        group_name = str(group.get("name", "")).strip() or f"规则组 {group_index}"
+        selected_ids = [str(item_id).strip() for item_id in group.get("selected_ids", []) if str(item_id).strip()]
+        if not selected_ids:
+            continue
+        selected_set = set(selected_ids)
+        order = parse_int(group.get("order"), group_index * 100, min_value=0, max_value=999999)
+        items = group.get("items", [])
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            item_id = str(item.get("id", "")).strip()
+            if item_id not in selected_set:
+                continue
+            if not parse_bool(item.get("enabled"), True):
+                continue
+            content = str(item.get("content", "")).strip()
+            if not content:
+                continue
+            item_name = str(item.get("name", "")).strip() or "规则项"
+            blocks.append((order, f"[规则组：{group_name} / {item_name}]\n{content}"))
+    return blocks
+
 
 def build_preset_prompt_from_preset(preset: dict[str, Any]) -> str:
     sanitized = sanitize_single_preset(preset)
@@ -221,18 +375,27 @@ def build_preset_prompt_from_preset(preset: dict[str, Any]) -> str:
                 module_statements.append(prompt)
     if module_statements:
         sections.append("预设模块规则（必须执行）：\n\n" + "\n\n".join(module_statements))
-    extra_blocks: list[str] = []
-    for item in sanitized.get("extra_prompts", []):
+
+    ordered_blocks: list[tuple[int, int, str]] = []
+    block_seq = 0
+    for order, block in build_selected_prompt_group_blocks(sanitized.get("prompt_groups", [])):
+        block_seq += 1
+        ordered_blocks.append((order, block_seq, block))
+    for item_index, item in enumerate(sanitized.get("extra_prompts", []), start=1):
         if not isinstance(item, dict) or not parse_bool(item.get("enabled"), True):
             continue
         content = str(item.get("content", "")).strip()
         if not content:
             continue
         name = str(item.get("name", "")).strip() or "规则块"
-        extra_blocks.append(f"[{name}]\n{content}")
-    if extra_blocks:
-        sections.append("\n\n".join(extra_blocks))
+        order = parse_int(item.get("order"), item_index * 100, min_value=0, max_value=999999)
+        block_seq += 1
+        ordered_blocks.append((order, block_seq, f"[{name}]\n{content}"))
+    if ordered_blocks:
+        ordered_blocks.sort(key=lambda item: (item[0], item[1]))
+        sections.append("\n\n".join(block for _, _, block in ordered_blocks))
     return "\n\n".join(section for section in sections if section).strip()
+
 
 def create_preset_in_store(store: dict[str, Any], name: str = "") -> dict[str, Any]:
     sanitized = sanitize_preset_store(store)
@@ -241,12 +404,14 @@ def create_preset_in_store(store: dict[str, Any], name: str = "") -> dict[str, A
     sanitized["presets"].append(new_preset)
     return sanitized
 
+
 def activate_preset_in_store(store: dict[str, Any], preset_id: str) -> dict[str, Any]:
     sanitized = sanitize_preset_store(store)
     target = str(preset_id or "").strip()
     if any(item["id"] == target for item in sanitized["presets"]):
         sanitized["active_preset_id"] = target
     return sanitized
+
 
 def duplicate_preset_in_store(store: dict[str, Any], preset_id: str) -> dict[str, Any]:
     sanitized = sanitize_preset_store(store)
@@ -261,6 +426,7 @@ def duplicate_preset_in_store(store: dict[str, Any], preset_id: str) -> dict[str
     duplicated["name"] = (str(target.get("name", "预设")).strip() or "预设") + "（副本）"
     sanitized["presets"].append(duplicated)
     return sanitized
+
 
 def delete_preset_from_store(store: dict[str, Any], preset_id: str) -> dict[str, Any]:
     sanitized = sanitize_preset_store(store)
