@@ -9,6 +9,1526 @@
       .status-line.strong {
         color: var(--text);
       }
+
+      .worldbook-overview-stats {
+        align-items: stretch;
+      }
+
+      .worldbook-status-box {
+        flex: 1 1 360px;
+        min-width: min(420px, 100%);
+      }
+
+      .worldbook-status-box .status-line {
+        display: block;
+        margin: 0;
+        line-height: 1.45;
+        white-space: normal;
+        word-break: break-word;
+      }
+
+      .worldbook-status-box.is-dirty {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(94, 194, 168, 0.14);
+      }
+
+      .config-shell.compact {
+        width: min(1760px, calc(100vw - 32px));
+        max-width: min(1760px, calc(100vw - 32px));
+      }
+
+      .worldbook-action-bar {
+        position: sticky;
+        top: 0;
+        z-index: 8;
+        margin: -4px -4px 14px;
+        padding: 10px 4px 12px;
+        backdrop-filter: blur(10px);
+      }
+
+      .worldbook-action-bar .button-row {
+        gap: 10px;
+      }
+
+      .worldbook-control-grid {
+        display: grid;
+        grid-template-columns: minmax(420px, 0.95fr) minmax(520px, 1.25fr);
+        gap: 16px;
+        align-items: start;
+        margin-bottom: 16px;
+      }
+
+      .worldbook-control-card {
+        height: 100%;
+        margin: 0;
+      }
+
+      .worldbook-control-card .section-head {
+        margin-bottom: 14px;
+      }
+
+      .worldbook-control-card .button-row {
+        gap: 10px;
+      }
+
+      .worldbook-list-toolbar {
+        display: grid;
+        grid-template-columns: minmax(340px, 1fr) auto;
+        gap: 16px;
+        align-items: end;
+        margin-bottom: 14px;
+      }
+
+      .worldbook-tools-grid {
+        display: grid;
+        grid-template-columns: minmax(360px, 0.9fr) minmax(460px, 1.1fr);
+        gap: 14px;
+        align-items: stretch;
+        margin: 12px 0 14px;
+      }
+
+      .worldbook-workspace {
+        display: grid;
+        grid-template-columns: minmax(230px, 280px) minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+      }
+
+      .worldbook-group-panel {
+        position: sticky;
+        top: 104px;
+        align-self: start;
+        max-height: calc(100vh - 128px);
+        overflow: hidden;
+      }
+
+      .worldbook-group-panel .section-head {
+        margin-bottom: 12px;
+      }
+
+      .worldbook-group-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: calc(100vh - 260px);
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
+      .worldbook-group-button {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: var(--input-bg);
+        color: var(--text);
+        border-radius: 12px;
+        padding: 9px 10px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .worldbook-group-button:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px rgba(94, 194, 168, 0.18);
+      }
+
+      .worldbook-group-button.active {
+        position: relative;
+        border-color: var(--accent);
+        background: linear-gradient(135deg, rgba(94, 194, 168, 0.34), rgba(94, 194, 168, 0.12));
+        box-shadow: 0 0 0 2px rgba(94, 194, 168, 0.24), 0 10px 26px rgba(0, 0, 0, 0.10);
+        font-weight: 800;
+        padding-left: 22px;
+      }
+
+      .worldbook-group-button.active::before {
+        content: "";
+        position: absolute;
+        left: 8px;
+        top: 9px;
+        bottom: 9px;
+        width: 4px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .worldbook-group-button.active span::before {
+        content: "当前：";
+        font-weight: 700;
+      }
+
+      .worldbook-group-button span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .worldbook-group-button em {
+        font-style: normal;
+        color: var(--muted);
+        flex: 0 0 auto;
+      }
+
+      .worldbook-group-button.active em {
+        color: var(--text);
+        border: 1px solid rgba(94, 194, 168, 0.45);
+        border-radius: 999px;
+        padding: 2px 7px;
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      .worldbook-filter-summary.is-active {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .worldbook-list-pane {
+        min-width: 0;
+      }
+
+      .worldbook-filter-summary {
+        margin-top: 8px;
+      }
+
+      .danger-button {
+        border-color: rgba(220, 84, 84, 0.45);
+      }
+
+      .danger-button:hover {
+        border-color: rgba(220, 84, 84, 0.8);
+      }
+
+      #save-worldbook-entries.is-dirty {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(94, 194, 168, 0.16);
+      }
+
+
+      .worldbook-filter-strip {
+        margin: 10px 0 14px;
+      }
+
+      .worldbook-quick-filter-panel {
+        margin: 0;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: rgba(94, 194, 168, 0.06);
+      }
+
+      .worldbook-quick-filter-heading {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .worldbook-filter-label {
+        font-weight: 800;
+        color: var(--text);
+      }
+
+      .worldbook-quick-filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        align-items: center;
+      }
+
+      .worldbook-quick-filter-button {
+        min-width: 0;
+        width: auto;
+        flex: 0 0 auto;
+        border: 1px solid var(--border);
+        background: var(--input-bg);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 0.84rem;
+        line-height: 1.1;
+        white-space: nowrap;
+      }
+
+      .worldbook-quick-filter-button:hover {
+        border-color: var(--accent);
+        transform: translateY(-1px);
+      }
+
+      .worldbook-quick-filter-button.active {
+        border-color: var(--accent);
+        background: rgba(94, 194, 168, 0.22);
+        box-shadow: 0 0 0 2px rgba(94, 194, 168, 0.14);
+        font-weight: 800;
+      }
+
+      .worldbook-card-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 7px;
+        width: 100%;
+        font-size: 0.82rem;
+      }
+
+      .worldbook-summary-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        max-width: 360px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 3px 8px;
+        color: var(--muted);
+        background: var(--input-bg);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .worldbook-summary-chip.strong {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .worldbook-summary-chip.warning {
+        border-color: rgba(220, 84, 84, 0.45);
+        color: var(--text);
+        background: rgba(220, 84, 84, 0.12);
+      }
+
+
+      .wb-quick-enabled-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 4px 9px;
+        background: var(--input-bg);
+        color: var(--muted);
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+        line-height: 1;
+      }
+
+      .wb-quick-enabled-switch:hover {
+        border-color: var(--accent);
+      }
+
+      .wb-quick-enabled-switch input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .wb-quick-enabled-track {
+        position: relative;
+        width: 36px;
+        height: 20px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.42);
+        transition: background 0.16s ease, box-shadow 0.16s ease;
+        flex: 0 0 auto;
+      }
+
+      .wb-quick-enabled-track::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 14px;
+        height: 14px;
+        border-radius: 999px;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.24);
+        transition: transform 0.16s ease;
+      }
+
+      .wb-quick-enabled-switch input:checked + .wb-quick-enabled-track {
+        background: var(--accent);
+        box-shadow: 0 0 0 2px rgba(94, 194, 168, 0.16);
+      }
+
+      .wb-quick-enabled-switch input:checked + .wb-quick-enabled-track::before {
+        transform: translateX(16px);
+      }
+
+      .wb-quick-enabled-label {
+        font-style: normal;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--muted);
+        min-width: 24px;
+      }
+
+      .wb-quick-enabled-switch.is-on .wb-quick-enabled-label {
+        color: var(--text);
+      }
+
+      .worldbook-entry-card.is-disabled {
+        opacity: 0.72;
+      }
+
+      .worldbook-entry-card.is-disabled .memory-card-head strong {
+        color: var(--muted);
+      }
+
+      .worldbook-health-results {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        max-height: 180px;
+        overflow-y: auto;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .worldbook-health-results.is-hidden {
+        display: none;
+      }
+
+      .worldbook-health-chip {
+        min-width: 0;
+        width: auto;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 10px;
+        color: var(--text);
+        background: var(--input-bg);
+        cursor: pointer;
+        font-size: 0.84rem;
+        line-height: 1.1;
+        white-space: nowrap;
+      }
+
+      .worldbook-health-chip:hover {
+        border-color: var(--accent);
+        transform: translateY(-1px);
+      }
+
+      .worldbook-health-chip.active {
+        border-color: var(--accent);
+        background: rgba(94, 194, 168, 0.22);
+        box-shadow: 0 0 0 2px rgba(94, 194, 168, 0.14);
+        font-weight: 800;
+      }
+
+      .worldbook-health-empty {
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .worldbook-health-filter-active {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+
+
+      .worldbook-tool-card {
+        transition: border-color 0.16s ease, box-shadow 0.16s ease;
+      }
+
+      .worldbook-tool-card .section-head {
+        position: relative;
+        padding-left: 36px;
+        margin-bottom: 0;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .worldbook-tool-card .section-head:hover h2 {
+        color: var(--text);
+      }
+
+      .worldbook-tool-toggle {
+        position: absolute;
+        left: 0;
+        top: 28px;
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--input-bg);
+        color: var(--text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.92rem;
+        line-height: 1;
+        transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+      }
+
+      .worldbook-tool-toggle:hover {
+        border-color: var(--accent);
+        background: rgba(94, 194, 168, 0.14);
+        transform: translateY(-1px);
+      }
+
+      .worldbook-tool-body {
+        margin-top: 14px;
+      }
+
+      .worldbook-tool-card.is-collapsed .worldbook-tool-body {
+        display: none;
+      }
+
+      .worldbook-tool-card.is-collapsed {
+        min-height: auto;
+      }
+
+      .worldbook-tool-card.is-collapsed .section-head .muted {
+        margin-bottom: 0;
+      }
+
+      .memory-card-head .wb-select-control {
+        flex: 0 0 auto;
+        padding: 2px;
+        margin: 0;
+        align-self: center;
+      }
+
+      .memory-card-head .wb-select-control input.wb-selected {
+        appearance: none;
+        -webkit-appearance: none;
+        position: relative;
+        width: 22px;
+        height: 22px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--input-bg);
+        cursor: pointer;
+        transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+      }
+
+      .memory-card-head .wb-select-control input.wb-selected:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.12);
+      }
+
+      .memory-card-head .wb-select-control input.wb-selected:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+        transform: scale(1.05);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.16);
+      }
+
+      .memory-card-head .wb-select-control input.wb-selected:checked::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 10px;
+        height: 6px;
+        border-left: 2.5px solid #fff;
+        border-bottom: 2.5px solid #fff;
+        border-radius: 1.5px;
+        transform: translate(-50%, -58%) rotate(-45deg);
+      }
+
+      .worldbook-entry-card .memory-card-head {
+        gap: 10px;
+      }
+
+      .worldbook-entry-card .memory-card-head > strong {
+        min-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .worldbook-entry-card .memory-card-head .button-row {
+        margin-left: auto;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .worldbook-entry-card .icon-button {
+        min-width: 30px;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        line-height: 1;
+      }
+
+      .worldbook-entry-card .danger-icon-button {
+        font-size: 1.1rem;
+        border-color: rgba(220, 84, 84, 0.45);
+      }
+
+      .worldbook-entry-card .danger-icon-button:hover {
+        border-color: rgba(220, 84, 84, 0.85);
+        background: rgba(220, 84, 84, 0.12);
+      }
+
+      .worldbook-entry-card .wb-quick-enabled-switch {
+        padding: 4px;
+        min-width: 46px;
+        justify-content: center;
+      }
+
+      .worldbook-entry-card .wb-quick-enabled-label {
+        display: none;
+      }
+
+      .worldbook-entry-card .worldbook-card-summary {
+        opacity: 0.96;
+      }
+
+      .worldbook-entry-card .memory-card-head {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-rows: auto auto;
+        align-items: center;
+        gap: 8px 10px;
+      }
+
+      .worldbook-entry-card .memory-card-head .wb-select-control {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: center;
+        justify-self: center;
+      }
+
+      .worldbook-entry-card .memory-card-head > strong {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: center;
+      }
+
+      .worldbook-entry-card .memory-card-head .button-row {
+        grid-column: 3;
+        grid-row: 1;
+        justify-self: end;
+      }
+
+      .worldbook-entry-card .worldbook-card-summary {
+        grid-column: 2 / 4;
+        grid-row: 2;
+        margin-top: 0;
+      }
+
+
+
+      .worldbook-toolbar-actions {
+        justify-content: flex-end;
+        align-items: center;
+      }
+
+      .worldbook-toolbar-actions .helper-text {
+        margin: 0;
+        white-space: nowrap;
+      }
+
+      /* Light theme polish: reduce pure-white controls and improve visual hierarchy. */
+      html:not([data-theme="dark"]) {
+        --wb-light-panel: rgba(247, 239, 230, 0.96);
+        --wb-light-panel-strong: rgba(243, 232, 220, 0.97);
+        --wb-light-control: rgba(238, 228, 216, 0.98);
+        --wb-light-control-hover: rgba(231, 219, 205, 0.99);
+        --wb-light-control-soft: rgba(244, 236, 227, 0.99);
+        --wb-light-active: rgba(232, 186, 139, 0.96);
+        --wb-light-border: rgba(152, 110, 78, 0.42);
+        --wb-light-border-strong: rgba(128, 83, 54, 0.70);
+        --wb-light-shadow: rgba(96, 63, 35, 0.12);
+        --wb-light-text-soft: #4d382a;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-group-panel {
+        background: var(--wb-light-panel-strong);
+        border: 1px solid rgba(160, 116, 84, 0.42);
+        box-shadow: 0 12px 30px var(--wb-light-shadow);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-group-button {
+        background: var(--wb-light-control);
+        border-color: var(--wb-light-border);
+        color: #403024;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 1px 2px rgba(96, 63, 35, 0.05);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-group-button:hover {
+        background: var(--wb-light-control-hover);
+        border-color: rgba(138, 93, 63, 0.58);
+        box-shadow: 0 6px 16px rgba(96, 63, 35, 0.12);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-group-button.active {
+        background: linear-gradient(180deg, rgba(240, 199, 157, 0.98), rgba(228, 180, 132, 0.96));
+        border-color: rgba(176, 109, 55, 0.76);
+        color: #2f2118;
+        box-shadow: inset 4px 0 0 rgba(176, 109, 55, 0.88), 0 8px 20px rgba(120, 72, 30, 0.16);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-group-button.active::before {
+        display: none;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-group-button em {
+        color: rgba(77, 56, 42, 0.86);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-group-button.active em {
+        background: rgba(255, 246, 236, 0.82);
+        border-color: rgba(176, 109, 55, 0.48);
+        color: #3b281b;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-quick-filter-panel,
+      html:not([data-theme="dark"]) .worldbook-health-results,
+      html:not([data-theme="dark"]) .worldbook-tool-card {
+        background: var(--wb-light-panel);
+        border-color: rgba(160, 116, 84, 0.38);
+        box-shadow: 0 8px 22px rgba(96, 63, 35, 0.10);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-quick-filter-button,
+      html:not([data-theme="dark"]) .worldbook-health-chip,
+      html:not([data-theme="dark"]) .worldbook-summary-chip {
+        background: var(--wb-light-control);
+        border-color: var(--wb-light-border);
+        color: var(--wb-light-text-soft);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), 0 1px 2px rgba(96, 63, 35, 0.04);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-quick-filter-button:hover,
+      html:not([data-theme="dark"]) .worldbook-health-chip:hover {
+        background: var(--wb-light-control-hover);
+        border-color: rgba(138, 93, 63, 0.58);
+        box-shadow: 0 4px 12px rgba(96, 63, 35, 0.10);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-quick-filter-button.active,
+      html:not([data-theme="dark"]) .worldbook-health-chip.active {
+        background: linear-gradient(180deg, rgba(242, 204, 165, 0.98), rgba(230, 184, 136, 0.96));
+        border-color: rgba(176, 109, 55, 0.76);
+        color: #2f2118;
+        box-shadow: 0 4px 12px rgba(120, 72, 30, 0.16);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-summary-chip.strong {
+        color: #493627;
+        border-color: rgba(145, 95, 65, 0.38);
+        background: rgba(241, 229, 217, 0.98);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-summary-chip.warning {
+        background: rgba(226, 170, 142, 0.20);
+        border-color: rgba(188, 91, 70, 0.38);
+        color: #583225;
+      }
+
+      html:not([data-theme="dark"]) .memory-card-head .wb-select-control {
+        background: rgba(228, 216, 202, 0.55);
+        border: 1px solid rgba(152, 110, 78, 0.28);
+        border-radius: 12px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      }
+
+      html:not([data-theme="dark"]) .memory-card-head .wb-select-control input.wb-selected {
+        width: 24px;
+        height: 24px;
+        border-width: 2px;
+        background: rgba(233, 220, 206, 0.98);
+        border-color: rgba(136, 95, 65, 0.70);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 3px rgba(96, 63, 35, 0.12);
+      }
+
+      html:not([data-theme="dark"]) .memory-card-head .wb-select-control input.wb-selected:hover {
+        background: rgba(227, 213, 198, 0.99);
+        border-color: rgba(128, 83, 54, 0.82);
+        box-shadow: 0 0 0 3px rgba(128, 83, 54, 0.12), 0 1px 3px rgba(96, 63, 35, 0.14);
+      }
+
+      html:not([data-theme="dark"]) .memory-card-head .wb-select-control input.wb-selected:checked {
+        background: var(--accent);
+        border-color: rgba(86, 148, 128, 0.96);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.18), 0 1px 3px rgba(56, 96, 84, 0.18);
+      }
+
+      html:not([data-theme="dark"]) .wb-quick-enabled-switch {
+        background: var(--wb-light-control);
+        border-color: var(--wb-light-border);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
+      }
+
+      html:not([data-theme="dark"]) .wb-quick-enabled-switch:hover {
+        background: var(--wb-light-control-hover);
+        border-color: rgba(148, 101, 72, 0.44);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card input,
+      html:not([data-theme="dark"]) .worldbook-tool-card select,
+      html:not([data-theme="dark"]) .worldbook-tool-card textarea,
+      html:not([data-theme="dark"]) .worldbook-list-pane input,
+      html:not([data-theme="dark"]) .worldbook-list-pane select,
+      html:not([data-theme="dark"]) .worldbook-list-pane textarea {
+        background: rgba(247, 239, 230, 0.99);
+        border: 1px solid rgba(152, 110, 78, 0.50);
+        color: #3c2d22;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 1px 2px rgba(96, 63, 35, 0.04);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card input:hover,
+      html:not([data-theme="dark"]) .worldbook-tool-card select:hover,
+      html:not([data-theme="dark"]) .worldbook-tool-card textarea:hover,
+      html:not([data-theme="dark"]) .worldbook-list-pane input:hover,
+      html:not([data-theme="dark"]) .worldbook-list-pane select:hover,
+      html:not([data-theme="dark"]) .worldbook-list-pane textarea:hover {
+        background: rgba(241, 230, 218, 0.99);
+        border-color: rgba(138, 93, 63, 0.64);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card input:focus,
+      html:not([data-theme="dark"]) .worldbook-tool-card select:focus,
+      html:not([data-theme="dark"]) .worldbook-tool-card textarea:focus,
+      html:not([data-theme="dark"]) .worldbook-list-pane input:focus,
+      html:not([data-theme="dark"]) .worldbook-list-pane select:focus,
+      html:not([data-theme="dark"]) .worldbook-list-pane textarea:focus {
+        background: rgba(250, 242, 234, 0.99);
+        border-color: var(--wb-light-border-strong);
+        box-shadow: 0 0 0 3px rgba(128, 83, 54, 0.14);
+        outline: none;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card input:disabled,
+      html:not([data-theme="dark"]) .worldbook-tool-card select:disabled,
+      html:not([data-theme="dark"]) .worldbook-tool-card textarea:disabled,
+      html:not([data-theme="dark"]) .worldbook-list-pane input:disabled,
+      html:not([data-theme="dark"]) .worldbook-list-pane select:disabled,
+      html:not([data-theme="dark"]) .worldbook-list-pane textarea:disabled {
+        background: rgba(238, 228, 218, 0.78);
+        color: rgba(95, 74, 59, 0.55);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card select,
+      html:not([data-theme="dark"]) .worldbook-list-pane select {
+        background-image: linear-gradient(45deg, transparent 50%, rgba(104, 70, 45, 0.85) 50%), linear-gradient(135deg, rgba(104, 70, 45, 0.85) 50%, transparent 50%);
+        background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);
+        background-size: 6px 6px, 6px 6px;
+        background-repeat: no-repeat;
+        padding-right: 34px;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-card .button-row .icon-button,
+      html:not([data-theme="dark"]) .worldbook-entry-card .button-row .danger-icon-button {
+        background: linear-gradient(180deg, rgba(224, 211, 197, 0.98), rgba(214, 199, 183, 0.98));
+        border-color: rgba(144, 101, 70, 0.50);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card .checkbox-row,
+      html:not([data-theme="dark"]) .worldbook-entry-body .grid-two > .checkbox-row,
+      html:not([data-theme="dark"]) .worldbook-entry-body > .checkbox-row {
+        background: rgba(240, 230, 218, 0.90);
+        border: 1px solid rgba(152, 110, 78, 0.38);
+        border-radius: 14px;
+        padding: 10px 12px;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card .checkbox-row input[type="checkbox"],
+      html:not([data-theme="dark"]) .worldbook-entry-body .checkbox-row input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        position: relative;
+        width: 24px;
+        height: 24px;
+        margin: 0 10px 0 0;
+        border-radius: 8px;
+        border: 2px solid rgba(136, 95, 65, 0.70);
+        background: rgba(233, 220, 206, 0.98);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 3px rgba(96, 63, 35, 0.12);
+        cursor: pointer;
+        flex: 0 0 auto;
+        transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card .checkbox-row input[type="checkbox"]:hover,
+      html:not([data-theme="dark"]) .worldbook-entry-body .checkbox-row input[type="checkbox"]:hover {
+        background: rgba(227, 213, 198, 0.99);
+        border-color: rgba(128, 83, 54, 0.82);
+        box-shadow: 0 0 0 3px rgba(128, 83, 54, 0.12), 0 1px 3px rgba(96, 63, 35, 0.14);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card .checkbox-row input[type="checkbox"]:checked,
+      html:not([data-theme="dark"]) .worldbook-entry-body .checkbox-row input[type="checkbox"]:checked {
+        background: var(--accent);
+        border-color: rgba(86, 148, 128, 0.96);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.18), 0 1px 3px rgba(56, 96, 84, 0.18);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card .checkbox-row input[type="checkbox"]:checked::after,
+      html:not([data-theme="dark"]) .worldbook-entry-body .checkbox-row input[type="checkbox"]:checked::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 10px;
+        height: 6px;
+        border-left: 2.5px solid #fff;
+        border-bottom: 2.5px solid #fff;
+        border-radius: 1.5px;
+        transform: translate(-50%, -58%) rotate(-45deg);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card .checkbox-row span,
+      html:not([data-theme="dark"]) .worldbook-entry-body .checkbox-row span {
+        color: #3c2d22;
+        font-weight: 600;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card button.secondary,
+      html:not([data-theme="dark"]) .worldbook-toolbar-actions button.secondary,
+      html:not([data-theme="dark"]) .worldbook-action-bar button.secondary,
+      html:not([data-theme="dark"]) .worldbook-entry-card button.secondary {
+        background: linear-gradient(180deg, rgba(236, 225, 212, 0.98), rgba(228, 216, 202, 0.98));
+        border-color: rgba(144, 101, 70, 0.54);
+        color: #4d382a;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36), 0 1px 2px rgba(96, 63, 35, 0.05);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-card button.secondary:hover,
+      html:not([data-theme="dark"]) .worldbook-toolbar-actions button.secondary:hover,
+      html:not([data-theme="dark"]) .worldbook-action-bar button.secondary:hover,
+      html:not([data-theme="dark"]) .worldbook-entry-card button.secondary:hover {
+        background: linear-gradient(180deg, rgba(231, 217, 202, 0.99), rgba(222, 207, 191, 0.99));
+        border-color: rgba(138, 93, 63, 0.62);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-toggle {
+        background: var(--wb-light-control);
+        border-color: var(--wb-light-border);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-card {
+        background: rgba(249, 243, 236, 0.96);
+        border: 1px solid rgba(160, 116, 84, 0.30);
+        box-shadow: 0 3px 10px rgba(96, 63, 35, 0.05);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-card:hover {
+        border-color: rgba(138, 93, 63, 0.46);
+        box-shadow: 0 6px 16px rgba(96, 63, 35, 0.08);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-card .memory-card-head > strong {
+        color: #36271d;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-body {
+        background: rgba(250, 244, 237, 0.42);
+        border: 1px solid rgba(160, 116, 84, 0.16);
+        border-radius: 18px;
+        padding: 12px;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-body > .button-row {
+        align-items: center;
+        padding: 10px;
+        border: 1px solid rgba(152, 110, 78, 0.34);
+        border-radius: 16px;
+        background: rgba(239, 228, 215, 0.82);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 2px 8px rgba(96, 63, 35, 0.04);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-body > .grid-two {
+        padding: 10px;
+        border: 1px solid rgba(152, 110, 78, 0.22);
+        border-radius: 16px;
+        background: rgba(251, 246, 240, 0.66);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-body > .button-row button.secondary {
+        min-height: 38px;
+        padding-inline: 18px;
+        border-radius: 14px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        background: linear-gradient(180deg, rgba(232, 214, 195, 0.99), rgba(219, 201, 181, 0.99));
+        border-color: rgba(132, 91, 61, 0.62);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), 0 2px 5px rgba(96, 63, 35, 0.08);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-body > .button-row button.secondary:hover {
+        background: linear-gradient(180deg, rgba(226, 205, 184, 0.99), rgba(211, 190, 168, 0.99));
+        border-color: rgba(120, 78, 50, 0.72);
+        transform: translateY(-1px);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-body > .button-row .danger-button {
+        background: linear-gradient(180deg, rgba(238, 214, 204, 0.99), rgba(225, 197, 186, 0.99));
+        border-color: rgba(174, 86, 70, 0.58);
+        color: #643225;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-tool-body > .button-row .danger-button:hover {
+        background: linear-gradient(180deg, rgba(235, 202, 190, 0.99), rgba(220, 184, 171, 0.99));
+        border-color: rgba(160, 67, 52, 0.72);
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-body {
+        margin-top: 12px;
+        padding: 14px;
+        border-top: 1px solid rgba(160, 116, 84, 0.26);
+        border-radius: 0 0 18px 18px;
+        background: linear-gradient(180deg, rgba(249, 243, 236, 0.55), rgba(244, 235, 225, 0.72));
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-body .grid-two {
+        padding: 10px;
+        border: 1px solid rgba(152, 110, 78, 0.18);
+        border-radius: 16px;
+        background: rgba(252, 247, 241, 0.58);
+        margin-bottom: 10px;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-body label:not(.checkbox-row) {
+        color: #6b4c36;
+        font-weight: 700;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-body > textarea,
+      html:not([data-theme="dark"]) .worldbook-entry-body > input {
+        margin-bottom: 12px;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-body > label:not(.checkbox-row) {
+        display: block;
+        margin: 12px 0 6px;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-body .grid-two > div {
+        min-width: 0;
+      }
+
+      html[data-theme="dark"] {
+        --wb-dark-panel: rgba(20, 30, 42, 0.92);
+        --wb-dark-panel-strong: rgba(16, 25, 36, 0.96);
+        --wb-dark-control: rgba(32, 45, 60, 0.94);
+        --wb-dark-control-hover: rgba(40, 55, 72, 0.98);
+        --wb-dark-control-soft: rgba(25, 37, 50, 0.96);
+        --wb-dark-border: rgba(126, 149, 169, 0.32);
+        --wb-dark-border-strong: rgba(94, 194, 168, 0.62);
+        --wb-dark-shadow: rgba(0, 0, 0, 0.26);
+        --wb-dark-text-soft: rgba(229, 237, 245, 0.86);
+      }
+
+      html[data-theme="dark"] .worldbook-group-panel {
+        background: var(--wb-dark-panel-strong);
+        border: 1px solid rgba(126, 149, 169, 0.34);
+        box-shadow: 0 14px 34px var(--wb-dark-shadow);
+      }
+
+      html[data-theme="dark"] .worldbook-group-button {
+        background: var(--wb-dark-control);
+        border-color: var(--wb-dark-border);
+        color: var(--text);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.12);
+      }
+
+      html[data-theme="dark"] .worldbook-group-button:hover {
+        background: var(--wb-dark-control-hover);
+        border-color: rgba(94, 194, 168, 0.48);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+      }
+
+      html[data-theme="dark"] .worldbook-group-button.active {
+        background: linear-gradient(135deg, rgba(94, 194, 168, 0.34), rgba(94, 194, 168, 0.16));
+        border-color: var(--wb-dark-border-strong);
+        color: #f1fff9;
+        box-shadow: inset 4px 0 0 rgba(94, 194, 168, 0.84), 0 8px 22px rgba(0, 0, 0, 0.20);
+      }
+
+      html[data-theme="dark"] .worldbook-group-button.active em {
+        background: rgba(94, 194, 168, 0.14);
+        border-color: rgba(94, 194, 168, 0.40);
+        color: #f1fff9;
+      }
+
+      html[data-theme="dark"] .worldbook-quick-filter-panel,
+      html[data-theme="dark"] .worldbook-health-results,
+      html[data-theme="dark"] .worldbook-tool-card {
+        background: var(--wb-dark-panel);
+        border-color: rgba(126, 149, 169, 0.34);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+      }
+
+      html[data-theme="dark"] .worldbook-quick-filter-button,
+      html[data-theme="dark"] .worldbook-health-chip,
+      html[data-theme="dark"] .worldbook-summary-chip {
+        background: var(--wb-dark-control);
+        border-color: var(--wb-dark-border);
+        color: var(--wb-dark-text-soft);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+
+      html[data-theme="dark"] .worldbook-quick-filter-button:hover,
+      html[data-theme="dark"] .worldbook-health-chip:hover {
+        background: var(--wb-dark-control-hover);
+        border-color: rgba(94, 194, 168, 0.48);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+      }
+
+      html[data-theme="dark"] .worldbook-quick-filter-button.active,
+      html[data-theme="dark"] .worldbook-health-chip.active {
+        background: linear-gradient(135deg, rgba(94, 194, 168, 0.30), rgba(94, 194, 168, 0.16));
+        border-color: var(--wb-dark-border-strong);
+        color: #f1fff9;
+        box-shadow: 0 0 0 2px rgba(94, 194, 168, 0.13), 0 4px 12px rgba(0, 0, 0, 0.16);
+      }
+
+      html[data-theme="dark"] .worldbook-summary-chip.strong {
+        color: #f1fff9;
+        border-color: rgba(94, 194, 168, 0.34);
+        background: rgba(94, 194, 168, 0.12);
+      }
+
+      html[data-theme="dark"] .worldbook-summary-chip.warning {
+        background: rgba(220, 84, 84, 0.18);
+        border-color: rgba(220, 84, 84, 0.48);
+        color: #ffe1dd;
+      }
+
+      html[data-theme="dark"] .memory-card-head .wb-select-control {
+        background: rgba(16, 25, 36, 0.72);
+        border: 1px solid rgba(126, 149, 169, 0.30);
+        border-radius: 12px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+
+      html[data-theme="dark"] .memory-card-head .wb-select-control input.wb-selected {
+        width: 24px;
+        height: 24px;
+        border-width: 2px;
+        background: rgba(32, 45, 60, 0.96);
+        border-color: rgba(146, 168, 188, 0.62);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 4px rgba(0, 0, 0, 0.22);
+      }
+
+      html[data-theme="dark"] .memory-card-head .wb-select-control input.wb-selected:hover {
+        background: rgba(40, 55, 72, 0.98);
+        border-color: rgba(94, 194, 168, 0.70);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.13), 0 1px 4px rgba(0, 0, 0, 0.22);
+      }
+
+      html[data-theme="dark"] .memory-card-head .wb-select-control input.wb-selected:checked {
+        background: var(--accent);
+        border-color: rgba(131, 222, 198, 0.96);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.18), 0 1px 4px rgba(0, 0, 0, 0.26);
+      }
+
+      html[data-theme="dark"] .wb-quick-enabled-switch {
+        background: var(--wb-dark-control);
+        border-color: var(--wb-dark-border);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+
+      html[data-theme="dark"] .wb-quick-enabled-switch:hover {
+        background: var(--wb-dark-control-hover);
+        border-color: rgba(94, 194, 168, 0.48);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card input,
+      html[data-theme="dark"] .worldbook-tool-card select,
+      html[data-theme="dark"] .worldbook-tool-card textarea,
+      html[data-theme="dark"] .worldbook-list-pane input,
+      html[data-theme="dark"] .worldbook-list-pane select,
+      html[data-theme="dark"] .worldbook-list-pane textarea {
+        background: var(--wb-dark-control-soft);
+        border: 1px solid rgba(126, 149, 169, 0.42);
+        color: var(--text);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 3px rgba(0, 0, 0, 0.12);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card input:hover,
+      html[data-theme="dark"] .worldbook-tool-card select:hover,
+      html[data-theme="dark"] .worldbook-tool-card textarea:hover,
+      html[data-theme="dark"] .worldbook-list-pane input:hover,
+      html[data-theme="dark"] .worldbook-list-pane select:hover,
+      html[data-theme="dark"] .worldbook-list-pane textarea:hover {
+        background: rgba(31, 45, 60, 0.98);
+        border-color: rgba(94, 194, 168, 0.44);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card input:focus,
+      html[data-theme="dark"] .worldbook-tool-card select:focus,
+      html[data-theme="dark"] .worldbook-tool-card textarea:focus,
+      html[data-theme="dark"] .worldbook-list-pane input:focus,
+      html[data-theme="dark"] .worldbook-list-pane select:focus,
+      html[data-theme="dark"] .worldbook-list-pane textarea:focus {
+        background: rgba(34, 49, 64, 0.99);
+        border-color: var(--wb-dark-border-strong);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.14);
+        outline: none;
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card input:disabled,
+      html[data-theme="dark"] .worldbook-tool-card select:disabled,
+      html[data-theme="dark"] .worldbook-tool-card textarea:disabled,
+      html[data-theme="dark"] .worldbook-list-pane input:disabled,
+      html[data-theme="dark"] .worldbook-list-pane select:disabled,
+      html[data-theme="dark"] .worldbook-list-pane textarea:disabled {
+        background: rgba(22, 32, 43, 0.78);
+        color: rgba(205, 216, 226, 0.50);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card select,
+      html[data-theme="dark"] .worldbook-list-pane select {
+        background-image: linear-gradient(45deg, transparent 50%, rgba(196, 220, 235, 0.86) 50%), linear-gradient(135deg, rgba(196, 220, 235, 0.86) 50%, transparent 50%);
+        background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);
+        background-size: 6px 6px, 6px 6px;
+        background-repeat: no-repeat;
+        padding-right: 34px;
+      }
+
+      html[data-theme="dark"] .worldbook-entry-card .button-row .icon-button,
+      html[data-theme="dark"] .worldbook-entry-card .button-row .danger-icon-button {
+        background: linear-gradient(180deg, rgba(42, 55, 70, 0.98), rgba(32, 43, 56, 0.98));
+        border-color: rgba(126, 149, 169, 0.38);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card .checkbox-row,
+      html[data-theme="dark"] .worldbook-entry-body .grid-two > .checkbox-row,
+      html[data-theme="dark"] .worldbook-entry-body > .checkbox-row {
+        background: rgba(24, 36, 49, 0.90);
+        border: 1px solid rgba(126, 149, 169, 0.34);
+        border-radius: 14px;
+        padding: 10px 12px;
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card .checkbox-row input[type="checkbox"],
+      html[data-theme="dark"] .worldbook-entry-body .checkbox-row input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        position: relative;
+        width: 24px;
+        height: 24px;
+        margin: 0 10px 0 0;
+        border-radius: 8px;
+        border: 2px solid rgba(146, 168, 188, 0.62);
+        background: rgba(32, 45, 60, 0.96);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 4px rgba(0, 0, 0, 0.22);
+        cursor: pointer;
+        flex: 0 0 auto;
+        transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card .checkbox-row input[type="checkbox"]:hover,
+      html[data-theme="dark"] .worldbook-entry-body .checkbox-row input[type="checkbox"]:hover {
+        background: rgba(40, 55, 72, 0.98);
+        border-color: rgba(94, 194, 168, 0.70);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.13), 0 1px 4px rgba(0, 0, 0, 0.22);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card .checkbox-row input[type="checkbox"]:checked,
+      html[data-theme="dark"] .worldbook-entry-body .checkbox-row input[type="checkbox"]:checked {
+        background: var(--accent);
+        border-color: rgba(131, 222, 198, 0.96);
+        box-shadow: 0 0 0 3px rgba(94, 194, 168, 0.18), 0 1px 4px rgba(0, 0, 0, 0.26);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card .checkbox-row input[type="checkbox"]:checked::after,
+      html[data-theme="dark"] .worldbook-entry-body .checkbox-row input[type="checkbox"]:checked::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 10px;
+        height: 6px;
+        border-left: 2.5px solid #fff;
+        border-bottom: 2.5px solid #fff;
+        border-radius: 1.5px;
+        transform: translate(-50%, -58%) rotate(-45deg);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card .checkbox-row span,
+      html[data-theme="dark"] .worldbook-entry-body .checkbox-row span {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card button.secondary,
+      html[data-theme="dark"] .worldbook-toolbar-actions button.secondary,
+      html[data-theme="dark"] .worldbook-action-bar button.secondary,
+      html[data-theme="dark"] .worldbook-entry-card button.secondary {
+        background: linear-gradient(180deg, rgba(42, 55, 70, 0.98), rgba(32, 43, 56, 0.98));
+        border-color: rgba(126, 149, 169, 0.42);
+        color: var(--text);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 6px rgba(0, 0, 0, 0.16);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-card button.secondary:hover,
+      html[data-theme="dark"] .worldbook-toolbar-actions button.secondary:hover,
+      html[data-theme="dark"] .worldbook-action-bar button.secondary:hover,
+      html[data-theme="dark"] .worldbook-entry-card button.secondary:hover {
+        background: linear-gradient(180deg, rgba(49, 65, 82, 0.99), rgba(38, 51, 66, 0.99));
+        border-color: rgba(94, 194, 168, 0.48);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-toggle {
+        background: var(--wb-dark-control);
+        border-color: var(--wb-dark-border);
+      }
+
+      html[data-theme="dark"] .worldbook-entry-card {
+        background: rgba(20, 30, 42, 0.92);
+        border: 1px solid rgba(126, 149, 169, 0.30);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+      }
+
+      html[data-theme="dark"] .worldbook-entry-card:hover {
+        border-color: rgba(94, 194, 168, 0.34);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.20);
+      }
+
+      html[data-theme="dark"] .worldbook-entry-card .memory-card-head > strong {
+        color: #f1f7fb;
+      }
+
+      html[data-theme="dark"] .worldbook-tool-body {
+        background: rgba(13, 21, 31, 0.36);
+        border: 1px solid rgba(126, 149, 169, 0.16);
+        border-radius: 18px;
+        padding: 12px;
+      }
+
+      html[data-theme="dark"] .worldbook-tool-body > .button-row {
+        align-items: center;
+        padding: 10px;
+        border: 1px solid rgba(126, 149, 169, 0.30);
+        border-radius: 16px;
+        background: rgba(18, 29, 41, 0.78);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 8px rgba(0, 0, 0, 0.12);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-body > .grid-two {
+        padding: 10px;
+        border: 1px solid rgba(126, 149, 169, 0.22);
+        border-radius: 16px;
+        background: rgba(16, 25, 36, 0.58);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-body > .button-row button.secondary {
+        min-height: 38px;
+        padding-inline: 18px;
+        border-radius: 14px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        background: linear-gradient(180deg, rgba(45, 61, 78, 0.99), rgba(34, 47, 62, 0.99));
+        border-color: rgba(126, 149, 169, 0.48);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 6px rgba(0, 0, 0, 0.18);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-body > .button-row button.secondary:hover {
+        background: linear-gradient(180deg, rgba(52, 70, 88, 0.99), rgba(40, 55, 72, 0.99));
+        border-color: rgba(94, 194, 168, 0.54);
+        transform: translateY(-1px);
+      }
+
+      html[data-theme="dark"] .worldbook-tool-body > .button-row .danger-button {
+        background: linear-gradient(180deg, rgba(82, 43, 42, 0.98), rgba(61, 34, 36, 0.98));
+        border-color: rgba(220, 84, 84, 0.50);
+        color: #ffd9d6;
+      }
+
+      html[data-theme="dark"] .worldbook-tool-body > .button-row .danger-button:hover {
+        background: linear-gradient(180deg, rgba(92, 49, 47, 0.99), rgba(70, 39, 40, 0.99));
+        border-color: rgba(220, 84, 84, 0.70);
+      }
+
+      html[data-theme="dark"] .worldbook-entry-body {
+        margin-top: 12px;
+        padding: 14px;
+        border-top: 1px solid rgba(126, 149, 169, 0.24);
+        border-radius: 0 0 18px 18px;
+        background: linear-gradient(180deg, rgba(18, 29, 41, 0.42), rgba(13, 21, 31, 0.62));
+      }
+
+      html[data-theme="dark"] .worldbook-entry-body .grid-two {
+        padding: 10px;
+        border: 1px solid rgba(126, 149, 169, 0.18);
+        border-radius: 16px;
+        background: rgba(16, 25, 36, 0.56);
+        margin-bottom: 10px;
+      }
+
+      html[data-theme="dark"] .worldbook-entry-body label:not(.checkbox-row) {
+        color: rgba(229, 237, 245, 0.82);
+        font-weight: 700;
+      }
+
+      html[data-theme="dark"] .worldbook-entry-body > textarea,
+      html[data-theme="dark"] .worldbook-entry-body > input {
+        margin-bottom: 12px;
+      }
+
+      html[data-theme="dark"] .worldbook-entry-body > label:not(.checkbox-row) {
+        display: block;
+        margin: 12px 0 6px;
+      }
+
+      html[data-theme="dark"] .worldbook-entry-body .grid-two > div {
+        min-width: 0;
+      }
+
+      /* compact worldbook entry layout */
+      .worldbook-entry-body .wb-wide-grid,
+      .worldbook-entry-body .wb-keyword-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+
+      .worldbook-entry-body .wb-compact-grid {
+        grid-template-columns: repeat(4, minmax(108px, 1fr));
+        align-items: end;
+        gap: 8px;
+      }
+
+      .worldbook-entry-body .wb-number-grid {
+        grid-template-columns: repeat(4, minmax(82px, 1fr));
+      }
+
+      .worldbook-entry-body .wb-injection-grid {
+        grid-template-columns: minmax(150px, 1.2fr) minmax(96px, 0.85fr) minmax(88px, 0.72fr) minmax(88px, 0.72fr);
+      }
+
+      .worldbook-entry-body .wb-compact-grid::before,
+      .worldbook-entry-body .wb-options-grid::before {
+        content: attr(data-section-title);
+        grid-column: 1 / -1;
+        font-size: 0.78rem;
+        font-weight: 850;
+        letter-spacing: 0.04em;
+        margin-bottom: -1px;
+      }
+
+      .worldbook-entry-body .wb-compact-grid label:not(.checkbox-row) {
+        font-size: 0.82rem;
+        margin-bottom: 3px;
+      }
+
+      .worldbook-entry-body .wb-compact-grid input,
+      .worldbook-entry-body .wb-compact-grid select {
+        min-height: 36px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .worldbook-entry-body .wb-options-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(116px, 1fr));
+        gap: 8px;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 16px;
+      }
+
+      .worldbook-entry-body .wb-options-grid .checkbox-row {
+        min-width: 0;
+        margin: 0;
+        min-height: 42px;
+        align-items: center;
+      }
+
+      .worldbook-entry-body .wb-options-grid .checkbox-row span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-body .wb-compact-grid::before,
+      html:not([data-theme="dark"]) .worldbook-entry-body .wb-options-grid::before {
+        color: #7a5235;
+      }
+
+      html:not([data-theme="dark"]) .worldbook-entry-body .wb-options-grid {
+        border: 1px solid rgba(152, 110, 78, 0.20);
+        background: rgba(252, 247, 241, 0.58);
+      }
+
+      html[data-theme="dark"] .worldbook-entry-body .wb-compact-grid::before,
+      html[data-theme="dark"] .worldbook-entry-body .wb-options-grid::before {
+        color: rgba(193, 226, 218, 0.86);
+      }
+
+      html[data-theme="dark"] .worldbook-entry-body .wb-options-grid {
+        border: 1px solid rgba(126, 149, 169, 0.18);
+        background: rgba(16, 25, 36, 0.56);
+      }
+
+      @media (max-width: 720px) {
+        .worldbook-entry-body .wb-wide-grid,
+        .worldbook-entry-body .wb-keyword-grid,
+        .worldbook-entry-body .wb-compact-grid,
+        .worldbook-entry-body .wb-injection-grid,
+        .worldbook-entry-body .wb-options-grid {
+          grid-template-columns: 1fr !important;
+        }
+
+        .worldbook-entry-card .memory-card-head {
+          grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .worldbook-entry-card .memory-card-head .button-row {
+          grid-column: 1 / 3;
+          grid-row: 2;
+          justify-self: start;
+          margin-left: 0;
+        }
+
+        .worldbook-entry-card .worldbook-card-summary {
+          grid-column: 1 / 3;
+          grid-row: 3;
+        }
+      }
+
+      @media (max-width: 1180px) {
+        .worldbook-control-grid,
+        .worldbook-list-toolbar,
+        .worldbook-tools-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .worldbook-entry-body .wb-compact-grid,
+        .worldbook-entry-body .wb-injection-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .worldbook-entry-body .wb-options-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 920px) {
+        .worldbook-workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .worldbook-group-panel {
+          position: static;
+          max-height: none;
+        }
+
+        .worldbook-group-list {
+          max-height: 220px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -35,7 +1555,7 @@
           <h2>世界书词条管理</h2>
           <p class="muted">支持标题、主关键词、副关键词、常驻/关键词触发、主副组关系、组别、概率、黏性、冷却、顺序，以及角色定义前/后与聊天内注入等字段。</p>
         </div>
-        <div class="stats-row">
+        <div class="stats-row worldbook-overview-stats">
           <div class="stat-box">
             <span class="stat-label">当前条数</span>
             <strong id="worldbook-count">{{ worldbook_count }}</strong>
@@ -44,11 +1564,15 @@
             <span class="stat-label">快速入口</span>
             <strong><a class="ghost-link" href="/config/worldbook">打开触发设置</a></strong>
           </div>
+          <div id="worldbook-status-box" class="stat-box worldbook-status-box">
+            <span class="stat-label">当前状态</span>
+            <strong id="status-text" class="status-line strong">就绪</strong>
+          </div>
         </div>
       </section>
 
       <section class="panel config-panel full-span">
-        <div class="memory-actions">
+        <div class="memory-actions worldbook-action-bar">
           <div class="button-row">
             <button id="add-worldbook-entry" type="button">新增词条</button>
             <button id="save-worldbook-entries" type="button" class="secondary">保存全部词条</button>
@@ -59,17 +1583,29 @@
           </div>
         </div>
 
-        <div class="panel config-panel full-span">
-          <div class="section-head">
-            <p class="eyebrow">Import</p>
+        <div class="worldbook-control-grid">
+          <div class="panel config-panel worldbook-control-card worldbook-tool-card" data-tool-card="import">
+            <div class="section-head">
+              <p class="eyebrow">Import</p>
             <h2>导入增强</h2>
             <p class="muted">兼容旧版 worldbook。已有注入字段的词条保留原值；缺失注入字段时，按这里的策略补齐。</p>
           </div>
           <div class="grid-two">
+            <div>
+              <label for="import-mode">导入模式</label>
+              <select id="import-mode">
+                <option value="replace" selected>替换当前世界书</option>
+                <option value="append">增量追加到当前世界书</option>
+              </select>
+              <p id="import-mode-hint" class="muted helper-text">替换模式会使用导入文件覆盖当前世界书。</p>
+            </div>
             <label class="checkbox-row">
               <input id="import-apply-settings" type="checkbox" checked />
               <span>导入时同时应用包内 settings</span>
             </label>
+          </div>
+
+          <div class="grid-two">
             <div>
               <label for="import-missing-injection-policy">缺失注入字段时</label>
               <select id="import-missing-injection-policy">
@@ -92,11 +1628,11 @@
               <input id="import-force-injection-order" type="number" min="0" max="999999" step="1" placeholder="留空则不强制" />
             </div>
           </div>
-        </div>
+          </div>
 
-        <div class="panel config-panel full-span">
-          <div class="section-head">
-            <p class="eyebrow">Batch</p>
+          <div class="panel config-panel worldbook-control-card worldbook-tool-card" data-tool-card="batch">
+            <div class="section-head">
+              <p class="eyebrow">Batch</p>
             <h2>批量编辑（V1）</h2>
             <p class="muted">先勾选词条，再批量修改位置、深度、注入顺序、递归开关与启用状态。</p>
           </div>
@@ -104,6 +1640,7 @@
           <div class="button-row">
             <button id="select-all-visible-worldbook" type="button" class="secondary">全选当前结果</button>
             <button id="clear-selected-worldbook" type="button" class="secondary">清空选择</button>
+            <button id="delete-selected-worldbook" type="button" class="secondary danger-button">删除选中词条</button>
             <span class="muted helper-text">已选中 <strong id="selected-worldbook-count">0</strong> 条</span>
           </div>
 
@@ -133,6 +1670,17 @@
           </div>
 
           <div class="grid-two">
+            <div>
+              <label for="bulk-group-target">批量移动到组别</label>
+              <input id="bulk-group-target" list="worldbook-group-options" placeholder="输入新组别，或选择已有组别" />
+              <datalist id="worldbook-group-options"></datalist>
+            </div>
+            <div class="button-row offset-top">
+              <button id="apply-bulk-group" type="button" class="secondary">应用组别到选中词条</button>
+            </div>
+          </div>
+
+          <div class="grid-two">
             <label class="checkbox-row">
               <input id="bulk-recursive-enabled" type="checkbox" checked />
               <span>批量允许递归参与</span>
@@ -148,31 +1696,59 @@
             <button id="bulk-enable-selected" type="button" class="secondary">启用选中词条</button>
             <button id="bulk-disable-selected" type="button" class="secondary">禁用选中词条</button>
           </div>
-        </div>
-
-        <div class="grid-two">
-          <div>
-            <label for="worldbook-search">搜索词条</label>
-            <input id="worldbook-search" type="text" placeholder="按标题、组别、关键词、内容、备注搜索" />
-          </div>
-          <div class="button-row offset-top">
-            <button id="collapse-all-worldbook" type="button" class="secondary">全部折叠</button>
-            <button id="expand-all-worldbook" type="button" class="secondary">全部展开</button>
           </div>
         </div>
 
-        <p class="muted helper-text">
-          说明：顺序数值越小越先处理。“常驻”表示该条不依赖关键词；
-          “关键词触发”表示仍依赖主关键词命中。主副组关系中的“与所有/与任意”是主组与副组之间的关系，不是组内别名关系。
-        </p>
+        <div class="worldbook-workspace">
+          <aside class="panel config-panel worldbook-group-panel">
+            <div class="section-head">
+              <p class="eyebrow">Groups</p>
+              <h2>组别导航</h2>
+              <p class="muted">点击左侧组别，只显示该组词条。</p>
+            </div>
+            <div id="worldbook-group-sidebar" class="worldbook-group-list"></div>
+          </aside>
 
-        <div id="worldbook-entry-list" class="memory-list">
+          <div class="worldbook-list-pane">
+            <div class="worldbook-list-toolbar">
+              <div>
+                <label for="worldbook-search">搜索词条</label>
+                <input id="worldbook-search" type="text" placeholder="按标题、组别、关键词、内容、备注搜索" />
+                <p id="active-worldbook-filter" class="muted helper-text worldbook-filter-summary">当前筛选：全部词条</p>
+              </div>
+              <div class="button-row offset-top worldbook-toolbar-actions">
+                <button id="check-worldbook-health" type="button" class="secondary">检查问题</button>
+                <button id="clear-worldbook-health-filter" type="button" class="secondary">清除问题</button>
+                <span id="active-health-filter" class="muted helper-text">问题筛选：未启用</span>
+                <button id="collapse-all-worldbook" type="button" class="secondary">全部折叠</button>
+                <button id="expand-all-worldbook" type="button" class="secondary">全部展开</button>
+              </div>
+            </div>
+
+            <div class="worldbook-filter-strip">
+              <div class="worldbook-quick-filter-panel">
+                <div class="worldbook-quick-filter-heading">
+                  <span class="worldbook-filter-label">快速筛选</span>
+                  <p id="active-quick-filter" class="muted helper-text">全部</p>
+                </div>
+                <div id="worldbook-quick-filters" class="worldbook-quick-filter-row" aria-label="世界书快速筛选"></div>
+              </div>
+              <div id="worldbook-health-results" class="worldbook-health-results is-hidden">
+                <p class="worldbook-health-empty">点击“检查问题”，可以查看空内容、重复关键词、未分组、禁用词条等问题。</p>
+              </div>
+            </div>
+
+            <p class="muted helper-text">
+              说明：顺序数值越小越先处理。“常驻”表示该条不依赖关键词；
+              “关键词触发”表示仍依赖主关键词命中。主副组关系中的“与所有/与任意”是主组与副组之间的关系，不是组内别名关系。
+            </p>
+
+            <div id="worldbook-entry-list" class="memory-list">
           {% for item in worldbook_entries %}
           <article class="memory-card worldbook-entry-card" data-collapsed="false">
             <div class="memory-card-head">
-              <label class="checkbox-row">
-                <input class="wb-selected" type="checkbox" />
-                <span>选中</span>
+              <label class="checkbox-row wb-select-control" title="选择此词条">
+                <input class="wb-selected" type="checkbox" aria-label="选择此词条" />
               </label>
               <strong>{{ item.title or ("词条 " ~ loop.index) }}</strong>
               <div class="button-row">
@@ -182,7 +1758,7 @@
             </div>
 
             <div class="worldbook-entry-body">
-              <div class="grid-two">
+              <div class="grid-two wb-wide-grid">
                 <div>
                   <label>标题</label>
                   <input class="wb-title" value="{{ item.title }}" placeholder="例如：身份·我是妻子" />
@@ -193,7 +1769,7 @@
                 </div>
               </div>
 
-              <div class="grid-two">
+              <div class="grid-two wb-keyword-grid">
                 <div>
                   <label>主关键词</label>
                   <input class="wb-trigger" value="{{ item.trigger }}" placeholder="多个别名可用逗号分隔" />
@@ -204,33 +1780,30 @@
                 </div>
               </div>
 
-              <div class="grid-two">
+              <div class="grid-two wb-compact-grid wb-trigger-rule-grid" data-section-title="触发规则">
                 <div>
-                  <label>触发类型</label>
+                  <label>触发</label>
                   <select class="wb-entry-type">
                     <option value="keyword" {% if (item.entry_type or 'keyword') == 'keyword' %}selected{% endif %}>关键词触发</option>
                     <option value="constant" {% if item.entry_type == 'constant' %}selected{% endif %}>常驻</option>
                   </select>
                 </div>
                 <div>
-                  <label>主副组关系</label>
+                  <label>主副关系</label>
                   <select class="wb-group-operator">
-                    <option value="and" {% if (item.group_operator or 'and') == 'and' %}selected{% endif %}>与所有（主副都要触发）</option>
-                    <option value="or" {% if item.group_operator == 'or' %}selected{% endif %}>与任意（主副任意一个即可）</option>
+                    <option value="and" {% if (item.group_operator or 'and') == 'and' %}selected{% endif %}>与所有</option>
+                    <option value="or" {% if item.group_operator == 'or' %}selected{% endif %}>与任意</option>
                   </select>
                 </div>
-              </div>
-
-              <div class="grid-two">
                 <div>
-                  <label>主关键词组逻辑</label>
+                  <label>主词</label>
                   <select class="wb-match-mode">
                     <option value="any" {% if (item.match_mode or 'any') == 'any' %}selected{% endif %}>任意命中</option>
                     <option value="all" {% if item.match_mode == 'all' %}selected{% endif %}>全部命中</option>
                   </select>
                 </div>
                 <div>
-                  <label>副关键词组逻辑</label>
+                  <label>副词</label>
                   <select class="wb-secondary-mode">
                     <option value="any" {% if item.secondary_mode == 'any' %}selected{% endif %}>任意命中</option>
                     <option value="all" {% if (item.secondary_mode or 'all') == 'all' %}selected{% endif %}>全部命中</option>
@@ -238,29 +1811,26 @@
                 </div>
               </div>
 
-              <div class="grid-two">
+              <div class="grid-two wb-compact-grid wb-number-grid" data-section-title="数值设置">
                 <div>
-                  <label>触发概率（0-100）</label>
+                  <label>概率</label>
                   <input class="wb-chance" type="number" min="0" max="100" step="1" value="{{ item.chance if item.chance is not none else 100 }}" />
                 </div>
                 <div>
                   <label>顺序</label>
                   <input class="wb-order" type="number" min="0" max="999999" step="1" value="{{ item.order if item.order is not none else item.priority if item.priority is not none else 100 }}" />
                 </div>
-              </div>
-
-              <div class="grid-two">
                 <div>
-                  <label>黏性（额外跟随几轮）</label>
+                  <label>黏性</label>
                   <input class="wb-sticky-turns" type="number" min="0" max="999" step="1" value="{{ item.sticky_turns if item.sticky_turns is not none else 0 }}" />
                 </div>
                 <div>
-                  <label>冷却（结束后冷却几轮）</label>
+                  <label>冷却</label>
                   <input class="wb-cooldown-turns" type="number" min="0" max="999" step="1" value="{{ item.cooldown_turns if item.cooldown_turns is not none else 0 }}" />
                 </div>
               </div>
 
-              <div class="grid-two">
+              <div class="grid-two wb-compact-grid wb-injection-grid" data-section-title="注入设置">
                 <div>
                   <label>插入位置</label>
                   <select class="wb-insertion-position">
@@ -273,11 +1843,8 @@
                   <label>注入顺序</label>
                   <input class="wb-injection-order" type="number" min="0" max="999999" step="1" value="{{ item.injection_order if item.injection_order is not none else item.order if item.order is not none else item.priority if item.priority is not none else 100 }}" />
                 </div>
-              </div>
-
-              <div class="grid-two">
                 <div>
-                  <label>聊天深度（仅聊天内注入生效）</label>
+                  <label>聊天深度</label>
                   <input class="wb-injection-depth" type="number" min="0" max="3" step="1" value="{{ item.injection_depth if item.injection_depth is not none else 0 }}" />
                 </div>
                 <div>
@@ -288,33 +1855,28 @@
                 </div>
               </div>
 
-              <div class="grid-two">
+              <div class="wb-options-grid" data-section-title="选项">
+                <label class="checkbox-row">
+                  <input class="wb-enabled" type="checkbox" {% if item.enabled %}checked{% endif %} />
+                  <span>启用</span>
+                </label>
                 <label class="checkbox-row">
                   <input class="wb-recursive-enabled" type="checkbox" {% if item.recursive_enabled is not defined or item.recursive_enabled %}checked{% endif %} />
-                  <span>允许递归参与</span>
+                  <span>允许递归</span>
                 </label>
                 <label class="checkbox-row">
                   <input class="wb-prevent-further-recursion" type="checkbox" {% if item.prevent_further_recursion %}checked{% endif %} />
-                  <span>命中后阻止继续递归</span>
-                </label>
-              </div>
-
-              <div class="grid-two">
-                <label class="checkbox-row">
-                  <input class="wb-enabled" type="checkbox" {% if item.enabled %}checked{% endif %} />
-                  <span>启用词条</span>
+                  <span>阻止继续递归</span>
                 </label>
                 <label class="checkbox-row">
                   <input class="wb-case-sensitive" type="checkbox" {% if item.case_sensitive %}checked{% endif %} />
                   <span>区分大小写</span>
                 </label>
+                <label class="checkbox-row">
+                  <input class="wb-whole-word" type="checkbox" {% if item.whole_word %}checked{% endif %} />
+                  <span>完整词匹配</span>
+                </label>
               </div>
-
-              <label class="checkbox-row">
-                <input class="wb-whole-word" type="checkbox" {% if item.whole_word %}checked{% endif %} />
-                <span>完整词匹配</span>
-              </label>
-
               <label>内容</label>
               <textarea class="wb-content" rows="6" placeholder="命中后会临时注入给模型的设定文本。">{{ item.content }}</textarea>
 
@@ -325,13 +1887,8 @@
             </div>
           </article>
           {% endfor %}
-        </div>
-      </section>
-      <section class="panel config-panel full-span">
-        <div class="section-head">
-          <p class="eyebrow">Status</p>
-          <h2>当前状态</h2>
-          <p id="status-text" class="muted status-line strong">就绪</p>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -339,9 +1896,8 @@
     <template id="worldbook-entry-template">
       <article class="memory-card worldbook-entry-card" data-collapsed="false">
         <div class="memory-card-head">
-          <label class="checkbox-row">
-            <input class="wb-selected" type="checkbox" />
-            <span>选中</span>
+          <label class="checkbox-row wb-select-control" title="选择此词条">
+            <input class="wb-selected" type="checkbox" aria-label="选择此词条" />
           </label>
           <strong>新词条</strong>
           <div class="button-row">
@@ -351,7 +1907,7 @@
         </div>
 
         <div class="worldbook-entry-body">
-          <div class="grid-two">
+          <div class="grid-two wb-wide-grid">
             <div>
               <label>标题</label>
               <input class="wb-title" placeholder="例如：身份·我是妻子" />
@@ -362,7 +1918,7 @@
             </div>
           </div>
 
-          <div class="grid-two">
+          <div class="grid-two wb-keyword-grid">
             <div>
               <label>主关键词</label>
               <input class="wb-trigger" placeholder="多个别名可用逗号分隔" />
@@ -373,33 +1929,30 @@
             </div>
           </div>
 
-          <div class="grid-two">
+          <div class="grid-two wb-compact-grid wb-trigger-rule-grid" data-section-title="触发规则">
             <div>
-              <label>触发类型</label>
+              <label>触发</label>
               <select class="wb-entry-type">
                 <option value="keyword" selected>关键词触发</option>
                 <option value="constant">常驻</option>
               </select>
             </div>
             <div>
-              <label>主副组关系</label>
+              <label>主副关系</label>
               <select class="wb-group-operator">
-                <option value="and" selected>与所有（主副都要触发）</option>
-                <option value="or">与任意（主副任意一个即可）</option>
+                <option value="and" selected>与所有</option>
+                <option value="or">与任意</option>
               </select>
             </div>
-          </div>
-
-          <div class="grid-two">
             <div>
-              <label>主关键词组逻辑</label>
+              <label>主词</label>
               <select class="wb-match-mode">
                 <option value="any" selected>任意命中</option>
                 <option value="all">全部命中</option>
               </select>
             </div>
             <div>
-              <label>副关键词组逻辑</label>
+              <label>副词</label>
               <select class="wb-secondary-mode">
                 <option value="any">任意命中</option>
                 <option value="all" selected>全部命中</option>
@@ -407,29 +1960,26 @@
             </div>
           </div>
 
-          <div class="grid-two">
+          <div class="grid-two wb-compact-grid wb-number-grid" data-section-title="数值设置">
             <div>
-              <label>触发概率（0-100）</label>
+              <label>概率</label>
               <input class="wb-chance" type="number" min="0" max="100" step="1" value="100" />
             </div>
             <div>
               <label>顺序</label>
               <input class="wb-order" type="number" min="0" max="999999" step="1" value="100" />
             </div>
-          </div>
-
-          <div class="grid-two">
             <div>
-              <label>黏性（额外跟随几轮）</label>
+              <label>黏性</label>
               <input class="wb-sticky-turns" type="number" min="0" max="999" step="1" value="0" />
             </div>
             <div>
-              <label>冷却（结束后冷却几轮）</label>
+              <label>冷却</label>
               <input class="wb-cooldown-turns" type="number" min="0" max="999" step="1" value="0" />
             </div>
           </div>
 
-          <div class="grid-two">
+          <div class="grid-two wb-compact-grid wb-injection-grid" data-section-title="注入设置">
             <div>
               <label>插入位置</label>
               <select class="wb-insertion-position">
@@ -442,11 +1992,8 @@
               <label>注入顺序</label>
               <input class="wb-injection-order" type="number" min="0" max="999999" step="1" value="100" />
             </div>
-          </div>
-
-          <div class="grid-two">
             <div>
-              <label>聊天深度（仅聊天内注入生效）</label>
+              <label>聊天深度</label>
               <input class="wb-injection-depth" type="number" min="0" max="3" step="1" value="0" />
             </div>
             <div>
@@ -457,33 +2004,28 @@
             </div>
           </div>
 
-          <div class="grid-two">
+          <div class="wb-options-grid" data-section-title="选项">
+            <label class="checkbox-row">
+              <input class="wb-enabled" type="checkbox" checked />
+              <span>启用</span>
+            </label>
             <label class="checkbox-row">
               <input class="wb-recursive-enabled" type="checkbox" checked />
-              <span>允许递归参与</span>
+              <span>允许递归</span>
             </label>
             <label class="checkbox-row">
               <input class="wb-prevent-further-recursion" type="checkbox" />
-              <span>命中后阻止继续递归</span>
-            </label>
-          </div>
-
-          <div class="grid-two">
-            <label class="checkbox-row">
-              <input class="wb-enabled" type="checkbox" checked />
-              <span>启用词条</span>
+              <span>阻止继续递归</span>
             </label>
             <label class="checkbox-row">
               <input class="wb-case-sensitive" type="checkbox" />
               <span>区分大小写</span>
             </label>
+            <label class="checkbox-row">
+              <input class="wb-whole-word" type="checkbox" />
+              <span>完整词匹配</span>
+            </label>
           </div>
-
-          <label class="checkbox-row">
-            <input class="wb-whole-word" type="checkbox" />
-            <span>完整词匹配</span>
-          </label>
-
           <label>内容</label>
           <textarea class="wb-content" rows="6" placeholder="命中后会临时注入给模型的设定文本。"></textarea>
 
@@ -507,14 +2049,52 @@
       const currentBackground = {{ settings.background_image_url | tojson }};
       const currentOverlay = {{ settings.background_overlay | tojson }};
       const selectedWorldbookCountEl = document.getElementById("selected-worldbook-count");
+      const importModeEl = document.getElementById("import-mode");
+      const importModeHintEl = document.getElementById("import-mode-hint");
+      const importApplySettingsEl = document.getElementById("import-apply-settings");
       const importMissingInjectionPolicyEl = document.getElementById("import-missing-injection-policy");
       const importForceInChatDepthEl = document.getElementById("import-force-in-chat-depth");
       const importForceInjectionOrderEl = document.getElementById("import-force-injection-order");
       const bulkInsertionPositionEl = document.getElementById("bulk-insertion-position");
       const bulkInjectionDepthEl = document.getElementById("bulk-injection-depth");
+      const bulkGroupTargetEl = document.getElementById("bulk-group-target");
+      const groupOptionsEl = document.getElementById("worldbook-group-options");
+      const groupSidebarEl = document.getElementById("worldbook-group-sidebar");
+      const activeWorldbookFilterEl = document.getElementById("active-worldbook-filter");
+      const quickFiltersEl = document.getElementById("worldbook-quick-filters");
+      const activeQuickFilterEl = document.getElementById("active-quick-filter");
+      const healthResultsEl = document.getElementById("worldbook-health-results");
+      const activeHealthFilterEl = document.getElementById("active-health-filter");
+      const saveWorldbookEntriesEl = document.getElementById("save-worldbook-entries");
+      const QUICK_FILTERS = [
+        { key: "__all__", label: "全部" },
+        { key: "enabled", label: "启用" },
+        { key: "disabled", label: "禁用" },
+        { key: "constant", label: "常驻" },
+        { key: "keyword", label: "关键词" },
+        { key: "in_chat", label: "聊天注入" },
+        { key: "before_char_defs", label: "角色前" },
+        { key: "after_char_defs", label: "角色后" },
+        { key: "ungrouped", label: "未分组" },
+      ];
+      let activeWorldbookGroup = "__all__";
+      let activeQuickFilter = "__all__";
+      let activeHealthIssue = "";
+      let worldbookDirty = false;
 
       function setStatus(text) {
-        statusEl.textContent = text;
+        statusEl.textContent = worldbookDirty ? `${text}（有未保存修改）` : text;
+      }
+
+      function setWorldbookDirty(dirty) {
+        worldbookDirty = Boolean(dirty);
+        saveWorldbookEntriesEl?.classList.toggle("is-dirty", worldbookDirty);
+        document.getElementById("worldbook-status-box")?.classList.toggle("is-dirty", worldbookDirty);
+      }
+
+      function markWorldbookDirty(message = "有未保存修改，记得保存。") {
+        setWorldbookDirty(true);
+        setStatus(message);
       }
 
       function applyTheme(theme) {
@@ -576,6 +2156,165 @@
         return String(value || "").trim().toLowerCase();
       }
 
+      function getCardGroupKey(card) {
+        const group = String(card.querySelector(".wb-group")?.value || "").trim();
+        return group || "__ungrouped__";
+      }
+
+      function getGroupLabel(groupKey) {
+        if (groupKey === "__all__") return "全部词条";
+        if (groupKey === "__ungrouped__") return "未分组";
+        return groupKey;
+      }
+
+      function quickFilterLabel(filterKey) {
+        return QUICK_FILTERS.find((item) => item.key === filterKey)?.label || "全部";
+      }
+
+      function getEntryTypeLabel(value) {
+        return value === "constant" ? "常驻" : "关键词";
+      }
+
+      function getInsertionPositionLabel(value) {
+        const mapping = {
+          before_char_defs: "角色前",
+          after_char_defs: "角色后",
+          in_chat: "聊天注入",
+        };
+        return mapping[value] || value || "角色定义后";
+      }
+
+      function getTrimmedValue(card, selector) {
+        return String(card.querySelector(selector)?.value || "").trim();
+      }
+
+      function getNormalizedTrigger(card) {
+        return normalizeSearchText(getTrimmedValue(card, ".wb-trigger").replace(/\s+/g, " "));
+      }
+
+      function matchesActiveGroup(card) {
+        if (activeWorldbookGroup === "__all__") return true;
+        return getCardGroupKey(card) === activeWorldbookGroup;
+      }
+
+      function getAllEntryCards() {
+        return [...worldbookListEl.querySelectorAll(".worldbook-entry-card")];
+      }
+
+      function getVisibleEntryCards() {
+        return getAllEntryCards().filter((card) => card.style.display !== "none");
+      }
+
+      function getExistingGroupKeys() {
+        const groups = new Set();
+        getAllEntryCards().forEach((card) => {
+          const group = String(card.querySelector(".wb-group")?.value || "").trim();
+          if (group) groups.add(group);
+        });
+        return [...groups].sort((left, right) => left.localeCompare(right, "zh-CN", { numeric: true }));
+      }
+
+      function syncGroupOptions() {
+        if (!groupOptionsEl) return;
+        groupOptionsEl.innerHTML = "";
+        getExistingGroupKeys().forEach((group) => {
+          const option = document.createElement("option");
+          option.value = group;
+          groupOptionsEl.appendChild(option);
+        });
+      }
+
+      function renderGroupSidebar() {
+        if (!groupSidebarEl) return;
+        const cards = getAllEntryCards();
+        const stats = new Map();
+        cards.forEach((card) => {
+          const key = getCardGroupKey(card);
+          stats.set(key, (stats.get(key) || 0) + 1);
+        });
+
+        const items = [{ key: "__all__", label: "全部词条", count: cards.length }];
+        if (stats.has("__ungrouped__")) {
+          items.push({ key: "__ungrouped__", label: "未分组", count: stats.get("__ungrouped__") || 0 });
+        }
+        [...stats.entries()]
+          .filter(([key]) => key !== "__ungrouped__")
+          .sort((left, right) => left[0].localeCompare(right[0], "zh-CN", { numeric: true }))
+          .forEach(([key, count]) => {
+            items.push({ key, label: key, count });
+          });
+
+        if (activeWorldbookGroup !== "__all__" && !items.some((item) => item.key === activeWorldbookGroup)) {
+          activeWorldbookGroup = "__all__";
+        }
+
+        groupSidebarEl.innerHTML = "";
+        items.forEach((item) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `worldbook-group-button${item.key === activeWorldbookGroup ? " active" : ""}`;
+          button.dataset.worldbookGroup = item.key;
+          const label = document.createElement("span");
+          label.textContent = item.label;
+          const count = document.createElement("em");
+          count.textContent = String(item.count);
+          button.append(label, count);
+          groupSidebarEl.appendChild(button);
+        });
+
+        if (activeWorldbookFilterEl) {
+          const groupLabel = getGroupLabel(activeWorldbookGroup);
+          activeWorldbookFilterEl.textContent = activeWorldbookGroup === "__all__"
+            ? "当前筛选：全部词条"
+            : `当前选中组别：${groupLabel}`;
+          activeWorldbookFilterEl.classList.toggle("is-active", activeWorldbookGroup !== "__all__");
+        }
+        syncGroupOptions();
+      }
+
+      function refreshWorldbookNavigation() {
+        renderGroupSidebar();
+        syncGroupOptions();
+      }
+
+      function renderQuickFilters() {
+        if (!quickFiltersEl) return;
+        quickFiltersEl.innerHTML = "";
+        QUICK_FILTERS.forEach((item) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `worldbook-quick-filter-button${item.key === activeQuickFilter ? " active" : ""}`;
+          button.dataset.quickFilter = item.key;
+          button.textContent = item.label;
+          quickFiltersEl.appendChild(button);
+        });
+        if (activeQuickFilterEl) {
+          activeQuickFilterEl.textContent = quickFilterLabel(activeQuickFilter);
+          activeQuickFilterEl.classList.toggle("worldbook-health-filter-active", activeQuickFilter !== "__all__");
+        }
+      }
+
+      function matchesQuickFilter(card) {
+        if (activeQuickFilter === "__all__") return true;
+        const entryType = card.querySelector(".wb-entry-type")?.value || "keyword";
+        const insertionPosition = card.querySelector(".wb-insertion-position")?.value || "after_char_defs";
+        if (activeQuickFilter === "enabled") return card.querySelector(".wb-enabled")?.checked !== false;
+        if (activeQuickFilter === "disabled") return card.querySelector(".wb-enabled")?.checked === false;
+        if (activeQuickFilter === "constant") return entryType === "constant";
+        if (activeQuickFilter === "keyword") return entryType === "keyword";
+        if (activeQuickFilter === "in_chat") return insertionPosition === "in_chat";
+        if (activeQuickFilter === "before_char_defs") return insertionPosition === "before_char_defs";
+        if (activeQuickFilter === "after_char_defs") return insertionPosition === "after_char_defs";
+        if (activeQuickFilter === "ungrouped") return getCardGroupKey(card) === "__ungrouped__";
+        return true;
+      }
+
+      function matchesHealthIssue(card) {
+        if (!activeHealthIssue) return true;
+        const issues = String(card.dataset.healthIssues || "").split(",").filter(Boolean);
+        return issues.includes(activeHealthIssue);
+      }
+
       function getCardSearchText(card) {
         return [
           card.querySelector(".wb-title")?.value || "",
@@ -598,20 +2337,38 @@
           body.style.display = collapsed ? "none" : "";
         }
         if (toggleBtn) {
-          toggleBtn.textContent = collapsed ? "展开" : "折叠";
+          toggleBtn.textContent = collapsed ? "▸" : "▾";
+          toggleBtn.title = collapsed ? "展开词条" : "折叠词条";
+          toggleBtn.setAttribute("aria-label", collapsed ? "展开词条" : "折叠词条");
+          toggleBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+          toggleBtn.classList.add("icon-button");
         }
       }
 
       function applyWorldbookSearch() {
         const keyword = normalizeSearchText(document.getElementById("worldbook-search")?.value || "");
-        const cards = [...worldbookListEl.querySelectorAll(".worldbook-entry-card")];
+        const cards = getAllEntryCards();
         let visibleCount = 0;
         for (const card of cards) {
-          const matched = !keyword || getCardSearchText(card).includes(keyword);
+          const matchedGroup = matchesActiveGroup(card);
+          const matchedQuickFilter = matchesQuickFilter(card);
+          const matchedHealthIssue = matchesHealthIssue(card);
+          const matchedKeyword = !keyword || getCardSearchText(card).includes(keyword);
+          const matched = matchedGroup && matchedQuickFilter && matchedHealthIssue && matchedKeyword;
           card.style.display = matched ? "" : "none";
           if (matched) visibleCount += 1;
         }
-        setStatus(keyword ? `搜索完成：找到 ${visibleCount} 条匹配词条。` : "已清除搜索筛选。");
+
+        const groupLabel = getGroupLabel(activeWorldbookGroup);
+        const parts = [groupLabel];
+        if (activeQuickFilter !== "__all__") parts.push(quickFilterLabel(activeQuickFilter));
+        if (activeHealthIssue) parts.push(`问题：${getHealthIssueMeta(activeHealthIssue)?.label || activeHealthIssue}`);
+        if (keyword) parts.push(`搜索：${keyword}`);
+        if (keyword || activeWorldbookGroup !== "__all__" || activeQuickFilter !== "__all__" || activeHealthIssue) {
+          setStatus(`筛选完成：${parts.join(" / ")}，找到 ${visibleCount} 条词条。`);
+        } else {
+          setStatus("已清除搜索筛选。");
+        }
       }
 
       function syncInjectionUi(card) {
@@ -634,6 +2391,19 @@
         }
       }
 
+      function syncImportModeUi() {
+        const mode = importModeEl?.value || "replace";
+        if (importModeHintEl) {
+          importModeHintEl.textContent = mode === "append"
+            ? "增量模式只追加词条，不改当前 settings；检查无误后点击“保存全部词条”落盘。"
+            : "替换模式会使用导入文件覆盖当前世界书。";
+        }
+        if (importApplySettingsEl) {
+          importApplySettingsEl.disabled = mode === "append";
+          importApplySettingsEl.title = mode === "append" ? "增量追加不应用 settings，避免覆盖当前世界书配置。" : "";
+        }
+      }
+
       function syncBulkInjectionUi() {
         const policy = bulkInsertionPositionEl?.value || "after_char_defs";
         if (bulkInjectionDepthEl) {
@@ -641,6 +2411,90 @@
           bulkInjectionDepthEl.disabled = disabled;
           bulkInjectionDepthEl.title = disabled ? "仅在“聊天内注入”时生效" : "";
         }
+      }
+
+      const TOOL_COLLAPSE_STORAGE_KEY = "fantareal.worldbook.toolCollapse.v1";
+
+      function readToolCollapseState() {
+        try {
+          const raw = localStorage.getItem(TOOL_COLLAPSE_STORAGE_KEY);
+          const parsed = raw ? JSON.parse(raw) : {};
+          return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (error) {
+          return {};
+        }
+      }
+
+      function writeToolCollapseState(state) {
+        try {
+          localStorage.setItem(TOOL_COLLAPSE_STORAGE_KEY, JSON.stringify(state || {}));
+        } catch (error) {
+          // localStorage may be unavailable in some embedded browsers.
+        }
+      }
+
+      function setToolCardCollapsed(card, collapsed, persist = true) {
+        if (!card) return;
+        const key = String(card.dataset.toolCard || "tool");
+        const button = card.querySelector(".worldbook-tool-toggle");
+        card.classList.toggle("is-collapsed", !!collapsed);
+        card.dataset.collapsed = collapsed ? "true" : "false";
+        if (button) {
+          button.textContent = collapsed ? "▸" : "▾";
+          button.title = collapsed ? "展开工具区" : "收起工具区";
+          button.setAttribute("aria-label", collapsed ? "展开工具区" : "收起工具区");
+          button.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        }
+        if (persist) {
+          const state = readToolCollapseState();
+          state[key] = !!collapsed;
+          writeToolCollapseState(state);
+        }
+      }
+
+      function setupCollapsibleToolCards() {
+        const saved = readToolCollapseState();
+        document.querySelectorAll(".worldbook-tool-card").forEach((card) => {
+          const key = String(card.dataset.toolCard || "tool");
+          const head = card.querySelector(".section-head");
+          if (!head) return;
+
+          if (!card.querySelector(".worldbook-tool-body")) {
+            const body = document.createElement("div");
+            body.className = "worldbook-tool-body";
+            while (head.nextSibling) {
+              body.appendChild(head.nextSibling);
+            }
+            card.appendChild(body);
+          }
+
+          let button = head.querySelector(".worldbook-tool-toggle");
+          if (!button) {
+            button = document.createElement("button");
+            button.type = "button";
+            button.className = "worldbook-tool-toggle";
+            head.insertBefore(button, head.firstChild);
+          }
+
+          const toggle = () => setToolCardCollapsed(card, card.dataset.collapsed !== "true");
+          button.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            toggle();
+          });
+          head.addEventListener("click", (event) => {
+            if (event.target.closest("button, input, select, textarea, a, label")) return;
+            toggle();
+          });
+          head.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            toggle();
+          });
+          head.tabIndex = 0;
+
+          setToolCardCollapsed(card, saved[key] ?? true, false);
+        });
       }
 
       function getSelectedCards() {
@@ -657,26 +2511,222 @@
       }
 
       function updateCount() {
-        worldbookCountEl.textContent = String(worldbookListEl.querySelectorAll(".worldbook-entry-card").length);
+        worldbookCountEl.textContent = String(getAllEntryCards().length);
+      }
+
+      function createSummaryChip(text, className = "") {
+        const chip = document.createElement("span");
+        chip.className = `worldbook-summary-chip${className ? ` ${className}` : ""}`;
+        chip.textContent = text;
+        return chip;
+      }
+
+      function ensureQuickEnabledSwitch(card) {
+        const head = card.querySelector(".memory-card-head");
+        if (!head) return null;
+        let switchEl = head.querySelector(".wb-quick-enabled-switch");
+        if (!switchEl) {
+          switchEl = document.createElement("label");
+          switchEl.className = "wb-quick-enabled-switch";
+          switchEl.title = "快速启用 / 停用这条世界书词条";
+          switchEl.innerHTML = `
+            <input class="wb-quick-enabled" type="checkbox" aria-label="快速启用或停用词条" />
+            <span class="wb-quick-enabled-track" aria-hidden="true"></span>
+            <em class="wb-quick-enabled-label">启用</em>
+          `;
+        }
+        const actions = head.querySelector(".button-row");
+        if (actions && switchEl.parentElement !== actions) {
+          actions.insertBefore(switchEl, actions.firstElementChild || null);
+        } else if (!actions && switchEl.parentElement !== head) {
+          head.appendChild(switchEl);
+        }
+        return switchEl;
+      }
+
+      function syncQuickEnabledSwitch(card) {
+        const enabled = card.querySelector(".wb-enabled")?.checked !== false;
+        const switchEl = ensureQuickEnabledSwitch(card);
+        const quickInput = switchEl?.querySelector(".wb-quick-enabled");
+        const label = switchEl?.querySelector(".wb-quick-enabled-label");
+        if (quickInput) quickInput.checked = enabled;
+        if (label) label.textContent = enabled ? "启用" : "停用";
+        if (switchEl) switchEl.title = enabled ? "当前启用，点击停用" : "当前停用，点击启用";
+        switchEl?.classList.toggle("is-on", enabled);
+        card.classList.toggle("is-disabled", !enabled);
+      }
+
+      function updateCardSummary(card) {
+        const head = card.querySelector(".memory-card-head");
+        if (!head) return;
+        ensureQuickEnabledSwitch(card);
+        let summary = head.querySelector(".worldbook-card-summary");
+        if (!summary) {
+          summary = document.createElement("div");
+          summary.className = "worldbook-card-summary";
+          const actions = head.querySelector(".button-row");
+          head.insertBefore(summary, actions || null);
+        }
+        summary.innerHTML = "";
+
+        const entryType = card.querySelector(".wb-entry-type")?.value || "keyword";
+        const insertionPosition = card.querySelector(".wb-insertion-position")?.value || "after_char_defs";
+        const depth = Number(card.querySelector(".wb-injection-depth")?.value || 0);
+        const order = Number(card.querySelector(".wb-order")?.value || 100);
+        const injectionOrder = Number(card.querySelector(".wb-injection-order")?.value || order);
+        const chance = Number(card.querySelector(".wb-chance")?.value || 100);
+
+        summary.appendChild(createSummaryChip(getEntryTypeLabel(entryType), "strong"));
+        summary.appendChild(createSummaryChip(
+          insertionPosition === "in_chat"
+            ? `聊天注入 depth ${depth}`
+            : getInsertionPositionLabel(insertionPosition),
+          "strong"
+        ));
+        summary.appendChild(createSummaryChip(`顺序 ${order}`));
+        summary.appendChild(createSummaryChip(`注入 ${injectionOrder}`));
+        summary.appendChild(createSummaryChip(`概率 ${chance}%`, chance <= 0 ? "warning" : ""));
+        syncQuickEnabledSwitch(card);
       }
 
       function updateCardTitle(card) {
         const title = card.querySelector(".wb-title")?.value?.trim() || "新词条";
         const group = card.querySelector(".wb-group")?.value?.trim();
         card.querySelector(".memory-card-head strong").textContent = group ? `${title} ｜ ${group}` : title;
+        updateCardSummary(card);
+      }
+
+      function getHealthIssueDefinitions() {
+        return [
+          { key: "empty_content", label: "空内容词条", description: "内容为空，命中后不会给模型有效设定。" },
+          { key: "keyword_without_trigger", label: "关键词触发但主关键词为空", description: "类型是关键词触发，但主关键词为空。" },
+          { key: "untitled", label: "无标题词条", description: "标题为空，不利于维护和搜索。" },
+          { key: "ungrouped", label: "未分组词条", description: "组别为空，长世界书中较难定位。" },
+          { key: "disabled", label: "禁用词条", description: "当前不会参与触发。" },
+          { key: "constant", label: "常驻词条", description: "常驻词条过多可能挤占上下文。" },
+          { key: "in_chat", label: "聊天内注入词条", description: "检查聊天深度和注入顺序是否符合预期。" },
+          { key: "chance_zero", label: "概率为 0 的词条", description: "概率为 0 时基本不会触发。" },
+          { key: "duplicate_title", label: "重复标题", description: "多个词条使用了同一个标题。" },
+          { key: "duplicate_trigger", label: "重复主关键词", description: "多个词条使用了相同主关键词，可能造成重复触发。" },
+        ];
+      }
+
+      function getHealthIssueMeta(key) {
+        return getHealthIssueDefinitions().find((item) => item.key === key);
+      }
+
+      function analyzeWorldbookHealth() {
+        const cards = getAllEntryCards();
+        const titleMap = new Map();
+        const triggerMap = new Map();
+
+        cards.forEach((card) => {
+          const title = normalizeSearchText(getTrimmedValue(card, ".wb-title"));
+          const trigger = getNormalizedTrigger(card);
+          if (title) titleMap.set(title, (titleMap.get(title) || 0) + 1);
+          if (trigger) triggerMap.set(trigger, (triggerMap.get(trigger) || 0) + 1);
+        });
+
+        const issueMap = new Map();
+        const addIssue = (card, issueKey) => {
+          if (!issueMap.has(issueKey)) issueMap.set(issueKey, []);
+          issueMap.get(issueKey).push(card);
+          const existing = String(card.dataset.healthIssues || "").split(",").filter(Boolean);
+          if (!existing.includes(issueKey)) {
+            existing.push(issueKey);
+            card.dataset.healthIssues = existing.join(",");
+          }
+        };
+
+        cards.forEach((card) => {
+          card.dataset.healthIssues = "";
+          const title = normalizeSearchText(getTrimmedValue(card, ".wb-title"));
+          const trigger = getNormalizedTrigger(card);
+          const content = getTrimmedValue(card, ".wb-content");
+          const entryType = card.querySelector(".wb-entry-type")?.value || "keyword";
+          const groupKey = getCardGroupKey(card);
+          const enabled = card.querySelector(".wb-enabled")?.checked !== false;
+          const insertionPosition = card.querySelector(".wb-insertion-position")?.value || "after_char_defs";
+          const chance = Number(card.querySelector(".wb-chance")?.value || 100);
+
+          if (!content) addIssue(card, "empty_content");
+          if (entryType === "keyword" && !trigger) addIssue(card, "keyword_without_trigger");
+          if (!title) addIssue(card, "untitled");
+          if (groupKey === "__ungrouped__") addIssue(card, "ungrouped");
+          if (!enabled) addIssue(card, "disabled");
+          if (entryType === "constant") addIssue(card, "constant");
+          if (insertionPosition === "in_chat") addIssue(card, "in_chat");
+          if (chance <= 0) addIssue(card, "chance_zero");
+          if (title && (titleMap.get(title) || 0) > 1) addIssue(card, "duplicate_title");
+          if (trigger && (triggerMap.get(trigger) || 0) > 1) addIssue(card, "duplicate_trigger");
+        });
+
+        return { cards, issueMap };
+      }
+
+      function updateHealthFilterLabel() {
+        if (!activeHealthFilterEl) return;
+        if (!activeHealthIssue) {
+          activeHealthFilterEl.textContent = "问题筛选：未启用";
+          activeHealthFilterEl.classList.remove("worldbook-health-filter-active");
+          return;
+        }
+        const meta = getHealthIssueMeta(activeHealthIssue);
+        activeHealthFilterEl.textContent = `问题筛选：${meta?.label || activeHealthIssue}`;
+        activeHealthFilterEl.classList.add("worldbook-health-filter-active");
+      }
+
+      function renderHealthResults() {
+        if (!healthResultsEl) return;
+        healthResultsEl.classList.remove("is-hidden");
+        const { cards, issueMap } = analyzeWorldbookHealth();
+        healthResultsEl.innerHTML = "";
+        const definitions = getHealthIssueDefinitions();
+        const matchedDefinitions = definitions.filter((item) => (issueMap.get(item.key) || []).length > 0);
+
+        if (!matchedDefinitions.length) {
+          const empty = document.createElement("p");
+          empty.className = "worldbook-health-empty";
+          empty.textContent = `检查完成：共 ${cards.length} 条，暂时没有发现明显问题。`;
+          healthResultsEl.appendChild(empty);
+          activeHealthIssue = "";
+          updateHealthFilterLabel();
+          applyWorldbookSearch();
+          return;
+        }
+
+        matchedDefinitions.forEach((item) => {
+          const count = (issueMap.get(item.key) || []).length;
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `worldbook-health-chip${activeHealthIssue === item.key ? " active" : ""}`;
+          button.dataset.healthIssue = item.key;
+          button.title = item.description;
+          button.textContent = `${item.label} ${count}`;
+          healthResultsEl.appendChild(button);
+        });
       }
 
       function attachRemoveHandler(card) {
-        card.querySelector(".remove-worldbook-entry").addEventListener("click", () => {
-          card.remove();
-          updateCount();
-          updateSelectedCount();
-          applyWorldbookSearch();
-          setStatus("已删除一条世界书词条，记得保存。");
-        });
+        const removeBtn = card.querySelector(".remove-worldbook-entry");
+        if (removeBtn) {
+          removeBtn.textContent = "×";
+          removeBtn.title = "删除词条";
+          removeBtn.setAttribute("aria-label", "删除词条");
+          removeBtn.classList.add("icon-button", "danger-icon-button");
+          removeBtn.addEventListener("click", () => {
+            card.remove();
+            updateCount();
+            updateSelectedCount();
+            refreshWorldbookNavigation();
+            applyWorldbookSearch();
+            markWorldbookDirty("已删除一条世界书词条，记得保存。");
+          });
+        }
 
         const toggleBtn = card.querySelector(".toggle-worldbook-entry");
         if (toggleBtn) {
+          toggleBtn.classList.add("icon-button");
           toggleBtn.addEventListener("click", () => {
             const collapsed = card.dataset.collapsed === "true";
             setEntryCollapsed(card, !collapsed);
@@ -684,7 +2734,7 @@
         }
       }
 
-      function createEntryCard(item = {}) {
+      function createEntryCard(item = {}, options = {}) {
         const fragment = templateEl.content.cloneNode(true);
         const card = fragment.querySelector(".worldbook-entry-card");
         card.querySelector(".wb-id").value = item.id || "";
@@ -714,6 +2764,7 @@
         attachRemoveHandler(card);
         syncInjectionUi(card);
         updateCardTitle(card);
+        setEntryCollapsed(card, options.collapsed ?? true);
         return card;
       }
 
@@ -758,6 +2809,10 @@
         }
         updateCount();
         updateSelectedCount();
+        setWorldbookDirty(false);
+        refreshWorldbookNavigation();
+        analyzeWorldbookHealth();
+        updateHealthFilterLabel();
         applyWorldbookSearch();
         setStatus("世界书词条已重新读取。");
       }
@@ -770,17 +2825,171 @@
         }
         updateCount();
         updateSelectedCount();
+        setWorldbookDirty(false);
+        refreshWorldbookNavigation();
+        analyzeWorldbookHealth();
+        updateHealthFilterLabel();
         applyWorldbookSearch();
         setStatus("世界书词条已保存。");
+      }
+
+      function stripJsonComments(rawText) {
+        let result = "";
+        let inString = false;
+        let escape = false;
+        let inLineComment = false;
+        let inBlockComment = false;
+        for (let index = 0; index < rawText.length; index += 1) {
+          const char = rawText[index];
+          const nextChar = rawText[index + 1] || "";
+          if (inLineComment) {
+            if (char === "\n") {
+              inLineComment = false;
+              result += char;
+            }
+            continue;
+          }
+          if (inBlockComment) {
+            if (char === "*" && nextChar === "/") {
+              inBlockComment = false;
+              index += 1;
+            }
+            continue;
+          }
+          if (inString) {
+            result += char;
+            if (escape) {
+              escape = false;
+            } else if (char === "\\") {
+              escape = true;
+            } else if (char === '"') {
+              inString = false;
+            }
+            continue;
+          }
+          if (char === '"') {
+            inString = true;
+            result += char;
+            continue;
+          }
+          if (char === "/" && nextChar === "/") {
+            inLineComment = true;
+            index += 1;
+            continue;
+          }
+          if (char === "/" && nextChar === "*") {
+            inBlockComment = true;
+            index += 1;
+            continue;
+          }
+          result += char;
+        }
+        return result;
+      }
+
+      function parseWorldbookJson(rawText) {
+        const text = String(rawText || "").trim();
+        if (!text) throw new Error("导入文件内容为空。");
+        try {
+          return JSON.parse(text);
+        } catch (error) {
+          return JSON.parse(stripJsonComments(text));
+        }
+      }
+
+      function extractWorldbookImportEntries(parsed) {
+        let rawStore = parsed;
+        if (rawStore && typeof rawStore === "object" && !Array.isArray(rawStore) && rawStore.worldbook) {
+          rawStore = rawStore.worldbook;
+        }
+        if (Array.isArray(rawStore)) return rawStore;
+        if (rawStore && typeof rawStore === "object") {
+          if (Array.isArray(rawStore.entries)) return rawStore.entries;
+          if (Array.isArray(rawStore.items)) return rawStore.items;
+        }
+        return [];
+      }
+
+      function worldbookFieldPresent(row, key) {
+        if (!Object.prototype.hasOwnProperty.call(row, key)) return false;
+        const value = row[key];
+        if (value === null || value === undefined) return false;
+        if (typeof value === "string") return value.trim() !== "";
+        return true;
+      }
+
+      function applyImportOptionsToRow(item, index, existingIds) {
+        const row = item && typeof item === "object" && !Array.isArray(item) ? { ...item } : {};
+        const policy = importMissingInjectionPolicyEl?.value || "follow_defaults";
+        const forceDepth = Math.min(Math.max(Number(importForceInChatDepthEl?.value || 0), 0), 3);
+        const forceOrderRaw = importForceInjectionOrderEl?.value?.trim() || "";
+        const forceOrder = forceOrderRaw ? Number(forceOrderRaw) : null;
+
+        if (policy !== "follow_defaults" && !worldbookFieldPresent(row, "insertion_position")) {
+          if (policy === "force_before_char_defs") row.insertion_position = "before_char_defs";
+          if (policy === "force_after_char_defs") row.insertion_position = "after_char_defs";
+          if (policy === "force_in_chat") row.insertion_position = "in_chat";
+        }
+        if (String(row.insertion_position || "").trim() === "in_chat" && !worldbookFieldPresent(row, "injection_depth")) {
+          row.injection_depth = forceDepth;
+        }
+        if (!worldbookFieldPresent(row, "injection_role")) {
+          row.injection_role = "system";
+        }
+        if (forceOrder !== null && Number.isFinite(forceOrder) && !worldbookFieldPresent(row, "injection_order")) {
+          row.injection_order = forceOrder;
+        }
+
+        const oldId = String(row.id || "").trim();
+        if (!oldId || existingIds.has(oldId)) {
+          row.id = `worldbook-import-${Date.now()}-${index}`;
+        } else {
+          row.id = oldId;
+        }
+        existingIds.add(row.id);
+        return row;
+      }
+
+      function appendImportedWorldbookEntries(rawJson) {
+        const parsed = parseWorldbookJson(rawJson);
+        const rawEntries = extractWorldbookImportEntries(parsed);
+        if (!Array.isArray(rawEntries) || rawEntries.length === 0) {
+          throw new Error("导入文件里没有找到 entries 或 items 数组。");
+        }
+        const existingIds = new Set(
+          getAllEntryCards().map((card) => String(card.querySelector(".wb-id")?.value || "").trim()).filter(Boolean)
+        );
+        const imported = rawEntries
+          .filter((item) => item && typeof item === "object" && !Array.isArray(item))
+          .map((item, index) => applyImportOptionsToRow(item, index, existingIds));
+        if (!imported.length) {
+          throw new Error("导入文件里没有可追加的世界书词条。");
+        }
+        imported.forEach((item) => {
+          worldbookListEl.appendChild(createEntryCard(item));
+        });
+        updateCount();
+        updateSelectedCount();
+        refreshWorldbookNavigation();
+        analyzeWorldbookHealth();
+        updateHealthFilterLabel();
+        applyWorldbookSearch();
+        markWorldbookDirty(`已增量追加 ${imported.length} 条世界书词条。检查无误后点击“保存全部词条”。`);
       }
 
       async function importWorldbookFile(file) {
         if (!file) return;
         const rawJson = await file.text();
+        const importMode = importModeEl?.value || "replace";
+        if (importMode === "append") {
+          appendImportedWorldbookEntries(rawJson);
+          return;
+        }
+
         const forceOrderRaw = importForceInjectionOrderEl?.value?.trim() || "";
         const data = await postJson("/api/worldbook/import", {
           raw_json: rawJson,
-          apply_settings: document.getElementById("import-apply-settings")?.checked ?? true,
+          apply_settings: importApplySettingsEl?.checked ?? true,
           missing_injection_policy: importMissingInjectionPolicyEl?.value || "follow_defaults",
           force_in_chat_depth: Number(importForceInChatDepthEl?.value || 0),
           force_injection_order: forceOrderRaw ? Number(forceOrderRaw) : null,
@@ -791,6 +3000,10 @@
         }
         updateCount();
         updateSelectedCount();
+        setWorldbookDirty(false);
+        refreshWorldbookNavigation();
+        analyzeWorldbookHealth();
+        updateHealthFilterLabel();
         applyWorldbookSearch();
         setStatus(`世界书导入完成：${data.items?.length || 0} 条。`);
       }
@@ -802,6 +3015,14 @@
           syncInjectionUi(card);
         }
         updateCardTitle(card);
+        if (event.target.classList.contains("wb-group")) {
+          refreshWorldbookNavigation();
+        }
+        if (activeHealthIssue) {
+          analyzeWorldbookHealth();
+          updateHealthFilterLabel();
+        }
+        markWorldbookDirty("有未保存修改，记得保存。");
         applyWorldbookSearch();
       });
 
@@ -817,15 +3038,24 @@
         attachRemoveHandler(card);
         syncInjectionUi(card);
         updateCardTitle(card);
+        setEntryCollapsed(card, true);
       });
 
       document.getElementById("add-worldbook-entry").addEventListener("click", () => {
-        const card = createEntryCard();
+        const card = createEntryCard({}, { collapsed: false });
+        if (activeWorldbookGroup !== "__all__" && activeWorldbookGroup !== "__ungrouped__") {
+          const groupInput = card.querySelector(".wb-group");
+          if (groupInput) groupInput.value = activeWorldbookGroup;
+          updateCardTitle(card);
+        }
         worldbookListEl.prepend(card);
         updateCount();
         updateSelectedCount();
+        refreshWorldbookNavigation();
+        analyzeWorldbookHealth();
+        updateHealthFilterLabel();
         applyWorldbookSearch();
-        setStatus("已新增一条空白世界书词条。");
+        markWorldbookDirty("已新增一条空白世界书词条。");
       });
 
       document.getElementById("save-worldbook-entries").addEventListener("click", async () => {
@@ -873,6 +3103,49 @@
         applyWorldbookSearch();
       });
 
+      quickFiltersEl?.addEventListener("click", (event) => {
+        const button = event.target.closest(".worldbook-quick-filter-button");
+        if (!button) return;
+        activeQuickFilter = button.dataset.quickFilter || "__all__";
+        renderQuickFilters();
+        applyWorldbookSearch();
+      });
+
+      document.getElementById("check-worldbook-health")?.addEventListener("click", () => {
+        renderHealthResults();
+        setStatus("世界书问题检查已完成。");
+      });
+
+      document.getElementById("clear-worldbook-health-filter")?.addEventListener("click", () => {
+        activeHealthIssue = "";
+        analyzeWorldbookHealth();
+        updateHealthFilterLabel();
+        if (healthResultsEl) {
+          healthResultsEl.classList.add("is-hidden");
+          healthResultsEl.innerHTML = '<p class="worldbook-health-empty">点击“检查问题”，可以查看空内容、重复关键词、未分组、禁用词条等问题。</p>';
+        }
+        applyWorldbookSearch();
+        setStatus("已清除问题筛选。");
+      });
+
+      healthResultsEl?.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-health-issue]");
+        if (!button) return;
+        activeHealthIssue = button.dataset.healthIssue || "";
+        analyzeWorldbookHealth();
+        updateHealthFilterLabel();
+        renderHealthResults();
+        applyWorldbookSearch();
+      });
+
+      groupSidebarEl?.addEventListener("click", (event) => {
+        const button = event.target.closest(".worldbook-group-button");
+        if (!button) return;
+        activeWorldbookGroup = button.dataset.worldbookGroup || "__all__";
+        renderGroupSidebar();
+        applyWorldbookSearch();
+      });
+
       document.getElementById("collapse-all-worldbook").addEventListener("click", () => {
         [...worldbookListEl.querySelectorAll(".worldbook-entry-card")].forEach((card) => setEntryCollapsed(card, true));
         setStatus("已折叠当前列表中的全部词条。");
@@ -883,6 +3156,32 @@
         setStatus("已展开当前列表中的全部词条。");
       });
 
+      worldbookListEl.addEventListener("click", (event) => {
+        const switchEl = event.target.closest(".wb-quick-enabled-switch");
+        if (!switchEl || !worldbookListEl.contains(switchEl)) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const card = switchEl.closest(".worldbook-entry-card");
+        if (!card) return;
+
+        const enabledEl = card.querySelector(".wb-enabled");
+        const quickInput = switchEl.querySelector(".wb-quick-enabled");
+        const currentEnabled = enabledEl ? enabledEl.checked : quickInput?.checked !== false;
+        const nextEnabled = !currentEnabled;
+
+        if (enabledEl) enabledEl.checked = nextEnabled;
+        if (quickInput) quickInput.checked = nextEnabled;
+        syncQuickEnabledSwitch(card);
+
+        if (activeHealthIssue) {
+          analyzeWorldbookHealth();
+          updateHealthFilterLabel();
+        }
+        applyWorldbookSearch();
+        markWorldbookDirty(nextEnabled ? "已快捷启用该词条，记得保存。" : "已快捷停用该词条，记得保存。");
+      });
 
       worldbookListEl.addEventListener("change", (event) => {
         const card = event.target.closest(".worldbook-entry-card");
@@ -892,7 +3191,23 @@
         }
         if (event.target.classList.contains("wb-selected")) {
           updateSelectedCount();
+          return;
         }
+        if (event.target.classList.contains("wb-quick-enabled")) {
+          const enabledEl = card.querySelector(".wb-enabled");
+          if (enabledEl) enabledEl.checked = event.target.checked;
+          syncQuickEnabledSwitch(card);
+        }
+        if (event.target.classList.contains("wb-group")) {
+          refreshWorldbookNavigation();
+        }
+        updateCardTitle(card);
+        if (activeHealthIssue) {
+          analyzeWorldbookHealth();
+          updateHealthFilterLabel();
+        }
+        applyWorldbookSearch();
+        markWorldbookDirty("有未保存修改，记得保存。");
       });
 
       document.getElementById("select-all-visible-worldbook").addEventListener("click", () => {
@@ -913,6 +3228,45 @@
         setStatus("已清空当前选择。");
       });
 
+      document.getElementById("delete-selected-worldbook").addEventListener("click", () => {
+        const cards = getSelectedCards();
+        if (!cards.length) {
+          setStatus("请先勾选至少一条词条，再批量删除。");
+          return;
+        }
+        const confirmed = window.confirm(
+          `确定删除选中的 ${cards.length} 条世界书词条吗？\n\n这一步只会先从页面移除，点击“保存全部词条”后才会写入文件。`
+        );
+        if (!confirmed) return;
+        cards.forEach((card) => card.remove());
+        updateCount();
+        updateSelectedCount();
+        refreshWorldbookNavigation();
+        analyzeWorldbookHealth();
+        updateHealthFilterLabel();
+        applyWorldbookSearch();
+        markWorldbookDirty(`已从页面移除 ${cards.length} 条词条，确认无误后请保存。`);
+      });
+
+      document.getElementById("apply-bulk-group").addEventListener("click", () => {
+        const cards = getSelectedCards();
+        if (!cards.length) {
+          setStatus("请先勾选至少一条词条，再批量移动组别。");
+          return;
+        }
+        const group = String(bulkGroupTargetEl?.value || "").trim();
+        cards.forEach((card) => {
+          const groupInput = card.querySelector(".wb-group");
+          if (groupInput) groupInput.value = group;
+          updateCardTitle(card);
+        });
+        refreshWorldbookNavigation();
+        analyzeWorldbookHealth();
+        updateHealthFilterLabel();
+        applyWorldbookSearch();
+        markWorldbookDirty(group ? `已将 ${cards.length} 条词条移动到「${group}」。` : `已清空 ${cards.length} 条词条的组别。`);
+      });
+
       document.getElementById("apply-bulk-injection").addEventListener("click", () => {
         const cards = getSelectedCards();
         if (!cards.length) {
@@ -930,9 +3284,14 @@
           if (depthEl) depthEl.value = depth;
           if (orderEl) orderEl.value = injectionOrder;
           syncInjectionUi(card);
+          updateCardTitle(card);
         });
+        if (activeHealthIssue) {
+          analyzeWorldbookHealth();
+          updateHealthFilterLabel();
+        }
         applyWorldbookSearch();
-        setStatus(`已将 ${cards.length} 条词条的注入设置批量更新。`);
+        markWorldbookDirty(`已将 ${cards.length} 条词条的注入设置批量更新。`);
       });
 
       document.getElementById("apply-bulk-recursion").addEventListener("click", () => {
@@ -949,7 +3308,7 @@
           if (recursiveEl) recursiveEl.checked = recursiveEnabled;
           if (preventEl) preventEl.checked = preventFurther;
         });
-        setStatus(`已将 ${cards.length} 条词条的递归设置批量更新。`);
+        markWorldbookDirty(`已将 ${cards.length} 条词条的递归设置批量更新。`);
       });
 
       document.getElementById("bulk-enable-selected").addEventListener("click", () => {
@@ -961,8 +3320,14 @@
         cards.forEach((card) => {
           const enabledEl = card.querySelector(".wb-enabled");
           if (enabledEl) enabledEl.checked = true;
+          updateCardTitle(card);
         });
-        setStatus(`已启用 ${cards.length} 条选中词条。`);
+        if (activeHealthIssue) {
+          analyzeWorldbookHealth();
+          updateHealthFilterLabel();
+        }
+        applyWorldbookSearch();
+        markWorldbookDirty(`已启用 ${cards.length} 条选中词条。`);
       });
 
       document.getElementById("bulk-disable-selected").addEventListener("click", () => {
@@ -974,17 +3339,36 @@
         cards.forEach((card) => {
           const enabledEl = card.querySelector(".wb-enabled");
           if (enabledEl) enabledEl.checked = false;
+          updateCardTitle(card);
         });
-        setStatus(`已停用 ${cards.length} 条选中词条。`);
+        if (activeHealthIssue) {
+          analyzeWorldbookHealth();
+          updateHealthFilterLabel();
+        }
+        applyWorldbookSearch();
+        markWorldbookDirty(`已停用 ${cards.length} 条选中词条。`);
       });
 
+      importModeEl?.addEventListener("change", syncImportModeUi);
       importMissingInjectionPolicyEl?.addEventListener("change", syncImportEnhancementUi);
       bulkInsertionPositionEl?.addEventListener("change", syncBulkInjectionUi);
 
+      window.addEventListener("beforeunload", (event) => {
+        if (!worldbookDirty) return;
+        event.preventDefault();
+        event.returnValue = "";
+      });
+
+      setupCollapsibleToolCards();
       updateCount();
       updateSelectedCount();
+      refreshWorldbookNavigation();
+      renderQuickFilters();
+      analyzeWorldbookHealth();
+      updateHealthFilterLabel();
       applyWorldbookSearch();
       syncImportEnhancementUi();
+      syncImportModeUi();
       syncBulkInjectionUi();
       applyTheme(currentTheme);
       applyUiOpacity(currentOpacity);
