@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ settings.theme }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xuqi LLM Chat</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="topbar topbar-chat">
+      <div class="topbar-left">
+        <button id="open-drawer" class="menu-button" type="button">Config</button>
+        <a class="brand" href="/">Xuqi LLM Chat</a>
+      </div>
+      <nav class="topnav topnav-chat">
+        <a class="ghost-link" href="/">Welcome</a>
+        <a class="ghost-link" href="/config/card">Card</a>
+        <a class="ghost-link" href="/config/sprite">Sprite</a>
+        <a class="ghost-link" href="/config/memory">Memory</a>
+      </nav>
+    </div>
+
+    <div class="slot-toolbar">
+      <div class="slot-toolbar-left">
+        <span class="slot-badge">Save</span>
+        <div class="slot-meta">
+          <strong>当前存档：{{ slot_registry.slots | selectattr("id", "equalto", active_slot) | map(attribute="name") | first or active_slot }}</strong>
+          <p class="slot-hint">每个存档都会独立保存立绘、记忆、人设、世界书和聊天记录。</p>
+        </div>
+      </div>
+      <div class="slot-toolbar-right">
+        <select id="slot-select" class="slot-select">
+          {% for slot in slot_registry.slots %}
+          <option value="{{ slot.id }}" {% if slot.id == active_slot %}selected{% endif %}>{{ slot.name }}</option>
+          {% endfor %}
+        </select>
+        <button id="rename-slot" type="button" class="secondary compact">重命名</button>
+        <button id="reset-slot" type="button" class="secondary compact">重置</button>
+      </div>
+    </div>
+
+    <div class="chat-shell">
+      <div class="chat-layout">
+        <aside class="sprite-stage panel">
+          <div class="section-head">
+            <p class="eyebrow">Sprite</p>
+            <h2>差分立绘</h2>
+            <p id="sprite-tag-label" class="muted">当前表情：未命中</p>
+          </div>
+          <div class="sprite-frame">
+            <img id="sprite-image" class="sprite-image" alt="当前立绘" hidden />
+            <div id="sprite-placeholder" class="sprite-placeholder">
+              这里会显示 `{{ settings.sprite_base_path }}/标签.png`
+            </div>
+          </div>
+        </aside>
+
+        <main class="chat-area standalone">
+          <div class="chat-header">
+            <div>
+              <p class="eyebrow">陪伴模式</p>
+              <h2 id="chat-title">{{ persona.name }}</h2>
+              <p id="chat-subtitle" class="chat-greeting-scroll">{{ persona.greeting }}</p>
+            </div>
+            <div class="header-actions">
+              <div class="theme-pill" id="theme-pill">{{ "暗色模式" if settings.theme == "dark" else "浅色模式" }}</div>
+              <button id="open-drawer-secondary" type="button" class="secondary compact">打开侧栏</button>
+            </div>
+          </div>
+
+          <div class="retrieval-bar" id="retrieval-bar" hidden>
+            <div class="retrieval-title">记忆命中</div>
+            <div class="retrieval-items" id="retrieval-items"></div>
+          </div>
+
+          <div class="retrieval-bar worldbook-bar" id="worldbook-bar" hidden>
+            <div class="retrieval-title">Worldbook Hits</div>
+            <div class="retrieval-items" id="worldbook-items"></div>
+          </div>
+
+          <div class="retrieval-bar worldbook-debug-panel" id="worldbook-debug-panel" hidden>
+            <div class="retrieval-title">Worldbook Debug</div>
+            <div class="debug-status-row">
+              <span id="worldbook-debug-status" class="debug-status-chip">No Hit</span>
+              <span id="worldbook-debug-count" class="muted">0 items</span>
+            </div>
+            <pre id="worldbook-debug-prompt" class="debug-code-block"></pre>
+          </div>
+
+          <div id="messages" class="messages">
+            {% for item in history %}
+            <div class="message {{ item.role }}">
+              <div class="bubble-wrap">
+                <div class="bubble">{{ item.content }}</div>
+                <div class="message-meta">{{ item.created_at or "" }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <form id="chat-form" class="composer">
+            <textarea id="message-input" placeholder="输入你想说的话..." rows="3"></textarea>
+            <div class="composer-actions">
+              <span id="status-text" class="muted">就绪</span>
+              <div class="action-group">
+                <button type="button" id="end-conversation" class="secondary compact">结束当前对话</button>
+                <button type="button" id="export-history" class="secondary compact">导出记录</button>
+                <button type="submit">发送</button>
+              </div>
+            </div>
+          </form>
+        </main>
+      </div>
+    </div>
+
+    <div id="drawer-overlay" class="drawer-overlay" hidden></div>
+    <aside id="config-drawer" class="config-drawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div>
+          <p class="eyebrow">Sidebar</p>
+          <h2>运行时配置</h2>
+          <p class="muted">这里的 API Key、模型参数和界面设置只保存在浏览器本地。</p>
+        </div>
+        <button id="close-drawer" class="secondary compact" type="button">关闭</button>
+      </div>
+
+      <div class="drawer-body">
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">LLM</p>
+            <h3>聊天模型</h3>
+          </div>
+          <label for="drawer-llm-base-url">API URL</label>
+          <input id="drawer-llm-base-url" placeholder="例如 https://api.deepseek.com/v1" />
+          <label for="drawer-llm-api-key">API Key</label>
+          <input id="drawer-llm-api-key" type="password" placeholder="只保存在本地 localStorage" />
+          <label for="drawer-llm-model">模型名</label>
+          <input id="drawer-llm-model" placeholder="例如 deepseek-chat" />
+          <div class="grid-two">
+            <div>
+              <label for="drawer-temperature">Temperature</label>
+              <input id="drawer-temperature" type="number" min="0" max="2" step="0.05" />
+            </div>
+            <div>
+              <label for="drawer-request-timeout">超时秒数</label>
+              <input id="drawer-request-timeout" type="number" min="10" max="600" step="1" />
+            </div>
+          </div>
+          <div class="grid-two">
+            <div>
+              <label for="drawer-history-limit">上下文条数</label>
+              <input id="drawer-history-limit" type="number" min="1" max="100" step="1" />
+            </div>
+            <div>
+              <label class="checkbox-row offset-top">
+                <input id="drawer-demo-mode" type="checkbox" />
+                <span>未配置模型时允许演示模式</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Retrieval</p>
+            <h3>嵌入与重排序</h3>
+          </div>
+          <label for="drawer-embedding-base-url">嵌入 API URL</label>
+          <input id="drawer-embedding-base-url" placeholder="例如 http://127.0.0.1:8000/v1" />
+          <label for="drawer-embedding-api-key">嵌入 API Key</label>
+          <input id="drawer-embedding-api-key" type="password" placeholder="本地服务可留空" />
+          <label for="drawer-embedding-model">嵌入模型名</label>
+          <input id="drawer-embedding-model" placeholder="例如 text-embedding-3-small" />
+          <label>嵌入时读取字段</label>
+          <div class="field-chip-row">
+            <label class="check-chip"><input class="drawer-embedding-field" type="checkbox" value="title" /><span>标题</span></label>
+            <label class="check-chip"><input class="drawer-embedding-field" type="checkbox" value="content" /><span>正文</span></label>
+            <label class="check-chip"><input class="drawer-embedding-field" type="checkbox" value="tags" /><span>标签</span></label>
+            <label class="check-chip"><input class="drawer-embedding-field" type="checkbox" value="notes" /><span>备注</span></label>
+          </div>
+          <div class="grid-two">
+            <div>
+              <label for="drawer-retrieval-top-k">召回条数</label>
+              <input id="drawer-retrieval-top-k" type="number" min="1" max="12" step="1" />
+            </div>
+            <div>
+              <label class="checkbox-row offset-top">
+                <input id="drawer-rerank-enabled" type="checkbox" />
+                <span>启用重排序</span>
+              </label>
+            </div>
+          </div>
+          <label for="drawer-rerank-base-url">重排序 API URL</label>
+          <input id="drawer-rerank-base-url" placeholder="例如 http://127.0.0.1:8000/v1" />
+          <label for="drawer-rerank-api-key">重排序 API Key</label>
+          <input id="drawer-rerank-api-key" type="password" placeholder="本地服务可留空" />
+          <div class="grid-two">
+            <div>
+              <label for="drawer-rerank-model">重排序模型名</label>
+              <input id="drawer-rerank-model" placeholder="例如 jina-reranker-v2-base-multilingual" />
+            </div>
+            <div>
+              <label for="drawer-rerank-top-n">保留条数</label>
+              <input id="drawer-rerank-top-n" type="number" min="1" max="12" step="1" />
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Appearance</p>
+            <h3>背景与透明度</h3>
+          </div>
+          <label for="drawer-theme">界面主题</label>
+          <select id="drawer-theme">
+            <option value="light">浅色</option>
+            <option value="dark">暗色</option>
+          </select>
+          <label for="drawer-ui-opacity">UI 透明度</label>
+          <input id="drawer-ui-opacity" type="range" min="0.2" max="1" step="0.01" />
+          <div class="range-value"><span>当前值</span><strong id="drawer-ui-opacity-value">0.84</strong></div>
+          <label for="drawer-background-url">背景图 URL</label>
+          <input id="drawer-background-url" placeholder="远程地址或上传后的本地地址" />
+          <label for="drawer-background-overlay">背景遮罩</label>
+          <input id="drawer-background-overlay" type="range" min="0" max="0.85" step="0.01" />
+          <div class="range-value"><span>当前值</span><strong id="drawer-background-overlay-value">0.42</strong></div>
+          <label for="drawer-background-file">上传背景图</label>
+          <div class="inline-field">
+            <input id="drawer-background-file" type="file" accept="image/*" />
+            <button id="upload-background" class="secondary compact" type="button">上传</button>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Sprite</p>
+            <h3>表情驱动立绘</h3>
+          </div>
+          <label class="checkbox-row">
+            <input id="drawer-sprite-enabled" type="checkbox" />
+            <span>强制模型输出 `[表情:标签]`</span>
+          </label>
+          <label for="drawer-sprite-base-path">立绘目录</label>
+          <input id="drawer-sprite-base-path" placeholder="{{ settings.sprite_base_path }}" />
+          <p class="muted">默认会按当前存档读取，例如 `{{ settings.sprite_base_path }}/害羞.png`。</p>
+        </section>
+
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Worldbook</p>
+            <h3>世界书</h3>
+            <p class="muted">命中触发词后会把对应设定文本临时拼进本轮 Prompt。</p>
+          </div>
+          <div id="worldbook-list" class="worldbook-list"></div>
+          <div class="button-row">
+            <button id="add-worldbook" type="button" class="secondary">新增词条</button>
+            <button id="save-worldbook" type="button">保存世界书</button>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <div class="section-head">
+            <p class="eyebrow">Quick Links</p>
+            <h3>更多页面</h3>
+          </div>
+          <div class="button-row">
+            <a class="ghost-link button-link" href="/config/card">Card Editor</a>
+            <a class="ghost-link button-link" href="/config/sprite">Sprite Manager</a>
+            <a class="ghost-link button-link" href="/config/memory">Memory Manager</a>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <script>
+      const rootEl = document.documentElement;
+      const bodyEl = document.body;
+      const messagesEl = document.getElementById("messages");
+      const chatForm = document.getElementById("chat-form");
+      const inputEl = document.getElementById("message-input");
+      const statusEl = document.getElementById("status-text");
+      const themePillEl = document.getElementById("theme-pill");
+      const retrievalBarEl = document.getElementById("retrieval-bar");
+      const retrievalItemsEl = document.getElementById("retrieval-items");
+      const worldbookBarEl = document.getElementById("worldbook-bar");
+      const worldbookItemsEl = document.getElementById("worldbook-items");
+      const worldbookDebugPanelEl = document.getElementById("worldbook-debug-panel");
+      const worldbookDebugStatusEl = document.getElementById("worldbook-debug-status");
+      const worldbookDebugCountEl = document.getElementById("worldbook-debug-count");
+      const worldbookDebugPromptEl = document.getElementById("worldbook-debug-prompt");
+      const drawerEl = document.getElementById("config-drawer");
+      const drawerOverlayEl = document.getElementById("drawer-overlay");
+      const spriteImageEl = document.getElementById("sprite-image");
+      const spritePlaceholderEl = document.getElementById("sprite-placeholder");
+      const spriteTagLabelEl = document.getElementById("sprite-tag-label");
+      const worldbookListEl = document.getElementById("worldbook-list");
+
+      const ACTIVE_SLOT = {{ active_slot | tojson }};
+      const STORAGE_KEY = `xuqi.runtime.sidebar.v1.${ACTIVE_SLOT}`;
+      const DEFAULT_SLOT_SPRITE_BASE_PATH = {{ settings.sprite_base_path | tojson }};
+      const initialState = {
+        llm_base_url: {{ settings.llm_base_url | tojson }},
+        llm_api_key: {{ settings.llm_api_key | tojson }},
+        llm_model: {{ settings.llm_model | tojson }},
+        temperature: {{ settings.temperature | tojson }},
+        history_limit: {{ settings.history_limit | tojson }},
+        request_timeout: {{ settings.request_timeout | tojson }},
+        demo_mode: {{ settings.demo_mode | tojson }},
+        embedding_base_url: {{ settings.embedding_base_url | tojson }},
+        embedding_api_key: {{ settings.embedding_api_key | tojson }},
+        embedding_model: {{ settings.embedding_model | tojson }},
+        embedding_fields: {{ settings.embedding_fields | tojson }},
+        retrieval_top_k: {{ settings.retrieval_top_k | tojson }},
+        rerank_enabled: {{ settings.rerank_enabled | tojson }},
+        rerank_base_url: {{ settings.rerank_base_url | tojson }},
+        rerank_api_key: {{ settings.rerank_api_key | tojson }},
+        rerank_model: {{ settings.rerank_model | tojson }},
+        rerank_top_n: {{ settings.rerank_top_n | tojson }},
+        theme: {{ settings.theme | tojson }},
+        ui_opacity: {{ settings.ui_opacity | tojson }},
+        background_image_url: {{ settings.background_image_url | tojson }},
+        background_overlay: {{ settings.background_overlay | tojson }},
+        sprite_enabled: {{ settings.sprite_enabled | tojson }},
+        sprite_base_path: DEFAULT_SLOT_SPRITE_BASE_PATH
+      };
+
+      let runtimeState = loadRuntimeState();
+      let worldbookEntries = [];
+
+      async function selectSlot(slotId) {
+        await postJson("/api/slots/select", { slot_id: slotId });
+        window.location.reload();
+      }
+
+      async function renameSlot(slotId) {
+        const currentName = document.getElementById("slot-select").selectedOptions[0]?.textContent || slotId;
+        const nextName = window.prompt("给这个存档起个名字：", currentName);
+        if (nextName === null) return;
+        await postJson("/api/slots/rename", { slot_id: slotId, name: nextName });
+        window.location.reload();
+      }
+
+      async function resetSlot(slotId) {
+        const confirmed = window.confirm("重置后，这个存档里的立绘、人设、记忆、世界书和聊天记录都会清空。要继续吗？");
+        if (!confirmed) return;
+        await postJson("/api/slots/reset", { slot_id: slotId });
+        window.location.reload();
+      }
+
+      function loadRuntimeState() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+          const merged = { ...initialState, ...saved };
+          if (!merged.sprite_base_path || merged.sprite_base_path === "/static/sprites") {
+            merged.sprite_base_path = DEFAULT_SLOT_SPRITE_BASE_PATH;
+          }
+          return merged;
+        } catch {
+          return { ...initialState };
+        }
+      }
+
+      function persistRuntimeState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(runtimeState));
+      }
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function drawerInput(id) {
+        return document.getElementById(id);
+      }
+
+      function syncDrawerFromState() {
+        drawerInput("drawer-llm-base-url").value = runtimeState.llm_base_url || "";
+        drawerInput("drawer-llm-api-key").value = runtimeState.llm_api_key || "";
+        drawerInput("drawer-llm-model").value = runtimeState.llm_model || "";
+        drawerInput("drawer-temperature").value = runtimeState.temperature ?? 0.85;
+        drawerInput("drawer-history-limit").value = runtimeState.history_limit ?? 20;
+        drawerInput("drawer-request-timeout").value = runtimeState.request_timeout ?? 120;
+        drawerInput("drawer-demo-mode").checked = !!runtimeState.demo_mode;
+        drawerInput("drawer-embedding-base-url").value = runtimeState.embedding_base_url || "";
+        drawerInput("drawer-embedding-api-key").value = runtimeState.embedding_api_key || "";
+        drawerInput("drawer-embedding-model").value = runtimeState.embedding_model || "";
+        drawerInput("drawer-retrieval-top-k").value = runtimeState.retrieval_top_k ?? 4;
+        drawerInput("drawer-rerank-enabled").checked = !!runtimeState.rerank_enabled;
+        drawerInput("drawer-rerank-base-url").value = runtimeState.rerank_base_url || "";
+        drawerInput("drawer-rerank-api-key").value = runtimeState.rerank_api_key || "";
+        drawerInput("drawer-rerank-model").value = runtimeState.rerank_model || "";
+        drawerInput("drawer-rerank-top-n").value = runtimeState.rerank_top_n ?? 3;
+        drawerInput("drawer-theme").value = runtimeState.theme || "light";
+        drawerInput("drawer-ui-opacity").value = runtimeState.ui_opacity ?? 0.84;
+        drawerInput("drawer-background-url").value = runtimeState.background_image_url || "";
+        drawerInput("drawer-background-overlay").value = runtimeState.background_overlay ?? 0.42;
+        drawerInput("drawer-sprite-enabled").checked = runtimeState.sprite_enabled !== false;
+        drawerInput("drawer-sprite-base-path").value = runtimeState.sprite_base_path || {{ settings.sprite_base_path | tojson }};
+
+        document.querySelectorAll(".drawer-embedding-field").forEach((el) => {
+          el.checked = (runtimeState.embedding_fields || []).includes(el.value);
+        });
+
+        document.getElementById("drawer-ui-opacity-value").textContent = Number(runtimeState.ui_opacity || 0.84).toFixed(2);
+        document.getElementById("drawer-background-overlay-value").textContent = Number(runtimeState.background_overlay || 0.42).toFixed(2);
+      }
+
+      function syncStateFromDrawer() {
+        runtimeState = {
+          ...runtimeState,
+          llm_base_url: drawerInput("drawer-llm-base-url").value.trim(),
+          llm_api_key: drawerInput("drawer-llm-api-key").value.trim(),
+          llm_model: drawerInput("drawer-llm-model").value.trim(),
+          temperature: Number(drawerInput("drawer-temperature").value || 0.85),
+          history_limit: Number(drawerInput("drawer-history-limit").value || 20),
+          request_timeout: Number(drawerInput("drawer-request-timeout").value || 120),
+          demo_mode: drawerInput("drawer-demo-mode").checked,
+          embedding_base_url: drawerInput("drawer-embedding-base-url").value.trim(),
+          embedding_api_key: drawerInput("drawer-embedding-api-key").value.trim(),
+          embedding_model: drawerInput("drawer-embedding-model").value.trim(),
+          embedding_fields: [...document.querySelectorAll(".drawer-embedding-field:checked")].map((el) => el.value),
+          retrieval_top_k: Number(drawerInput("drawer-retrieval-top-k").value || 4),
+          rerank_enabled: drawerInput("drawer-rerank-enabled").checked,
+          rerank_base_url: drawerInput("drawer-rerank-base-url").value.trim(),
+          rerank_api_key: drawerInput("drawer-rerank-api-key").value.trim(),
+          rerank_model: drawerInput("drawer-rerank-model").value.trim(),
+          rerank_top_n: Number(drawerInput("drawer-rerank-top-n").value || 3),
+          theme: drawerInput("drawer-theme").value,
+          ui_opacity: Number(drawerInput("drawer-ui-opacity").value || 0.84),
+          background_image_url: drawerInput("drawer-background-url").value.trim(),
+          background_overlay: Number(drawerInput("drawer-background-overlay").value || 0.42),
+          sprite_enabled: drawerInput("drawer-sprite-enabled").checked,
+          sprite_base_path: drawerInput("drawer-sprite-base-path").value.trim() || {{ settings.sprite_base_path | tojson }},
+        };
+
+        persistRuntimeState();
+        applyTheme(runtimeState.theme);
+        applyUiOpacity(runtimeState.ui_opacity);
+        applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
+      }
+
+      function openDrawer() {
+        drawerEl.classList.add("open");
+        drawerEl.setAttribute("aria-hidden", "false");
+        drawerOverlayEl.hidden = false;
+      }
+
+      function closeDrawer() {
+        drawerEl.classList.remove("open");
+        drawerEl.setAttribute("aria-hidden", "true");
+        drawerOverlayEl.hidden = true;
+      }
+
+      function updateThemeBadge() {
+        const theme = rootEl.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        themePillEl.textContent = theme === "dark" ? "暗色模式" : "浅色模式";
+      }
+
+      function applyTheme(theme) {
+        rootEl.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+        updateThemeBadge();
+      }
+
+      function applyUiOpacity(value) {
+        const opacity = Math.min(Math.max(Number(value || 0.84), 0.2), 1);
+        document.getElementById("drawer-ui-opacity-value").textContent = opacity.toFixed(2);
+        const theme = rootEl.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const palette = theme === "dark"
+          ? { panel: "18, 27, 37", strong: "20, 30, 41", input: "11, 18, 26", user: "34, 52, 70", assistant: "23, 33, 46" }
+          : { panel: "255, 250, 244", strong: "255, 250, 244", input: "255, 255, 255", user: "239, 220, 206", assistant: "255, 248, 242" };
+
+        rootEl.style.setProperty("--panel", `rgba(${palette.panel}, ${opacity.toFixed(2)})`);
+        rootEl.style.setProperty("--panel-strong", `rgba(${palette.strong}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--input-bg", `rgba(${palette.input}, ${Math.max(opacity - 0.1, 0.16).toFixed(2)})`);
+        rootEl.style.setProperty("--user", `rgba(${palette.user}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--assistant", `rgba(${palette.assistant}, ${Math.min(opacity + 0.12, 0.99).toFixed(2)})`);
+      }
+
+      function applyBackground(url, overlay) {
+        const normalizedOverlay = Math.min(Math.max(Number(overlay || 0), 0), 0.85);
+        document.getElementById("drawer-background-overlay-value").textContent = normalizedOverlay.toFixed(2);
+        bodyEl.style.setProperty("--background-overlay-opacity", String(normalizedOverlay));
+        if (url) {
+          bodyEl.style.setProperty("--background-image", `url("${url}")`);
+        } else {
+          bodyEl.style.setProperty("--background-image", "none");
+        }
+      }
+
+      function spriteUrlFor(tag) {
+        const cleanBase = (runtimeState.sprite_base_path || {{ settings.sprite_base_path | tojson }}).replace(/\/+$/, "");
+        return `${cleanBase}/${encodeURIComponent(tag)}.png`;
+      }
+
+      function updateSprite(tag) {
+        if (!tag || runtimeState.sprite_enabled === false) {
+          spriteImageEl.hidden = true;
+          spritePlaceholderEl.hidden = false;
+          spriteTagLabelEl.textContent = "当前表情：未命中";
+          return;
+        }
+
+        spriteTagLabelEl.textContent = `当前表情：${tag}`;
+        spriteImageEl.src = spriteUrlFor(tag);
+        spriteImageEl.hidden = false;
+        spritePlaceholderEl.hidden = true;
+      }
+
+      spriteImageEl.addEventListener("error", () => {
+        spriteImageEl.hidden = true;
+        spritePlaceholderEl.hidden = false;
+        spritePlaceholderEl.textContent = `没有找到对应立绘，请在 ${runtimeState.sprite_base_path || {{ settings.sprite_base_path | tojson }}} 里放入同名 PNG。`;
+      });
+
+      function createMessage(role, content, createdAt = new Date().toLocaleString()) {
+        const wrapper = document.createElement("div");
+        wrapper.className = `message ${role}`;
+        const bubbleWrap = document.createElement("div");
+        bubbleWrap.className = "bubble-wrap";
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = content;
+        const meta = document.createElement("div");
+        meta.className = "message-meta";
+        meta.textContent = createdAt;
+        bubbleWrap.appendChild(bubble);
+        bubbleWrap.appendChild(meta);
+        wrapper.appendChild(bubbleWrap);
+        messagesEl.appendChild(wrapper);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return { wrapper, bubble, meta };
+      }
+
+      function addMessage(role, content, createdAt = new Date().toLocaleString()) {
+        return createMessage(role, content, createdAt);
+      }
+
+      function updateMessage(entry, content, createdAt = "") {
+        if (!entry) return;
+        entry.bubble.textContent = content;
+        if (createdAt) {
+          entry.meta.textContent = createdAt;
+        }
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      function renderRetrievedItems(items) {
+        if (!Array.isArray(items) || items.length === 0) {
+          retrievalItemsEl.innerHTML = "";
+          retrievalBarEl.hidden = true;
+          return;
+        }
+        retrievalItemsEl.innerHTML = "";
+        for (const item of items) {
+          const chip = document.createElement("div");
+          chip.className = "retrieval-chip";
+          const title = item.title || "未命名记忆";
+          const score = typeof item.score === "number" ? ` · ${item.score.toFixed(3)}` : "";
+          chip.textContent = `${title}${score}`;
+          retrievalItemsEl.appendChild(chip);
+        }
+        retrievalBarEl.hidden = false;
+      }
+
+      function renderWorldbookHits(items) {
+        if (!Array.isArray(items) || items.length === 0) {
+          worldbookItemsEl.innerHTML = "";
+          worldbookBarEl.hidden = true;
+          return;
+        }
+        worldbookItemsEl.innerHTML = "";
+        for (const item of items) {
+          const chip = document.createElement("div");
+          chip.className = "retrieval-chip";
+          chip.textContent = item.trigger;
+          worldbookItemsEl.appendChild(chip);
+        }
+        worldbookBarEl.hidden = false;
+      }
+
+      function renderWorldbookDebug(debug) {
+        const hits = Array.isArray(debug?.matched) ? debug.matched : [];
+        const prompt = typeof debug?.prompt === "string" ? debug.prompt.trim() : "";
+        const enforced = !!debug?.enforced;
+        if (!hits.length && !prompt) {
+          worldbookDebugPanelEl.hidden = true;
+          worldbookDebugPromptEl.textContent = "";
+          worldbookDebugStatusEl.classList.remove("active");
+          return;
+        }
+        worldbookDebugStatusEl.textContent = enforced ? "Hit + Boost" : "Hit";
+        worldbookDebugStatusEl.classList.add("active");
+        worldbookDebugCountEl.textContent = `${hits.length} items`;
+        worldbookDebugPromptEl.textContent = prompt || hits.map((item) => item.trigger).join("\n");
+        worldbookDebugPanelEl.hidden = false;
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "请求失败");
+        }
+        return response.json();
+      }
+
+      async function streamChat(payload, handlers = {}) {
+        const response = await fetch("/api/chat/stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "璇锋眰澶辫触");
+        }
+        if (!response.body) {
+          throw new Error("Streaming is not supported in this browser.");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { value, done } = await reader.read();
+          buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+
+          let boundary = buffer.indexOf("\n\n");
+          while (boundary !== -1) {
+            const block = buffer.slice(0, boundary).trim();
+            buffer = buffer.slice(boundary + 2);
+            if (block.startsWith("data:")) {
+              const jsonText = block.slice(5).trim();
+              if (jsonText) {
+                const event = JSON.parse(jsonText);
+                if (event.type === "meta" && handlers.onMeta) handlers.onMeta(event);
+                if (event.type === "chunk" && handlers.onChunk) handlers.onChunk(event);
+                if (event.type === "done" && handlers.onDone) handlers.onDone(event);
+                if (event.type === "error" && handlers.onError) handlers.onError(event);
+              }
+            }
+            boundary = buffer.indexOf("\n\n");
+          }
+
+          if (done) break;
+        }
+      }
+
+      function renderWorldbookEditor() {
+        worldbookListEl.innerHTML = "";
+        if (worldbookEntries.length === 0) {
+          worldbookEntries.push({ trigger: "", content: "" });
+        }
+        worldbookEntries.forEach((item, index) => {
+          const card = document.createElement("div");
+          card.className = "worldbook-card";
+          const head = document.createElement("div");
+          head.className = "memory-card-head";
+          head.innerHTML = `<strong>词条 ${index + 1}</strong>`;
+          const removeBtn = document.createElement("button");
+          removeBtn.type = "button";
+          removeBtn.className = "secondary compact";
+          removeBtn.textContent = "删除";
+          removeBtn.addEventListener("click", () => {
+            worldbookEntries.splice(index, 1);
+            renderWorldbookEditor();
+          });
+          head.appendChild(removeBtn);
+          const triggerLabel = document.createElement("label");
+          triggerLabel.textContent = "触发词";
+          const triggerInput = document.createElement("input");
+          triggerInput.value = item.trigger || "";
+          triggerInput.placeholder = "例如 魔杖，古木，莉莉丝";
+          triggerInput.addEventListener("input", (event) => {
+            worldbookEntries[index].trigger = event.target.value;
+          });
+          const contentLabel = document.createElement("label");
+          contentLabel.textContent = "设定文本";
+          const contentInput = document.createElement("textarea");
+          contentInput.rows = 4;
+          contentInput.value = item.content || "";
+          contentInput.placeholder = "命中触发词后，会把这里的内容作为设定补丁拼入 Prompt";
+          contentInput.addEventListener("input", (event) => {
+            worldbookEntries[index].content = event.target.value;
+          });
+          card.appendChild(head);
+          card.appendChild(triggerLabel);
+          card.appendChild(triggerInput);
+          card.appendChild(contentLabel);
+          card.appendChild(contentInput);
+          worldbookListEl.appendChild(card);
+        });
+      }
+
+      async function loadWorldbook() {
+        const data = await fetch("/api/worldbook").then((response) => response.json());
+        worldbookEntries = Array.isArray(data.items) ? data.items : [];
+        renderWorldbookEditor();
+      }
+
+      async function saveWorldbook() {
+        const payload = {
+          items: worldbookEntries
+            .map((item) => ({
+              trigger: String(item.trigger || "").trim(),
+              content: String(item.content || "").trim(),
+            }))
+            .filter((item) => item.trigger && item.content),
+        };
+        const data = await postJson("/api/worldbook", payload);
+        worldbookEntries = data.items || [];
+        renderWorldbookEditor();
+        setStatus("世界书已保存");
+      }
+
+      async function uploadBackground() {
+        const fileInput = document.getElementById("drawer-background-file");
+        const file = fileInput.files[0];
+        if (!file) {
+          throw new Error("请先选择一张背景图");
+        }
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch("/api/background", { method: "POST", body: formData });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "上传失败");
+        }
+        const data = await response.json();
+        runtimeState.background_image_url = data.url || "";
+        drawerInput("drawer-background-url").value = runtimeState.background_image_url;
+        persistRuntimeState();
+        applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
+        setStatus("背景图已上传到本地 static/uploads");
+      }
+
+      function buildChatRuntimeConfig() {
+        return {
+          llm_base_url: runtimeState.llm_base_url,
+          llm_api_key: runtimeState.llm_api_key,
+          llm_model: runtimeState.llm_model,
+          temperature: runtimeState.temperature,
+          history_limit: runtimeState.history_limit,
+          request_timeout: runtimeState.request_timeout,
+          demo_mode: runtimeState.demo_mode,
+          embedding_base_url: runtimeState.embedding_base_url,
+          embedding_api_key: runtimeState.embedding_api_key,
+          embedding_model: runtimeState.embedding_model,
+          embedding_fields: runtimeState.embedding_fields,
+          retrieval_top_k: runtimeState.retrieval_top_k,
+          rerank_enabled: runtimeState.rerank_enabled,
+          rerank_base_url: runtimeState.rerank_base_url,
+          rerank_api_key: runtimeState.rerank_api_key,
+          rerank_model: runtimeState.rerank_model,
+          rerank_top_n: runtimeState.rerank_top_n,
+          sprite_enabled: runtimeState.sprite_enabled,
+          sprite_base_path: runtimeState.sprite_base_path,
+        };
+      }
+
+      inputEl.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          chatForm.requestSubmit();
+        }
+      });
+
+      chatForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const text = inputEl.value.trim();
+        if (!text) return;
+        addMessage("user", text);
+        inputEl.value = "";
+        setStatus("?????...");
+        const assistantEntry = createMessage("assistant", "");
+        let finalReply = "";
+        try {
+          await streamChat({
+            message: text,
+            runtime_config: buildChatRuntimeConfig(),
+          }, {
+            onMeta(data) {
+              renderRetrievedItems(data.retrieved_items || []);
+              renderWorldbookHits(data.worldbook_hits || []);
+              renderWorldbookDebug(data.worldbook_debug || {});
+            },
+            onChunk(data) {
+              finalReply += data.delta || "";
+              updateMessage(assistantEntry, finalReply);
+            },
+            onDone(data) {
+              finalReply = typeof data.reply === "string" ? data.reply : finalReply;
+              if (finalReply.trim()) {
+                updateMessage(assistantEntry, finalReply);
+              } else {
+                assistantEntry.wrapper.remove();
+              }
+              updateSprite(data.sprite_tag || "");
+            },
+            onError(data) {
+              throw new Error(data.detail || "Streaming failed");
+            },
+          });
+          setStatus("???");
+        } catch (error) {
+          assistantEntry.wrapper.remove();
+          addMessage("assistant", `??????${error.message}`);
+          renderRetrievedItems([]);
+          renderWorldbookHits([]);
+          renderWorldbookDebug({});
+          setStatus("??????");
+        }
+      });
+
+      document.getElementById("end-conversation").addEventListener("click", async () => {
+        setStatus("正在整理当前对话...");
+        try {
+          const data = await postJson("/api/conversation/end", {});
+          messagesEl.innerHTML = "";
+          renderRetrievedItems([]);
+          renderWorldbookHits([]);
+          if (data.blocked) {
+            setStatus(`已清空当前对话，并拦截了已删除记忆的回写：${data.memory_item?.title || "已跳过"}`);
+          } else if (data.deduplicated) {
+            setStatus(`这段对话和已有记忆高度相似，已跳过重复写入：${data.memory_item?.title || "已复用"}`);
+          } else {
+            setStatus(`已写入长期记忆：${data.memory_item?.title || "完成"}`);
+          }
+        } catch (error) {
+          setStatus(`结束失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("export-history").addEventListener("click", () => {
+        window.location.href = "/api/export/history";
+      });
+
+      document.getElementById("open-drawer").addEventListener("click", openDrawer);
+      document.getElementById("open-drawer-secondary").addEventListener("click", openDrawer);
+      document.getElementById("close-drawer").addEventListener("click", closeDrawer);
+      drawerOverlayEl.addEventListener("click", closeDrawer);
+
+      document.querySelectorAll("#config-drawer input, #config-drawer select").forEach((element) => {
+        element.addEventListener("input", syncStateFromDrawer);
+        element.addEventListener("change", syncStateFromDrawer);
+      });
+
+      document.getElementById("upload-background").addEventListener("click", async () => {
+        try {
+          await uploadBackground();
+        } catch (error) {
+          setStatus(`上传失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("add-worldbook").addEventListener("click", () => {
+        worldbookEntries.push({ trigger: "", content: "" });
+        renderWorldbookEditor();
+      });
+
+      document.getElementById("save-worldbook").addEventListener("click", async () => {
+        try {
+          await saveWorldbook();
+        } catch (error) {
+          setStatus(`世界书保存失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("slot-select").addEventListener("change", async (event) => {
+        try {
+          setStatus("正在切换存档...");
+          await selectSlot(event.target.value);
+        } catch (error) {
+          setStatus(`切换存档失败：${error.message}`);
+          event.target.value = ACTIVE_SLOT;
+        }
+      });
+
+      document.getElementById("rename-slot").addEventListener("click", async () => {
+        try {
+          await renameSlot(document.getElementById("slot-select").value);
+        } catch (error) {
+          setStatus(`重命名失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("reset-slot").addEventListener("click", async () => {
+        try {
+          await resetSlot(document.getElementById("slot-select").value);
+        } catch (error) {
+          setStatus(`重置失败：${error.message}`);
+        }
+      });
+
+      applyTheme(runtimeState.theme);
+      applyUiOpacity(runtimeState.ui_opacity);
+      applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
+      syncDrawerFromState();
+      loadWorldbook().catch(() => {
+        worldbookEntries = [];
+        renderWorldbookEditor();
+      });
+    </script>
+  </body>
+</html>

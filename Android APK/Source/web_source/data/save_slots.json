@@ -1,0 +1,17 @@
+{
+  "active_slot": "slot_1",
+  "slots": [
+    {
+      "id": "slot_1",
+      "name": "Slot 1"
+    },
+    {
+      "id": "slot_2",
+      "name": "Slot 2"
+    },
+    {
+      "id": "slot_3",
+      "name": "Slot 3"
+    }
+  ]
+}

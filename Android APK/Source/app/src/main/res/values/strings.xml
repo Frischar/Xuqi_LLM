@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fantareal</string>
+    <string name="app_subtitle">Fantareal companion chat app</string>
+    <string name="server_url_hint">http://10.0.2.2:8000</string>
+    <string name="open_button">连接</string>
+    <string name="reload_button">刷新</string>
+    <string name="server_button">服务</string>
+    <string name="welcome_button">欢迎</string>
+    <string name="chat_button">聊天</string>
+    <string name="config_button">配置</string>
+    <string name="server_section_title">服务地址</string>
+    <string name="server_section_desc">模拟器可用 10.0.2.2，真机需要填写你电脑的局域网 IP。</string>
+    <string name="loopback_warning">127.0.0.1 代表当前手机自己，不是你的电脑服务。真机请改成电脑局域网 IP。</string>
+</resources>
