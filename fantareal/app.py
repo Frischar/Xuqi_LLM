@@ -2913,6 +2913,130 @@ def extract_sprite_tag(reply_text: str) -> tuple[str, str]:
     return tag, cleaned
 
 
+THINK_TAG_NAMES = (
+    "think",
+    "thinking",
+    "thought",
+    "thoughts",
+    "reason",
+    "reasoning",
+    "analysis",
+    "chain_of_thought",
+    "chain-of-thought",
+    "cot",
+    "思考",
+    "思考过程",
+    "推理",
+    "推理过程",
+    "思维",
+    "思维链",
+    "内心",
+    "内心独白",
+)
+THINK_TAG_PATTERN = "|".join(re.escape(tag) for tag in sorted(THINK_TAG_NAMES, key=len, reverse=True))
+THINK_LABELED_START_RE = re.compile(
+    rf"(?im)^[ \t>#*\-]*(?:\*\*)?(?P<label>{THINK_TAG_PATTERN})(?:\*\*)?"
+    r"(?![\w\u4e00-\u9fff])[ \t]*(?:[:：][ \t]*)?(?:\r?\n)?"
+)
+THINK_LABELED_ANSWER_RE = re.compile(
+    r"(?im)^[ \t>#*\-]*(?:\*\*)?(?:最终回答|最终回复|回答|回复|正文|输出|answer|final|response)"
+    r"(?:\*\*)?(?![\w\u4e00-\u9fff])[ \t]*(?:[:：][ \t]*)?(?:\r?\n)?"
+)
+REASONING_FIELD_NAMES = (
+    "reasoning_content",
+    "reasoning",
+    "reasoning_text",
+    "thinking",
+    "thoughts",
+    "analysis",
+)
+
+
+def _stringify_model_text(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        parts: list[str] = []
+        for item in value:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict):
+                for key in ("text", "content", "reasoning_content", "reasoning"):
+                    part = item.get(key)
+                    if isinstance(part, str):
+                        parts.append(part)
+                        break
+        return "".join(parts)
+    return str(value)
+
+
+def extract_reasoning_field(payload: Any) -> str:
+    if not isinstance(payload, dict):
+        return ""
+    parts: list[str] = []
+    for field_name in REASONING_FIELD_NAMES:
+        text = _stringify_model_text(payload.get(field_name))
+        if text:
+            parts.append(text)
+    return "".join(parts)
+
+
+def combine_think_parts(*parts: str) -> str:
+    return "\n\n".join(str(part or "").strip() for part in parts if str(part or "").strip())
+
+
+def normalize_thought_markup(text: str) -> str:
+    normalized = str(text or "")
+    for tag in THINK_TAG_NAMES:
+        escaped = re.escape(tag)
+        normalized = re.sub(
+            rf"<\s*{escaped}(?:\s+[^>]*)?>",
+            "<think>",
+            normalized,
+            flags=re.IGNORECASE,
+        )
+        normalized = re.sub(
+            rf"</\s*{escaped}\s*>",
+            "</think>",
+            normalized,
+            flags=re.IGNORECASE,
+        )
+        normalized = re.sub(
+            rf"(?:\[\s*{escaped}\s*\]|【\s*{escaped}\s*】)",
+            "<think>",
+            normalized,
+            flags=re.IGNORECASE,
+        )
+        normalized = re.sub(
+            rf"(?:\[/\s*{escaped}\s*\]|【/\s*{escaped}\s*】)",
+            "</think>",
+            normalized,
+            flags=re.IGNORECASE,
+        )
+        normalized = re.sub(
+            rf"(?ims)^[ \t]*```[ \t]*{escaped}[^\n]*\n(.*?)(?:\n)?^[ \t]*```",
+            r"<think>\1</think>",
+            normalized,
+        )
+    if re.search(r"<\s*think\b", normalized, flags=re.IGNORECASE):
+        return normalized
+
+    start_match = THINK_LABELED_START_RE.search(normalized)
+    if not start_match or normalized[: start_match.start()].strip():
+        return normalized
+    answer_match = THINK_LABELED_ANSWER_RE.search(normalized, start_match.end())
+    if not answer_match:
+        return normalized
+
+    think_text = normalized[start_match.end() : answer_match.start()].strip()
+    visible_text = normalized[answer_match.end() :].strip()
+    if not think_text or not visible_text:
+        return normalized
+    return f"<think>\n{think_text}\n</think>\n\n{visible_text}"
+
+
 def extract_reply_parts(raw_text: str) -> dict[str, Any]:
     text = str(raw_text or "")
     if not text:
@@ -2923,7 +3047,7 @@ def extract_reply_parts(raw_text: str) -> dict[str, Any]:
         return {"sprite_tag": "", "visible": "", "think": "", "thinking": False}
 
     sprite_tag, cleaned = extract_sprite_tag(text)
-    source = cleaned or text
+    source = normalize_thought_markup(cleaned or text)
 
     think_parts: list[str] = []
     visible_parts: list[str] = []
@@ -3064,11 +3188,14 @@ async def request_model_reply(
     )
 
     try:
-        raw_reply = str(data["choices"][0]["message"]["content"]).strip()
+        message_payload = data["choices"][0]["message"]
+        raw_reply = _stringify_model_text(message_payload.get("content")).strip()
     except (KeyError, IndexError, TypeError) as exc:
         raise HTTPException(status_code=502, detail="Model response format is invalid.") from exc
 
+    reasoning_text = extract_reasoning_field(message_payload)
     reply_parts = extract_reply_parts(raw_reply)
+    think_text = combine_think_parts(reasoning_text, str(reply_parts["think"]))
     sprite_tag = str(reply_parts["sprite_tag"])
     reply_source = str(reply_parts["visible"] or raw_reply)
     final_reply = enforce_worldbook_fact_in_reply(
@@ -3081,8 +3208,8 @@ async def request_model_reply(
         sprite_tag = "calm"
     return {
         "reply": final_reply,
-        "full_reply": compose_full_reply(str(reply_parts["think"]), final_reply),
-        "think": str(reply_parts["think"]),
+        "full_reply": compose_full_reply(think_text, final_reply),
+        "think": think_text,
         "sprite_tag": sprite_tag,
         "worldbook_enforced": worldbook_enforced,
     }
@@ -3175,6 +3302,8 @@ async def stream_model_reply(
 
     accumulated_raw = ""
     accumulated_visible = ""
+    accumulated_reasoning = ""
+    accumulated_tag_think = ""
     accumulated_think = ""
     sprite_tag = ""
     was_thinking = False
@@ -3209,16 +3338,33 @@ async def stream_model_reply(
                         if not isinstance(choices, list) or not choices:
                             continue
                         delta = choices[0].get("delta") or {}
-                        chunk = delta.get("content")
-                        if not isinstance(chunk, str) or not chunk:
+                        reasoning_chunk = extract_reasoning_field(delta)
+                        chunk = _stringify_model_text(delta.get("content"))
+                        if not reasoning_chunk and not chunk:
                             continue
 
                         stream_started = True
+                        if reasoning_chunk:
+                            accumulated_reasoning += reasoning_chunk
+                            next_think = combine_think_parts(accumulated_reasoning, accumulated_tag_think)
+                            if not was_thinking:
+                                yield {"type": "think_start"}
+                            if len(next_think) > len(accumulated_think):
+                                think_delta = next_think[len(accumulated_think) :]
+                                accumulated_think = next_think
+                                if think_delta:
+                                    yield {"type": "think_chunk", "delta": think_delta}
+                            was_thinking = True
+
+                        if not chunk:
+                            continue
+
                         accumulated_raw += chunk
                         reply_parts = extract_reply_parts(accumulated_raw)
                         parsed_tag = str(reply_parts["sprite_tag"])
                         visible_text = str(reply_parts["visible"])
-                        think_text = str(reply_parts["think"])
+                        accumulated_tag_think = str(reply_parts["think"])
+                        think_text = combine_think_parts(accumulated_reasoning, accumulated_tag_think)
                         is_thinking = bool(reply_parts["thinking"])
                         if parsed_tag and not sprite_tag:
                             sprite_tag = parsed_tag

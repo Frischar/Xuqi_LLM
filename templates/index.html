@@ -1239,8 +1239,91 @@
         }
       }
 
+      const THINK_TAG_NAMES = [
+        "think",
+        "thinking",
+        "thought",
+        "thoughts",
+        "reason",
+        "reasoning",
+        "analysis",
+        "chain_of_thought",
+        "chain-of-thought",
+        "cot",
+        "思考",
+        "思考过程",
+        "推理",
+        "推理过程",
+        "思维",
+        "思维链",
+        "内心",
+        "内心独白",
+      ];
+      const THINK_ANSWER_LABELS = [
+        "最终回答",
+        "最终回复",
+        "回答",
+        "回复",
+        "正文",
+        "输出",
+        "answer",
+        "final",
+        "response",
+      ];
+      const THINK_LABEL_PATTERN = THINK_TAG_NAMES
+        .slice()
+        .sort((left, right) => right.length - left.length)
+        .map((tag) => tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+        .join("|");
+      const THINK_ANSWER_PATTERN = THINK_ANSWER_LABELS
+        .slice()
+        .sort((left, right) => right.length - left.length)
+        .map((tag) => tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+        .join("|");
+      const THINK_LABELED_START_RE = new RegExp(
+        `^[ \\t>#*\\-]*(?:\\*\\*)?(?:${THINK_LABEL_PATTERN})(?:\\*\\*)?(?![\\w\\u4e00-\\u9fff])[ \\t]*(?:[:：][ \\t]*)?(?:\\r?\\n)?`,
+        "im"
+      );
+      const THINK_LABELED_ANSWER_RE = new RegExp(
+        `^[ \\t>#*\\-]*(?:\\*\\*)?(?:${THINK_ANSWER_PATTERN})(?:\\*\\*)?(?![\\w\\u4e00-\\u9fff])[ \\t]*(?:[:：][ \\t]*)?(?:\\r?\\n)?`,
+        "im"
+      );
+
+      function normalizeThoughtMarkup(content) {
+        let normalized = String(content || "");
+        for (const tag of THINK_TAG_NAMES) {
+          const escaped = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          normalized = normalized
+            .replace(new RegExp(`<\\s*${escaped}(?:\\s+[^>]*)?>`, "gi"), "<think>")
+            .replace(new RegExp(`</\\s*${escaped}\\s*>`, "gi"), "</think>")
+            .replace(new RegExp(`(?:\\[\\s*${escaped}\\s*\\]|【\\s*${escaped}\\s*】)`, "gi"), "<think>")
+            .replace(new RegExp(`(?:\\[/\\s*${escaped}\\s*\\]|【/\\s*${escaped}\\s*】)`, "gi"), "</think>")
+            .replace(new RegExp(`^[ \\t]*\`\`\`[ \\t]*${escaped}[^\\n]*\\n([\\s\\S]*?)(?:\\n)?^[ \\t]*\`\`\``, "gim"), "<think>$1</think>");
+        }
+
+        if (/<\s*think\b/i.test(normalized)) {
+          return normalized;
+        }
+
+        const startMatch = normalized.match(THINK_LABELED_START_RE);
+        if (!startMatch || normalized.slice(0, startMatch.index).trim()) {
+          return normalized;
+        }
+        const answerSource = normalized.slice(startMatch.index + startMatch[0].length);
+        const answerMatch = answerSource.match(THINK_LABELED_ANSWER_RE);
+        if (!answerMatch) {
+          return normalized;
+        }
+        const thinkText = answerSource.slice(0, answerMatch.index).trim();
+        const visibleText = answerSource.slice(answerMatch.index + answerMatch[0].length).trim();
+        if (!thinkText || !visibleText) {
+          return normalized;
+        }
+        return `<think>\n${thinkText}\n</think>\n\n${visibleText}`;
+      }
+
       function parseThoughtSections(content) {
-        const text = String(content || "");
+        const text = normalizeThoughtMarkup(content);
         if (!text) {
           return { visible: "", think: "" };
         }
