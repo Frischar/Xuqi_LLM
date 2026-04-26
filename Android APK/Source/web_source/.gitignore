@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+exports/
+browser_profile/
+static/uploads/
+build/
+dist/
+*.spec
+tmp_index_script*.js

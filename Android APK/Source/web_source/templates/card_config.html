@@ -1,0 +1,416 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ settings.theme }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Card Config - Xuqi LLM Chat</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="topbar-stack">
+      <div class="topbar">
+        <a class="brand" href="/">Xuqi LLM Chat</a>
+        <nav class="topnav">
+          <a class="navlink" href="/">Welcome</a>
+          <a class="navlink" href="/chat">Chat</a>
+          <a class="navlink" href="/config">Config</a>
+          <a class="navlink active" href="/config/card">Card Config</a>
+          <a class="navlink" href="/config/sprite">Sprite</a>
+          <a class="navlink" href="/config/memory">Memory</a>
+        </nav>
+      </div>
+      <div class="slot-toolbar">
+        <div class="slot-toolbar-left">
+          <span class="slot-badge">Save</span>
+          <div class="slot-meta">
+            <strong>当前存档：{{ slot_registry.slots | selectattr("id", "equalto", active_slot) | map(attribute="name") | first or active_slot }}</strong>
+            <p class="slot-hint">这个页面编辑的是当前存档专属的人设与角色卡状态。</p>
+          </div>
+        </div>
+        <div class="slot-toolbar-right">
+          <select id="slot-select" class="slot-select">
+            {% for slot in slot_registry.slots %}
+            <option value="{{ slot.id }}" {% if slot.id == active_slot %}selected{% endif %}>{{ slot.name }}</option>
+            {% endfor %}
+          </select>
+          <button id="rename-slot" type="button" class="secondary compact">重命名</button>
+          <button id="reset-slot" type="button" class="secondary compact">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="config-shell compact">
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Role Card</p>
+          <h2>角色卡编辑器</h2>
+          <p class="muted">这里把常用的 JSON 键都拆成了固定输入位。玩家只需要逐项填写，然后点击保存并加载即可。加载后的当前角色卡也支持直接导出。</p>
+        </div>
+
+        <div class="grid-two card-top-grid">
+          <div>
+            <label for="card-file-select">文件夹里的角色卡</label>
+            <select id="card-file-select">
+              <option value="">选择一个角色卡文件</option>
+              {% for item in cards %}
+              <option value="{{ item.filename }}" {% if current_card.source_name == item.filename %}selected{% endif %}>{{ item.filename }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label for="card-filename">保存文件名</label>
+            <input id="card-filename" value="{{ current_card.source_name or 'role_card.json' }}" placeholder="例如 yuki.json" />
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="refresh-cards" type="button" class="secondary">刷新列表</button>
+          <button id="load-card" type="button">加载所选角色卡</button>
+          <button id="save-card" type="button" class="secondary">保存并加载当前角色卡</button>
+          <button id="export-card" type="button" class="secondary">导出当前角色卡</button>
+        </div>
+      </section>
+
+      <section class="panel config-panel card-builder full-span">
+        <div class="card-grid">
+          <div class="card-column">
+            <div class="card-block">
+              <h3>基础信息</h3>
+              <label for="card-name">name</label>
+              <input id="card-name" value="{{ card_template.name }}" />
+
+              <label for="card-tags">tags</label>
+              <input id="card-tags" value="{{ card_template.tags | join(', ') }}" placeholder="用英文逗号分隔" />
+
+              <label for="card-description">description</label>
+              <textarea id="card-description" rows="5">{{ card_template.description }}</textarea>
+
+              <label for="card-personality">personality</label>
+              <textarea id="card-personality" rows="4">{{ card_template.personality }}</textarea>
+
+              <label for="card-scenario">scenario</label>
+              <textarea id="card-scenario" rows="4">{{ card_template.scenario }}</textarea>
+
+              <label for="card-first-mes">first_mes</label>
+              <textarea id="card-first-mes" rows="4">{{ card_template.first_mes }}</textarea>
+
+              <label for="card-mes-example">mes_example</label>
+              <textarea id="card-mes-example" rows="5">{{ card_template.mes_example }}</textarea>
+
+              <label for="card-creator-notes">creator_notes</label>
+              <textarea id="card-creator-notes" rows="4">{{ card_template.creator_notes }}</textarea>
+            </div>
+          </div>
+          <div class="card-column">
+            <div class="card-block">
+              <h3>剧情阶段</h3>
+              {% for stage in ['A', 'B', 'C'] %}
+              <div class="sub-block">
+                <div class="sub-title">plotStages.{{ stage }}</div>
+                <label for="stage-{{ stage }}-description">description</label>
+                <textarea id="stage-{{ stage }}-description" rows="3">{{ card_template.plotStages[stage].description }}</textarea>
+                <label for="stage-{{ stage }}-rules">rules</label>
+                <textarea id="stage-{{ stage }}-rules" rows="3">{{ card_template.plotStages[stage].rules }}</textarea>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="card-persona-grid">
+          {% for key in ['1', '2', '3'] %}
+          <div class="card-block">
+            <h3>personas.{{ key }}</h3>
+            <label for="persona-{{ key }}-name">name</label>
+            <input id="persona-{{ key }}-name" value="{{ card_template.personas[key].name }}" />
+
+            <label for="persona-{{ key }}-description">description</label>
+            <textarea id="persona-{{ key }}-description" rows="3">{{ card_template.personas[key].description }}</textarea>
+
+            <label for="persona-{{ key }}-personality">personality</label>
+            <textarea id="persona-{{ key }}-personality" rows="3">{{ card_template.personas[key].personality }}</textarea>
+
+            <label for="persona-{{ key }}-scenario">scenario</label>
+            <textarea id="persona-{{ key }}-scenario" rows="3">{{ card_template.personas[key].scenario }}</textarea>
+
+            <label for="persona-{{ key }}-creator-notes">creator_notes</label>
+            <textarea id="persona-{{ key }}-creator-notes" rows="3">{{ card_template.personas[key].creator_notes }}</textarea>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Status</p>
+          <h2>当前状态</h2>
+          <p id="status-text" class="muted status-line">就绪</p>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const rootEl = document.documentElement;
+      const bodyEl = document.body;
+      const statusEl = document.getElementById("status-text");
+      const ACTIVE_SLOT = {{ active_slot | tojson }};
+      const currentTheme = {{ settings.theme | tojson }};
+      const currentOpacity = {{ settings.ui_opacity | tojson }};
+      const currentBackground = {{ settings.background_image_url | tojson }};
+      const currentOverlay = {{ settings.background_overlay | tojson }};
+
+      async function selectSlot(slotId) {
+        await postJson("/api/slots/select", { slot_id: slotId });
+        window.location.reload();
+      }
+
+      async function renameSlot(slotId) {
+        const currentName = document.getElementById("slot-select").selectedOptions[0]?.textContent || slotId;
+        const nextName = window.prompt("给这个存档起个名字：", currentName);
+        if (nextName === null) return;
+        await postJson("/api/slots/rename", { slot_id: slotId, name: nextName });
+        window.location.reload();
+      }
+
+      async function resetSlot(slotId) {
+        const confirmed = window.confirm("重置后，这个存档里的立绘、人设、记忆、世界书和聊天记录都会清空。要继续吗？");
+        if (!confirmed) return;
+        await postJson("/api/slots/reset", { slot_id: slotId });
+        window.location.reload();
+      }
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function applyTheme(theme) {
+        rootEl.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+      }
+
+      function applyUiOpacity(value) {
+        const opacity = Math.min(Math.max(Number(value || 0.84), 0.2), 1);
+        const theme = rootEl.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const palette = theme === "dark"
+          ? { panel: "18, 27, 37", strong: "20, 30, 41", input: "11, 18, 26", user: "34, 52, 70", assistant: "23, 33, 46" }
+          : { panel: "255, 250, 244", strong: "255, 250, 244", input: "255, 255, 255", user: "239, 220, 206", assistant: "255, 248, 242" };
+        rootEl.style.setProperty("--panel", `rgba(${palette.panel}, ${opacity.toFixed(2)})`);
+        rootEl.style.setProperty("--panel-strong", `rgba(${palette.strong}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--input-bg", `rgba(${palette.input}, ${Math.max(opacity - 0.1, 0.16).toFixed(2)})`);
+        rootEl.style.setProperty("--user", `rgba(${palette.user}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--assistant", `rgba(${palette.assistant}, ${Math.min(opacity + 0.12, 0.99).toFixed(2)})`);
+      }
+
+      function applyBackground(url, overlay) {
+        const normalizedOverlay = Math.min(Math.max(Number(overlay || 0), 0), 0.85);
+        bodyEl.style.setProperty("--background-overlay-opacity", String(normalizedOverlay));
+        bodyEl.style.setProperty("--background-image", url ? `url("${url}")` : "none");
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "请求失败");
+        }
+
+        return response.json();
+      }
+
+      function value(id) {
+        return document.getElementById(id).value.trim();
+      }
+
+      function buildCardPayload() {
+        return {
+          name: value("card-name"),
+          description: value("card-description"),
+          personality: value("card-personality"),
+          first_mes: value("card-first-mes"),
+          mes_example: value("card-mes-example"),
+          scenario: value("card-scenario"),
+          creator_notes: value("card-creator-notes"),
+          tags: value("card-tags").split(",").map((item) => item.trim()).filter(Boolean),
+          plotStages: {
+            A: { description: value("stage-A-description"), rules: value("stage-A-rules") },
+            B: { description: value("stage-B-description"), rules: value("stage-B-rules") },
+            C: { description: value("stage-C-description"), rules: value("stage-C-rules") },
+          },
+          personas: {
+            1: {
+              name: value("persona-1-name"),
+              description: value("persona-1-description"),
+              personality: value("persona-1-personality"),
+              scenario: value("persona-1-scenario"),
+              creator_notes: value("persona-1-creator-notes"),
+            },
+            2: {
+              name: value("persona-2-name"),
+              description: value("persona-2-description"),
+              personality: value("persona-2-personality"),
+              scenario: value("persona-2-scenario"),
+              creator_notes: value("persona-2-creator-notes"),
+            },
+            3: {
+              name: value("persona-3-name"),
+              description: value("persona-3-description"),
+              personality: value("persona-3-personality"),
+              scenario: value("persona-3-scenario"),
+              creator_notes: value("persona-3-creator-notes"),
+            },
+          },
+        };
+      }
+
+      function fillCardForm(card) {
+        if (!card) return;
+        document.getElementById("card-name").value = card.name || "";
+        document.getElementById("card-description").value = card.description || "";
+        document.getElementById("card-personality").value = card.personality || "";
+        document.getElementById("card-first-mes").value = card.first_mes || "";
+        document.getElementById("card-mes-example").value = card.mes_example || "";
+        document.getElementById("card-scenario").value = card.scenario || "";
+        document.getElementById("card-creator-notes").value = card.creator_notes || "";
+        document.getElementById("card-tags").value = Array.isArray(card.tags) ? card.tags.join(", ") : "";
+
+        ["A", "B", "C"].forEach((stage) => {
+          document.getElementById(`stage-${stage}-description`).value = card.plotStages?.[stage]?.description || "";
+          document.getElementById(`stage-${stage}-rules`).value = card.plotStages?.[stage]?.rules || "";
+        });
+
+        ["1", "2", "3"].forEach((key) => {
+          document.getElementById(`persona-${key}-name`).value = card.personas?.[key]?.name || "";
+          document.getElementById(`persona-${key}-description`).value = card.personas?.[key]?.description || "";
+          document.getElementById(`persona-${key}-personality`).value = card.personas?.[key]?.personality || "";
+          document.getElementById(`persona-${key}-scenario`).value = card.personas?.[key]?.scenario || "";
+          document.getElementById(`persona-${key}-creator-notes`).value = card.personas?.[key]?.creator_notes || "";
+        });
+      }
+
+      async function refreshCardList(selectedFilename = "") {
+        const data = await fetch("/api/cards").then((response) => response.json());
+        const select = document.getElementById("card-file-select");
+        const current = selectedFilename || select.value || "";
+        select.innerHTML = '<option value="">选择一个角色卡文件</option>';
+        for (const item of data.items || []) {
+          const option = document.createElement("option");
+          option.value = item.filename;
+          option.textContent = item.filename;
+          if (item.filename === current) {
+            option.selected = true;
+          }
+          select.appendChild(option);
+        }
+      }
+
+      async function saveCard() {
+        const filename = value("card-filename") || "role_card.json";
+        const card = buildCardPayload();
+        const data = await postJson("/api/cards/import", {
+          raw_json: JSON.stringify(card, null, 2),
+          filename,
+          apply_now: true,
+        });
+        document.getElementById("card-filename").value = data.filename || filename;
+        await refreshCardList(data.filename || filename);
+        setStatus(`角色卡已保存并加载：${data.filename}`);
+      }
+
+      async function loadCard() {
+        const filename = value("card-file-select");
+        if (!filename) {
+          throw new Error("请先选择一个角色卡文件");
+        }
+        const data = await postJson("/api/cards/load", { filename });
+        document.getElementById("card-filename").value = data.filename || filename;
+        fillCardForm(data.card || {});
+        await refreshCardList(data.filename || filename);
+        setStatus(`角色卡已加载：${data.filename}`);
+      }
+
+      document.getElementById("save-card").addEventListener("click", async () => {
+        try {
+          await saveCard();
+        } catch (error) {
+          setStatus(`保存失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("load-card").addEventListener("click", async () => {
+        try {
+          await loadCard();
+        } catch (error) {
+          setStatus(`加载失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("refresh-cards").addEventListener("click", async () => {
+        try {
+          await refreshCardList();
+          setStatus("角色卡列表已刷新。");
+        } catch (error) {
+          setStatus(`刷新失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("card-file-select").addEventListener("change", async (event) => {
+        if (!event.target.value) {
+          return;
+        }
+        try {
+          await loadCard();
+        } catch (error) {
+          setStatus(`加载失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("export-card").addEventListener("click", () => {
+        window.location.href = "/api/cards/export/current";
+      });
+
+      window.addEventListener("focus", () => {
+        refreshCardList().catch(() => {});
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          refreshCardList().catch(() => {});
+        }
+      });
+
+      document.getElementById("slot-select").addEventListener("change", async (event) => {
+        try {
+          setStatus("正在切换存档...");
+          await selectSlot(event.target.value);
+        } catch (error) {
+          setStatus(`切换存档失败：${error.message}`);
+          event.target.value = ACTIVE_SLOT;
+        }
+      });
+
+      document.getElementById("rename-slot").addEventListener("click", async () => {
+        try {
+          await renameSlot(document.getElementById("slot-select").value);
+        } catch (error) {
+          setStatus(`重命名失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("reset-slot").addEventListener("click", async () => {
+        try {
+          await resetSlot(document.getElementById("slot-select").value);
+        } catch (error) {
+          setStatus(`重置失败：${error.message}`);
+        }
+      });
+
+      applyTheme(currentTheme);
+      applyUiOpacity(currentOpacity);
+      applyBackground(currentBackground, currentOverlay);
+    </script>
+  </body>
+</html>

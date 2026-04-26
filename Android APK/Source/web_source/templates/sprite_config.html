@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ settings.theme }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sprite - Xuqi LLM Chat</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="topbar-stack">
+      <div class="topbar">
+        <a class="brand" href="/">Xuqi LLM Chat</a>
+        <nav class="topnav">
+          <a class="navlink" href="/">Welcome</a>
+          <a class="navlink" href="/chat">Chat</a>
+          <a class="navlink" href="/config">Config</a>
+          <a class="navlink" href="/config/card">Card Config</a>
+          <a class="navlink active" href="/config/sprite">Sprite</a>
+          <a class="navlink" href="/config/memory">Memory</a>
+        </nav>
+      </div>
+      <div class="slot-toolbar">
+        <div class="slot-toolbar-left">
+          <span class="slot-badge">Save</span>
+          <div class="slot-meta">
+            <strong>当前存档：{{ slot_registry.slots | selectattr("id", "equalto", active_slot) | map(attribute="name") | first or active_slot }}</strong>
+            <p class="slot-hint">每个存档都会读取自己的立绘目录，切档后不会串表情资源。</p>
+          </div>
+        </div>
+        <div class="slot-toolbar-right">
+          <select id="slot-select" class="slot-select">
+            {% for slot in slot_registry.slots %}
+            <option value="{{ slot.id }}" {% if slot.id == active_slot %}selected{% endif %}>{{ slot.name }}</option>
+            {% endfor %}
+          </select>
+          <button id="rename-slot" type="button" class="secondary compact">重命名</button>
+          <button id="reset-slot" type="button" class="secondary compact">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="config-shell compact">
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Sprite</p>
+          <h2>立绘资源管理</h2>
+          <p class="muted">这里管理当前存档的表情 PNG/JPG。聊天时模型输出的 <code>[表情:标签]</code> 会去当前目录下查找同名图片。</p>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-label">当前目录</span>
+            <strong id="sprite-base-path">{{ sprite_base_path }}</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">资源数量</span>
+            <strong id="sprite-count">{{ sprite_count }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Upload</p>
+          <h2>上传新表情</h2>
+          <p class="muted">建议标签直接用中文，例如 <code>平静</code>、<code>害羞</code>、<code>生气</code>。同标签再次上传会覆盖旧图。</p>
+        </div>
+
+        <div class="grid-two">
+          <div>
+            <label for="sprite-tag">表情标签</label>
+            <input id="sprite-tag" placeholder="例如 平静" />
+          </div>
+          <div>
+            <label for="sprite-file">图片文件</label>
+            <input id="sprite-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="upload-sprite" type="button">上传当前表情</button>
+          <button id="reload-sprites" type="button" class="secondary">重新扫描目录</button>
+        </div>
+      </section>
+
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Library</p>
+          <h2>当前存档立绘</h2>
+          <p class="muted">如果聊天命中了某个标签，但这里没有同名图片，就会回退到占位提示。</p>
+        </div>
+        <div id="sprite-grid" class="sprite-manager-grid">
+          {% for item in sprites %}
+          <article class="sprite-card" data-filename="{{ item.filename }}">
+            <div class="sprite-preview-wrap">
+              <img class="sprite-preview" src="{{ item.url }}" alt="{{ item.tag }}" loading="lazy" />
+            </div>
+            <div class="sprite-card-body">
+              <strong>{{ item.tag }}</strong>
+              <span class="muted">{{ item.filename }}</span>
+              <span class="muted">{{ item.updated_at }}</span>
+            </div>
+            <div class="button-row">
+              <button type="button" class="secondary compact delete-sprite">删除</button>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Status</p>
+          <h2>当前状态</h2>
+          <p id="status-text" class="muted status-line">就绪</p>
+        </div>
+      </section>
+    </div>
+
+    <template id="sprite-card-template">
+      <article class="sprite-card">
+        <div class="sprite-preview-wrap">
+          <img class="sprite-preview" alt="" loading="lazy" />
+        </div>
+        <div class="sprite-card-body">
+          <strong></strong>
+          <span class="muted sprite-filename"></span>
+          <span class="muted sprite-updated-at"></span>
+        </div>
+        <div class="button-row">
+          <button type="button" class="secondary compact delete-sprite">删除</button>
+        </div>
+      </article>
+    </template>
+
+    <script>
+      const rootEl = document.documentElement;
+      const bodyEl = document.body;
+      const statusEl = document.getElementById("status-text");
+      const spriteGridEl = document.getElementById("sprite-grid");
+      const spriteCountEl = document.getElementById("sprite-count");
+      const spriteBasePathEl = document.getElementById("sprite-base-path");
+      const templateEl = document.getElementById("sprite-card-template");
+      const ACTIVE_SLOT = {{ active_slot | tojson }};
+
+      const currentTheme = {{ settings.theme | tojson }};
+      const currentOpacity = {{ settings.ui_opacity | tojson }};
+      const currentBackground = {{ settings.background_image_url | tojson }};
+      const currentOverlay = {{ settings.background_overlay | tojson }};
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function applyTheme(theme) {
+        rootEl.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+      }
+
+      function applyUiOpacity(value) {
+        const opacity = Math.min(Math.max(Number(value || 0.84), 0.2), 1);
+        const theme = rootEl.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const palette = theme === "dark"
+          ? { panel: "18, 27, 37", strong: "20, 30, 41", input: "11, 18, 26", user: "34, 52, 70", assistant: "23, 33, 46" }
+          : { panel: "255, 250, 244", strong: "255, 250, 244", input: "255, 255, 255", user: "239, 220, 206", assistant: "255, 248, 242" };
+        rootEl.style.setProperty("--panel", `rgba(${palette.panel}, ${opacity.toFixed(2)})`);
+        rootEl.style.setProperty("--panel-strong", `rgba(${palette.strong}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--input-bg", `rgba(${palette.input}, ${Math.max(opacity - 0.1, 0.16).toFixed(2)})`);
+        rootEl.style.setProperty("--user", `rgba(${palette.user}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--assistant", `rgba(${palette.assistant}, ${Math.min(opacity + 0.12, 0.99).toFixed(2)})`);
+      }
+
+      function applyBackground(url, overlay) {
+        const normalizedOverlay = Math.min(Math.max(Number(overlay || 0), 0), 0.85);
+        bodyEl.style.setProperty("--background-overlay-opacity", String(normalizedOverlay));
+        bodyEl.style.setProperty("--background-image", url ? `url("${url}")` : "none");
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "请求失败");
+        }
+        return response.json();
+      }
+
+      async function selectSlot(slotId) {
+        await postJson("/api/slots/select", { slot_id: slotId });
+        window.location.reload();
+      }
+
+      async function renameSlot(slotId) {
+        const currentName = document.getElementById("slot-select").selectedOptions[0]?.textContent || slotId;
+        const nextName = window.prompt("给这个存档起个名字：", currentName);
+        if (nextName === null) return;
+        await postJson("/api/slots/rename", { slot_id: slotId, name: nextName });
+        window.location.reload();
+      }
+
+      async function resetSlot(slotId) {
+        const confirmed = window.confirm("重置后，这个存档里的立绘、角色卡、记忆、世界书和聊天记录都会清空。要继续吗？");
+        if (!confirmed) return;
+        await postJson("/api/slots/reset", { slot_id: slotId });
+        window.location.reload();
+      }
+
+      function updateSpriteCount() {
+        spriteCountEl.textContent = String(spriteGridEl.querySelectorAll(".sprite-card").length);
+      }
+
+      function createSpriteCard(item) {
+        const fragment = templateEl.content.cloneNode(true);
+        const card = fragment.querySelector(".sprite-card");
+        card.dataset.filename = item.filename || "";
+        const imageEl = card.querySelector(".sprite-preview");
+        imageEl.src = item.url || "";
+        imageEl.alt = item.tag || item.filename || "sprite";
+        card.querySelector("strong").textContent = item.tag || item.filename || "未命名";
+        card.querySelector(".sprite-filename").textContent = item.filename || "";
+        card.querySelector(".sprite-updated-at").textContent = item.updated_at || "";
+        card.querySelector(".delete-sprite").addEventListener("click", async () => {
+          try {
+            await deleteSprite(item.filename);
+          } catch (error) {
+            setStatus(`删除失败：${error.message}`);
+          }
+        });
+        return card;
+      }
+
+      function renderSprites(items, basePath) {
+        spriteGridEl.innerHTML = "";
+        spriteBasePathEl.textContent = basePath || "";
+        for (const item of items || []) {
+          spriteGridEl.appendChild(createSpriteCard(item));
+        }
+        updateSpriteCount();
+      }
+
+      async function loadSprites() {
+        const data = await fetch("/api/sprites").then((response) => response.json());
+        renderSprites(data.items || [], data.base_path || "");
+        setStatus("当前存档立绘列表已刷新。");
+      }
+
+      async function uploadSprite() {
+        const tag = document.getElementById("sprite-tag").value.trim();
+        const fileInput = document.getElementById("sprite-file");
+        const file = fileInput.files[0];
+        if (!file) {
+          throw new Error("请先选择一张立绘图片。");
+        }
+        const formData = new FormData();
+        formData.append("tag", tag);
+        formData.append("file", file);
+        const response = await fetch("/api/sprites", { method: "POST", body: formData });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "上传失败");
+        }
+        const data = await response.json();
+        renderSprites(data.items || [], data.base_path || "");
+        document.getElementById("sprite-tag").value = "";
+        fileInput.value = "";
+        setStatus(`已上传表情：${data.uploaded?.tag || "未命名"}`);
+      }
+
+      async function deleteSprite(filename) {
+        const confirmed = window.confirm(`确定要删除立绘 ${filename} 吗？`);
+        if (!confirmed) return;
+        const data = await postJson("/api/sprites/delete", { filename });
+        renderSprites(data.items || [], data.base_path || "");
+        setStatus(`已删除立绘：${filename}`);
+      }
+
+      document.getElementById("upload-sprite").addEventListener("click", async () => {
+        try {
+          await uploadSprite();
+        } catch (error) {
+          setStatus(`上传失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("reload-sprites").addEventListener("click", async () => {
+        try {
+          await loadSprites();
+        } catch (error) {
+          setStatus(`刷新失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("slot-select").addEventListener("change", async (event) => {
+        try {
+          setStatus("正在切换存档...");
+          await selectSlot(event.target.value);
+        } catch (error) {
+          setStatus(`切换存档失败：${error.message}`);
+          event.target.value = ACTIVE_SLOT;
+        }
+      });
+
+      document.getElementById("rename-slot").addEventListener("click", async () => {
+        try {
+          await renameSlot(document.getElementById("slot-select").value);
+        } catch (error) {
+          setStatus(`重命名失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("reset-slot").addEventListener("click", async () => {
+        try {
+          await resetSlot(document.getElementById("slot-select").value);
+        } catch (error) {
+          setStatus(`重置失败：${error.message}`);
+        }
+      });
+
+      applyTheme(currentTheme);
+      applyUiOpacity(currentOpacity);
+      applyBackground(currentBackground, currentOverlay);
+      updateSpriteCount();
+    </script>
+  </body>
+</html>

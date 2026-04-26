@@ -1,0 +1,546 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ settings.theme }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Config - Xuqi LLM Chat</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="topbar-stack">
+      <div class="topbar">
+        <a class="brand" href="/">Xuqi LLM Chat</a>
+        <nav class="topnav">
+          <a class="navlink" href="/">Welcome</a>
+          <a class="navlink" href="/chat">Chat</a>
+          <a class="navlink active" href="/config">Config</a>
+          <a class="navlink" href="/config/card">Card Config</a>
+          <a class="navlink" href="/config/sprite">Sprite</a>
+          <a class="navlink" href="/config/memory">Memory</a>
+        </nav>
+      </div>
+      <div class="slot-toolbar">
+        <div class="slot-toolbar-left">
+          <span class="slot-badge">Save</span>
+          <div class="slot-meta">
+            <strong>当前存档：{{ slot_registry.slots | selectattr("id", "equalto", active_slot) | map(attribute="name") | first or active_slot }}</strong>
+            <p class="slot-hint">模型设置、立绘、记忆、人设和世界书都会跟随当前存档。</p>
+          </div>
+        </div>
+        <div class="slot-toolbar-right">
+          <select id="slot-select" class="slot-select">
+            {% for slot in slot_registry.slots %}
+            <option value="{{ slot.id }}" {% if slot.id == active_slot %}selected{% endif %}>{{ slot.name }}</option>
+            {% endfor %}
+          </select>
+          <button id="rename-slot" type="button" class="secondary compact">重命名</button>
+          <button id="reset-slot" type="button" class="secondary compact">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="config-shell compact">
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Guide</p>
+          <h2>配置总览</h2>
+          <p class="muted">这里保留模型、检索和界面设置。角色卡请去单独的 <code>Card Config</code> 页面。记忆库现在有单独的 <code>Memory</code> 页面，可以手动修改并作为固定前情提要持续投喂给模型。</p>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-label">当前角色卡</span>
+            <strong>{{ current_card.source_name or '未命名角色卡' }}</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">记忆条数</span>
+            <strong id="memory-count">{{ memory_count }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel config-panel">
+        <div class="section-head">
+          <p class="eyebrow">LLM</p>
+          <h2>聊天模型</h2>
+          <p class="muted">兼容 OpenAI 风格接口，常见写法是 <code>.../v1</code>。</p>
+        </div>
+
+        <label for="llm-base-url">API URL</label>
+        <input id="llm-base-url" value="{{ settings.llm_base_url }}" placeholder="例如 http://127.0.0.1:8000/v1" />
+
+        <label for="llm-api-key">API Key</label>
+        <div class="inline-field">
+          <input id="llm-api-key" type="password" value="{{ settings.llm_api_key }}" placeholder="本地服务可留空" />
+          <button type="button" id="toggle-llm-api-key" class="secondary compact">显示</button>
+        </div>
+
+        <label for="llm-model">模型名</label>
+        <input id="llm-model" value="{{ settings.llm_model }}" placeholder="例如 deepseek-chat" />
+
+        <div class="grid-two">
+          <div>
+            <label for="temperature">Temperature</label>
+            <input id="temperature" type="number" min="0" max="2" step="0.05" value="{{ settings.temperature }}" />
+          </div>
+          <div>
+            <label for="request-timeout">超时秒数</label>
+            <input id="request-timeout" type="number" min="10" max="600" step="1" value="{{ settings.request_timeout }}" />
+          </div>
+        </div>
+
+        <div class="grid-two">
+          <div>
+            <label for="history-limit">上下文历史条数</label>
+            <input id="history-limit" type="number" min="1" max="100" step="1" value="{{ settings.history_limit }}" />
+          </div>
+          <div>
+            <label class="checkbox-row offset-top">
+              <input id="demo-mode" type="checkbox" {% if settings.demo_mode %}checked{% endif %} />
+              <span>没有模型时允许演示模式</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="save-settings">立即保存聊天模型</button>
+          <button id="test-connection" class="secondary">测试连接</button>
+        </div>
+      </section>
+
+      <section class="panel config-panel">
+        <div class="section-head">
+          <p class="eyebrow">Retrieval</p>
+          <h2>嵌入与重排序</h2>
+          <p class="muted">嵌入模型负责召回，重排序模型可在召回后进一步精选结果。</p>
+        </div>
+
+        <label for="embedding-base-url">嵌入 API URL</label>
+        <input id="embedding-base-url" value="{{ settings.embedding_base_url }}" placeholder="例如 http://127.0.0.1:8000/v1" />
+
+        <label for="embedding-api-key">嵌入 API Key</label>
+        <div class="inline-field">
+          <input id="embedding-api-key" type="password" value="{{ settings.embedding_api_key }}" placeholder="本地服务可留空" />
+          <button type="button" id="toggle-embedding-api-key" class="secondary compact">显示</button>
+        </div>
+
+        <label for="embedding-model">嵌入模型名</label>
+        <input id="embedding-model" value="{{ settings.embedding_model }}" placeholder="例如 text-embedding-3-small" />
+
+        <label>嵌入时读取字段</label>
+        <div class="field-chip-row">
+          <label class="check-chip"><input class="embedding-field" type="checkbox" value="title" {% if 'title' in settings.embedding_fields %}checked{% endif %} /><span>标题</span></label>
+          <label class="check-chip"><input class="embedding-field" type="checkbox" value="content" {% if 'content' in settings.embedding_fields %}checked{% endif %} /><span>正文</span></label>
+          <label class="check-chip"><input class="embedding-field" type="checkbox" value="tags" {% if 'tags' in settings.embedding_fields %}checked{% endif %} /><span>标签</span></label>
+          <label class="check-chip"><input class="embedding-field" type="checkbox" value="notes" {% if 'notes' in settings.embedding_fields %}checked{% endif %} /><span>备注</span></label>
+        </div>
+
+        <div class="grid-two">
+          <div>
+            <label for="retrieval-top-k">召回条数</label>
+            <input id="retrieval-top-k" type="number" min="1" max="12" step="1" value="{{ settings.retrieval_top_k }}" />
+          </div>
+          <div>
+            <label class="checkbox-row offset-top">
+              <input id="rerank-enabled" type="checkbox" {% if settings.rerank_enabled %}checked{% endif %} />
+              <span>启用重排序模型</span>
+            </label>
+          </div>
+        </div>
+
+        <label for="rerank-base-url">重排序 API URL</label>
+        <input id="rerank-base-url" value="{{ settings.rerank_base_url }}" placeholder="例如 http://127.0.0.1:8000/v1" />
+
+        <label for="rerank-api-key">重排序 API Key</label>
+        <div class="inline-field">
+          <input id="rerank-api-key" type="password" value="{{ settings.rerank_api_key }}" placeholder="本地服务可留空" />
+          <button type="button" id="toggle-rerank-api-key" class="secondary compact">显示</button>
+        </div>
+
+        <div class="grid-two">
+          <div>
+            <label for="rerank-model">重排序模型名</label>
+            <input id="rerank-model" value="{{ settings.rerank_model }}" placeholder="例如 jina-reranker-v2-base-multilingual" />
+          </div>
+          <div>
+            <label for="rerank-top-n">保留条数</label>
+            <input id="rerank-top-n" type="number" min="1" max="12" step="1" value="{{ settings.rerank_top_n }}" />
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="save-retrieval" class="secondary">立即保存检索设置</button>
+          <button id="test-embedding" class="secondary">测试嵌入</button>
+        </div>
+      </section>
+
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Appearance</p>
+          <h2>界面与背景</h2>
+          <p class="muted">主题、透明度、背景图和遮罩强度都会实时预览，并自动保存。</p>
+        </div>
+
+        <label for="theme-select">界面主题</label>
+        <select id="theme-select">
+          <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>浅色</option>
+          <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>暗色</option>
+        </select>
+
+        <label for="ui-opacity">界面透明度</label>
+        <input id="ui-opacity" type="range" min="0.20" max="1" step="0.01" value="{{ settings.ui_opacity }}" />
+        <div class="range-value"><span>当前值</span><strong id="ui-opacity-value">{{ settings.ui_opacity }}</strong></div>
+
+        <label for="background-url">背景图 URL</label>
+        <input id="background-url" value="{{ settings.background_image_url }}" placeholder="可填写远程地址或上传后生成的本地地址" />
+
+        <label for="background-overlay">背景遮罩强度</label>
+        <input id="background-overlay" type="range" min="0" max="0.85" step="0.01" value="{{ settings.background_overlay }}" />
+        <div class="range-value"><span>当前值</span><strong id="background-overlay-value">{{ settings.background_overlay }}</strong></div>
+
+        <label for="background-file">上传背景图</label>
+        <div class="inline-field">
+          <input id="background-file" type="file" accept="image/*" />
+          <button type="button" id="upload-background" class="secondary compact">上传</button>
+        </div>
+
+        <div class="preview-card background-preview" id="background-preview">
+          <div class="preview-tag">Preview</div>
+          <div class="preview-user">用户消息示例</div>
+          <div class="preview-ai">AI 回复示例</div>
+        </div>
+      </section>
+
+      <section class="panel config-panel full-span">
+        <div class="section-head">
+          <p class="eyebrow">Actions</p>
+          <h2>整体操作</h2>
+          <p id="status-text" class="muted status-line">就绪</p>
+        </div>
+
+        <div class="button-row">
+          <button id="save-all">立即保存全部配置</button>
+          <button id="reset-chat" class="secondary">清空聊天记录</button>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const rootEl = document.documentElement;
+      const bodyEl = document.body;
+      const statusEl = document.getElementById("status-text");
+      const ACTIVE_SLOT = {{ active_slot | tojson }};
+      const themeSelectEl = document.getElementById("theme-select");
+      const uiOpacityEl = document.getElementById("ui-opacity");
+      const uiOpacityValueEl = document.getElementById("ui-opacity-value");
+      const backgroundUrlEl = document.getElementById("background-url");
+      const backgroundOverlayEl = document.getElementById("background-overlay");
+      const backgroundOverlayValueEl = document.getElementById("background-overlay-value");
+      const backgroundPreviewEl = document.getElementById("background-preview");
+
+      const saveTimers = { settings: null };
+
+      async function selectSlot(slotId) {
+        await postJson("/api/slots/select", { slot_id: slotId });
+        window.location.reload();
+      }
+
+      async function renameSlot(slotId) {
+        const currentName = document.getElementById("slot-select").selectedOptions[0]?.textContent || slotId;
+        const nextName = window.prompt("给这个存档起个名字：", currentName);
+        if (nextName === null) return;
+        await postJson("/api/slots/rename", { slot_id: slotId, name: nextName });
+        window.location.reload();
+      }
+
+      async function resetSlot(slotId) {
+        const confirmed = window.confirm("重置后，这个存档里的立绘、人设、记忆、世界书和聊天记录都会清空。要继续吗？");
+        if (!confirmed) return;
+        await postJson("/api/slots/reset", { slot_id: slotId });
+        window.location.reload();
+      }
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function scheduleSave(handler, text, delay = 600) {
+        if (saveTimers.settings) {
+          clearTimeout(saveTimers.settings);
+        }
+        setStatus(text);
+        saveTimers.settings = setTimeout(async () => {
+          try {
+            await handler();
+          } catch (error) {
+            setStatus(`自动保存失败：${error.message}`);
+          } finally {
+            saveTimers.settings = null;
+          }
+        }, delay);
+      }
+
+      function applyTheme(theme) {
+        rootEl.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+        applyUiOpacity(uiOpacityEl.value);
+      }
+
+      function applyUiOpacity(value) {
+        const opacity = Math.min(Math.max(Number(value || 0.84), 0.2), 1);
+        uiOpacityValueEl.textContent = opacity.toFixed(2);
+        const theme = rootEl.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        const palette = theme === "dark"
+          ? { panel: "18, 27, 37", strong: "20, 30, 41", input: "11, 18, 26", user: "34, 52, 70", assistant: "23, 33, 46" }
+          : { panel: "255, 250, 244", strong: "255, 250, 244", input: "255, 255, 255", user: "239, 220, 206", assistant: "255, 248, 242" };
+
+        rootEl.style.setProperty("--panel", `rgba(${palette.panel}, ${opacity.toFixed(2)})`);
+        rootEl.style.setProperty("--panel-strong", `rgba(${palette.strong}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--input-bg", `rgba(${palette.input}, ${Math.max(opacity - 0.1, 0.16).toFixed(2)})`);
+        rootEl.style.setProperty("--user", `rgba(${palette.user}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
+        rootEl.style.setProperty("--assistant", `rgba(${palette.assistant}, ${Math.min(opacity + 0.12, 0.99).toFixed(2)})`);
+      }
+
+      function applyBackground(url, overlay) {
+        const normalizedOverlay = Math.min(Math.max(Number(overlay || 0), 0), 0.85);
+        backgroundOverlayValueEl.textContent = normalizedOverlay.toFixed(2);
+        bodyEl.style.setProperty("--background-overlay-opacity", String(normalizedOverlay));
+
+        const bgValue = url ? `url("${url}")` : "none";
+        bodyEl.style.setProperty("--background-image", bgValue);
+        backgroundPreviewEl.style.setProperty("--preview-background-image", bgValue);
+        backgroundPreviewEl.style.setProperty("--preview-overlay-opacity", String(normalizedOverlay));
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "请求失败");
+        }
+
+        return response.json();
+      }
+
+      function toggleSecret(inputId, buttonId) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        button.addEventListener("click", () => {
+          const showing = input.type === "text";
+          input.type = showing ? "password" : "text";
+          button.textContent = showing ? "显示" : "隐藏";
+        });
+      }
+
+      function selectedEmbeddingFields() {
+        return [...document.querySelectorAll(".embedding-field:checked")].map((el) => el.value);
+      }
+
+      function settingsPayload() {
+        return {
+          llm_base_url: document.getElementById("llm-base-url").value.trim(),
+          llm_api_key: document.getElementById("llm-api-key").value.trim(),
+          llm_model: document.getElementById("llm-model").value.trim(),
+          theme: themeSelectEl.value,
+          temperature: Number(document.getElementById("temperature").value || 0.85),
+          history_limit: Number(document.getElementById("history-limit").value || 20),
+          request_timeout: Number(document.getElementById("request-timeout").value || 120),
+          demo_mode: document.getElementById("demo-mode").checked,
+          ui_opacity: Number(uiOpacityEl.value || 0.84),
+          background_image_url: backgroundUrlEl.value.trim(),
+          background_overlay: Number(backgroundOverlayEl.value || 0.42),
+          embedding_base_url: document.getElementById("embedding-base-url").value.trim(),
+          embedding_api_key: document.getElementById("embedding-api-key").value.trim(),
+          embedding_model: document.getElementById("embedding-model").value.trim(),
+          embedding_fields: selectedEmbeddingFields(),
+          retrieval_top_k: Number(document.getElementById("retrieval-top-k").value || 4),
+          rerank_enabled: document.getElementById("rerank-enabled").checked,
+          rerank_base_url: document.getElementById("rerank-base-url").value.trim(),
+          rerank_api_key: document.getElementById("rerank-api-key").value.trim(),
+          rerank_model: document.getElementById("rerank-model").value.trim(),
+          rerank_top_n: Number(document.getElementById("rerank-top-n").value || 3),
+        };
+      }
+
+      async function saveSettings(statusText = "设置已自动保存") {
+        const data = await postJson("/api/settings", settingsPayload());
+        applyTheme(data.settings.theme);
+        applyUiOpacity(data.settings.ui_opacity);
+        applyBackground(data.settings.background_image_url, data.settings.background_overlay);
+        setStatus(statusText);
+        return data;
+      }
+
+      async function uploadBackground() {
+        const fileInput = document.getElementById("background-file");
+        const file = fileInput.files[0];
+        if (!file) {
+          throw new Error("请先选择一张图片");
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch("/api/background", { method: "POST", body: formData });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "上传失败");
+        }
+
+        const data = await response.json();
+        backgroundUrlEl.value = data.url || "";
+        applyBackground(backgroundUrlEl.value, backgroundOverlayEl.value);
+        await saveSettings("背景图已上传并自动保存");
+      }
+
+      document.getElementById("save-settings").addEventListener("click", async () => {
+        try {
+          await saveSettings("聊天模型配置已保存");
+        } catch (error) {
+          setStatus(`保存失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("save-retrieval").addEventListener("click", async () => {
+        try {
+          await saveSettings("检索配置已保存");
+        } catch (error) {
+          setStatus(`保存失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("save-all").addEventListener("click", async () => {
+        try {
+          await saveSettings("全部配置已保存");
+        } catch (error) {
+          setStatus(`保存失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("test-connection").addEventListener("click", async () => {
+        try {
+          await saveSettings("正在测试聊天模型...");
+          const data = await postJson("/api/test-connection", {});
+          setStatus(`聊天模型连接成功：${data.reply}`);
+        } catch (error) {
+          setStatus(`连接失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("test-embedding").addEventListener("click", async () => {
+        try {
+          await saveSettings("正在测试嵌入模型...");
+          const data = await postJson("/api/test-embedding", {});
+          setStatus(`嵌入连接成功：共返回 ${data.count} 个向量，维度 ${data.dimension}`);
+        } catch (error) {
+          setStatus(`连接失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("reset-chat").addEventListener("click", async () => {
+        try {
+          await postJson("/api/reset", {});
+          setStatus("聊天记录已清空");
+        } catch (error) {
+          setStatus(`清空失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("upload-background").addEventListener("click", async () => {
+        try {
+          await uploadBackground();
+        } catch (error) {
+          setStatus(`上传失败：${error.message}`);
+        }
+      });
+
+      [
+        "llm-base-url",
+        "llm-api-key",
+        "llm-model",
+        "temperature",
+        "request-timeout",
+        "history-limit",
+        "embedding-base-url",
+        "embedding-api-key",
+        "embedding-model",
+        "retrieval-top-k",
+        "rerank-base-url",
+        "rerank-api-key",
+        "rerank-model",
+        "rerank-top-n",
+        "background-url",
+      ].forEach((id) => {
+        document.getElementById(id).addEventListener("input", () => {
+          scheduleSave(saveSettings, "设置变更中...");
+        });
+      });
+
+      ["demo-mode", "rerank-enabled"].forEach((id) => {
+        document.getElementById(id).addEventListener("change", () => {
+          scheduleSave(saveSettings, "设置变更中...", 300);
+        });
+      });
+
+      document.querySelectorAll(".embedding-field").forEach((el) => {
+        el.addEventListener("change", () => {
+          scheduleSave(saveSettings, "检索字段变更中...", 300);
+        });
+      });
+
+      themeSelectEl.addEventListener("change", () => {
+        applyTheme(themeSelectEl.value);
+        scheduleSave(saveSettings, "主题切换中...", 250);
+      });
+
+      uiOpacityEl.addEventListener("input", () => {
+        applyUiOpacity(uiOpacityEl.value);
+        scheduleSave(saveSettings, "透明度调整中...", 250);
+      });
+
+      backgroundOverlayEl.addEventListener("input", () => {
+        applyBackground(backgroundUrlEl.value, backgroundOverlayEl.value);
+        scheduleSave(saveSettings, "背景遮罩调整中...", 250);
+      });
+
+      backgroundUrlEl.addEventListener("input", () => {
+        applyBackground(backgroundUrlEl.value, backgroundOverlayEl.value);
+      });
+
+      document.getElementById("slot-select").addEventListener("change", async (event) => {
+        try {
+          setStatus("正在切换存档...");
+          await selectSlot(event.target.value);
+        } catch (error) {
+          setStatus(`切换存档失败：${error.message}`);
+          event.target.value = ACTIVE_SLOT;
+        }
+      });
+
+      document.getElementById("rename-slot").addEventListener("click", async () => {
+        try {
+          await renameSlot(document.getElementById("slot-select").value);
+        } catch (error) {
+          setStatus(`重命名失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("reset-slot").addEventListener("click", async () => {
+        try {
+          await resetSlot(document.getElementById("slot-select").value);
+        } catch (error) {
+          setStatus(`重置失败：${error.message}`);
+        }
+      });
+
+      toggleSecret("llm-api-key", "toggle-llm-api-key");
+      toggleSecret("embedding-api-key", "toggle-embedding-api-key");
+      toggleSecret("rerank-api-key", "toggle-rerank-api-key");
+      applyTheme({{ settings.theme | tojson }});
+      applyUiOpacity({{ settings.ui_opacity | tojson }});
+      applyBackground({{ settings.background_image_url | tojson }}, {{ settings.background_overlay | tojson }});
+    </script>
+  </body>
+</html>

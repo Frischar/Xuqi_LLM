@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ settings.theme }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Welcome - Xuqi LLM Chat</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="topbar-stack">
+      <div class="topbar mobile-friendly-topbar">
+        <a class="brand" href="/">Xuqi Chat</a>
+        <nav class="topnav mobile-topnav">
+          <a class="navlink active" href="/">欢迎</a>
+          <a class="navlink" href="/chat">聊天</a>
+          <a class="navlink" href="/config">配置</a>
+          <a class="navlink" href="/config/card">角色卡</a>
+          <a class="navlink" href="/config/sprite">立绘</a>
+          <a class="navlink" href="/config/memory">记忆</a>
+        </nav>
+      </div>
+    </div>
+
+    <main class="welcome-shell welcome-shell-mobile">
+      <section class="welcome-hero panel welcome-hero-mobile">
+        <div class="welcome-copy">
+          <p class="eyebrow">Frischar Project</p>
+          <h1>欢迎来到 Xuqi Chat</h1>
+          <p class="welcome-lead">
+            这是一个面向长期陪伴聊天场景的本地 WebUI，支持角色卡、记忆库、世界书、差分立绘与独立存档。
+          </p>
+          <p class="muted">
+            当前版本由 <strong>Frischar</strong> 设计与整理，目标是把多角色陪伴聊天、可视化调教和本地化工作流整合到一个顺手的界面里。
+          </p>
+          <div class="welcome-actions">
+            <a class="welcome-primary" href="/chat">进入聊天</a>
+            <a class="welcome-secondary" href="/config">打开配置</a>
+          </div>
+        </div>
+
+        <div class="welcome-card-grid">
+          <article class="welcome-card">
+            <p class="eyebrow">Features</p>
+            <h2>你可以做什么</h2>
+            <ul class="welcome-list">
+              <li>按存档隔离角色卡、世界书、记忆和立绘</li>
+              <li>导入或手动编辑角色卡</li>
+              <li>把记忆库作为固定前情提要持续投喂给 AI</li>
+              <li>管理立绘标签并切换对应表情</li>
+            </ul>
+          </article>
+
+          <article class="welcome-card">
+            <p class="eyebrow">Workflow</p>
+            <h2>推荐使用顺序</h2>
+            <ol class="welcome-list ordered">
+              <li>先在配置页填好聊天模型参数</li>
+              <li>在角色卡页导入或整理当前人设</li>
+              <li>在立绘页放好当前存档的表情图</li>
+              <li>在记忆页和世界书里补齐前情与设定</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

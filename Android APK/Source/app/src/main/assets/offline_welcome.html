@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Fantareal</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top left, rgba(84, 134, 255, 0.24), transparent 30%),
+          radial-gradient(circle at bottom right, rgba(255, 154, 120, 0.18), transparent 28%),
+          linear-gradient(180deg, #0f1722, #101723 48%, #111b29);
+        color: #eef5ff;
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      }
+      .wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 28px 18px 40px;
+      }
+      .panel {
+        padding: 24px;
+        border-radius: 26px;
+        background: rgba(20, 31, 46, 0.82);
+        border: 1px solid rgba(126, 157, 198, 0.16);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(14px);
+      }
+      .eyebrow {
+        margin: 0 0 10px;
+        color: #74a5ff;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font-size: 38px;
+        line-height: 1.12;
+      }
+      .lead {
+        margin: 14px 0 0;
+        color: #d6e5f8;
+        font-size: 17px;
+        line-height: 1.8;
+      }
+      .note {
+        margin-top: 22px;
+        padding: 16px 18px;
+        border-radius: 20px;
+        background: rgba(14, 22, 34, 0.84);
+        border: 1px solid rgba(126, 157, 198, 0.12);
+      }
+      .note strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+      ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #c1d4eb;
+        line-height: 1.8;
+      }
+      .footer {
+        margin-top: 18px;
+        color: #91a7c2;
+        font-size: 14px;
+      }
+      code {
+        padding: 2px 6px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <section class="panel">
+        <p class="eyebrow">Frischar Project</p>
+        <h1>欢迎来到 Fantareal</h1>
+        <p class="lead">
+          这是安卓版壳程序。你现在看到的是本地欢迎页，所以即使聊天服务还没有连上，应用本身也能先正常打开。
+        </p>
+
+        <div class="note">
+          <strong>接下来怎么用</strong>
+          <ul>
+            <li>点顶部的 <code>服务</code> 按钮，展开服务地址设置。</li>
+            <li>如果你在模拟器里跑服务，用 <code>http://10.0.2.2:8000</code>。</li>
+            <li>如果你在真机上测试，需要填电脑的局域网 IP，例如 <code>http://192.168.x.x:8000</code>。</li>
+            <li>填好后点 <code>连接</code>，再切到聊天或配置页面。</li>
+          </ul>
+        </div>
+
+        <p class="footer">Made by Frischar</p>
+      </section>
+    </div>
+  </body>
+</html>

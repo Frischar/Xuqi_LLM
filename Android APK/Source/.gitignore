@@ -1,0 +1,20 @@
+.gradle/
+local.properties
+build/
+app/build/
+captures/
+*.iml
+.idea/
+signing/
+!signing/.gitkeep
+
+# Keep copied web source clean as well
+web_source/.venv/
+web_source/__pycache__/
+web_source/dist/
+web_source/build/
+web_source/exports/
+web_source/browser_profile/
+web_source/.env
+web_source/*.pyc
+web_source/*.pyo

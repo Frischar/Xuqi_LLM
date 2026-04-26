@@ -1,0 +1,940 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Fantareal Mobile</title>
+    <link rel="stylesheet" href="./app.css" />
+  </head>
+  <body>
+    <div class="mobile-app" id="mobileApp">
+      <header class="topbar panel topbar-compact">
+        <div class="topbar-main">
+          <button class="ghost-button icon-button" id="openDrawerButton" type="button" aria-label="打开菜单">
+            ☰
+          </button>
+          <div class="brand-block">
+            <h1 id="currentRouteTitle">聊天</h1>
+          </div>
+        </div>
+      </header>
+
+      <div class="drawer-backdrop hidden" id="drawerBackdrop">
+        <aside class="side-drawer panel" id="sideDrawer">
+          <div class="drawer-head">
+            <div>
+              <p class="eyebrow">导航</p>
+              <h2>聊天</h2>
+            </div>
+            <button class="ghost-button icon-button" id="closeDrawerButton" type="button" aria-label="关闭菜单">
+              ×
+            </button>
+          </div>
+
+          <section class="drawer-section">
+            <p class="eyebrow">页面</p>
+            <nav class="drawer-nav">
+              <button data-nav="chat" type="button">聊天</button>
+              <button data-nav="config" type="button">设置</button>
+              <button data-nav="preset" type="button">预设</button>
+              <button data-nav="card" type="button">角色卡</button>
+              <button data-nav="workshop" type="button">创意工坊</button>
+              <button data-nav="memory" type="button">记忆库</button>
+              <button data-nav="worldbook" type="button">世界书</button>
+            </nav>
+          </section>
+
+          <section class="drawer-section">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">运行态</p>
+                <h3 id="activeRuntimeName">全局运行数据</h3>
+                <p class="muted compact" id="runtimeSummaryText"></p>
+              </div>
+            </div>
+            <p class="muted compact">记忆、世界书、预设、工坊进度和聊天记录都保存在这份全局运行态里；切换角色卡不会清空它们。</p>
+          </section>
+
+          <section class="drawer-section">
+            <p class="eyebrow">快捷</p>
+            <div class="button-row stacked-buttons">
+              <button class="ghost-button" id="themeToggleButton" type="button">切换主题</button>
+              <button class="ghost-button" id="exportRuntimeButton" type="button">导出运行态备份</button>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <main class="route-host">
+        <section class="route-screen" data-route="chat">
+          <section class="chat-panel panel chat-only-panel">
+            <div class="section-head chat-header">
+              <div>
+                <p class="eyebrow">Persona</p>
+                <h3 id="chatPersonaName">Template Character</h3>
+                <p class="muted compact" id="chatGreeting"></p>
+              </div>
+              <div class="button-row compact-buttons">
+                <button class="ghost-button small-chip" id="previewPromptButton" type="button">预览 Prompt</button>
+                <button class="ghost-button small-chip" id="refreshChatRouteButton" type="button">刷新</button>
+              </div>
+            </div>
+            <div class="chat-reading-shell">
+              <div class="message-list" id="messageList"></div>
+            </div>
+            <div class="composer-card">
+              <textarea id="messageInput" rows="4" placeholder="输入你想说的话..."></textarea>
+              <div class="composer-toolbar">
+                <p class="muted" id="statusText">就绪</p>
+                <div class="composer-actions">
+                  <button class="ghost-button" id="endConversationButton" type="button">结束当前对话</button>
+                  <button class="ghost-button" id="exportChatButton" type="button">导出记录</button>
+                  <button class="primary-button" id="sendButton" type="button">发送</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="route-screen hidden" data-route="config">
+          <div class="config-grid">
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Model</p>
+                  <h3>模型配置</h3>
+                </div>
+                <button class="ghost-button" id="testConnectionButton" type="button">测试连接</button>
+              </div>
+
+              <label for="presetSelect">接口预设</label>
+              <select id="presetSelect"></select>
+
+              <label for="apiBaseUrl">API URL</label>
+              <input id="apiBaseUrl" placeholder="例如 https://api.openai.com/v1" />
+
+              <label for="apiKey">API Key</label>
+              <input id="apiKey" type="password" placeholder="仅保存在手机本地" />
+
+              <label for="modelName">模型名</label>
+              <input id="modelName" placeholder="例如 gpt-4.1-mini" />
+
+              <div class="two-col">
+                <div>
+                  <label for="temperature">Temperature</label>
+                  <input id="temperature" type="number" min="0" max="2" step="0.05" />
+                </div>
+                <div>
+                  <label for="timeoutSec">超时秒数</label>
+                  <input id="timeoutSec" type="number" min="15" max="300" step="1" />
+                </div>
+              </div>
+
+              <div class="two-col">
+                <div>
+                  <label for="historyLimit">上下文保留轮数</label>
+                  <input id="historyLimit" type="number" min="4" max="60" step="1" />
+                </div>
+                <div>
+                  <label for="maxTokens">最大输出 Token（0 为不限制）</label>
+                  <input id="maxTokens" type="number" min="0" max="32768" step="1" />
+                </div>
+                <div>
+                  <label for="themeSelect">主题</label>
+                  <select id="themeSelect">
+                    <option value="dark">暗色</option>
+                    <option value="light">浅色</option>
+                  </select>
+                </div>
+              </div>
+              <div class="button-row compact-buttons">
+                <button class="ghost-button" id="saveRefreshConfigButton" type="button">保存并刷新模型配置</button>
+              </div>
+            </article>
+
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Appearance</p>
+                  <h3>界面与背景</h3>
+                </div>
+              </div>
+
+              <label for="uiOpacity">界面透明度</label>
+              <input id="uiOpacity" type="range" min="0.25" max="1" step="0.01" />
+              <div class="inline-value" id="uiOpacityValue">0.88</div>
+
+              <label for="backgroundOverlay">背景遮罩强度</label>
+              <input id="backgroundOverlay" type="range" min="0" max="0.9" step="0.01" />
+              <div class="inline-value" id="backgroundOverlayValue">0.36</div>
+
+              <label for="backgroundImageUrl">背景图 URL</label>
+              <input id="backgroundImageUrl" placeholder="可以填写远程图片地址" />
+
+              <div class="button-row">
+                <label class="ghost-button fake-file-button">
+                  上传背景图
+                  <input id="backgroundFileInput" type="file" accept="image/*" hidden />
+                </label>
+                <button class="ghost-button" id="clearBackgroundButton" type="button">清空背景</button>
+              </div>
+            </article>
+
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Retrieval</p>
+                  <h3>检索与重排</h3>
+                </div>
+              </div>
+
+              <label for="embeddingBaseUrl">嵌入 API URL</label>
+              <input id="embeddingBaseUrl" placeholder="例如 http://127.0.0.1:8000/v1" />
+              <label for="embeddingApiKey">嵌入 API Key</label>
+              <input id="embeddingApiKey" type="password" placeholder="本地服务可留空" />
+              <label for="embeddingModel">嵌入模型名</label>
+              <input id="embeddingModel" placeholder="例如 text-embedding-3-small" />
+              <label>嵌入时读取字段</label>
+              <div class="field-chip-row">
+                <label class="check-chip"><input class="embedding-field" type="checkbox" value="title" /><span>标题</span></label>
+                <label class="check-chip"><input class="embedding-field" type="checkbox" value="content" /><span>正文</span></label>
+                <label class="check-chip"><input class="embedding-field" type="checkbox" value="tags" /><span>标签</span></label>
+                <label class="check-chip"><input class="embedding-field" type="checkbox" value="notes" /><span>备注</span></label>
+              </div>
+              <div class="two-col">
+                <div>
+                  <label for="retrievalTopK">召回条数</label>
+                  <input id="retrievalTopK" type="number" min="1" max="12" step="1" />
+                </div>
+                <div>
+                  <label class="checkbox-row offset-top">
+                    <input id="rerankEnabled" type="checkbox" />
+                    <span>启用重排序</span>
+                  </label>
+                </div>
+              </div>
+              <label for="rerankBaseUrl">重排 API URL</label>
+              <input id="rerankBaseUrl" placeholder="例如 http://127.0.0.1:8000/v1" />
+              <label for="rerankApiKey">重排 API Key</label>
+              <input id="rerankApiKey" type="password" placeholder="本地服务可留空" />
+              <div class="two-col">
+                <div>
+                  <label for="rerankModel">重排模型名</label>
+                  <input id="rerankModel" placeholder="例如 jina-reranker-v2-base-multilingual" />
+                </div>
+                <div>
+                  <label for="rerankTopN">保留条数</label>
+                  <input id="rerankTopN" type="number" min="1" max="12" step="1" />
+                </div>
+              </div>
+            </article>
+
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Avatar</p>
+                  <h3>头像资料</h3>
+                </div>
+              </div>
+
+              <div class="avatar-preview-grid">
+                <div class="avatar-preview-box">
+                  <p class="muted compact">用户头像</p>
+                  <img id="userAvatarPreview" class="avatar-preview" alt="用户头像预览" hidden />
+                </div>
+                <div class="avatar-preview-box">
+                  <p class="muted compact">角色头像</p>
+                  <img id="userRoleAvatarPreview" class="avatar-preview" alt="角色头像预览" hidden />
+                </div>
+              </div>
+
+              <label for="userDisplayName">显示名</label>
+              <input id="userDisplayName" placeholder="例如 我" />
+              <label for="userNickname">昵称</label>
+              <input id="userNickname" placeholder="例如 阿辰" />
+              <label for="userProfileText">用户设定</label>
+              <textarea id="userProfileText" rows="4" placeholder="可写一些会影响对话理解的资料"></textarea>
+              <label for="userNotes">备注</label>
+              <textarea id="userNotes" rows="3" placeholder="额外说明"></textarea>
+              <label for="userAvatarUrl">用户头像地址</label>
+              <input id="userAvatarUrl" placeholder="可以是 data URL 或远程图片" />
+              <div class="button-row compact-buttons">
+                <button class="ghost-button" id="userAvatarUploadButton" type="button" onclick="return window.XuqiMobileApp && window.XuqiMobileApp.pickAvatar && window.XuqiMobileApp.pickAvatar('avatarUrl');">上传用户头像</button>
+                <input id="userAvatarFile" class="file-input-proxy" type="file" accept="image/*" />
+              </div>
+              <label for="userRoleAvatarUrl">角色头像地址</label>
+              <input id="userRoleAvatarUrl" placeholder="可以是 data URL 或远程图片" />
+              <div class="button-row compact-buttons">
+                <button class="ghost-button" id="userRoleAvatarUploadButton" type="button" onclick="return window.XuqiMobileApp && window.XuqiMobileApp.pickAvatar && window.XuqiMobileApp.pickAvatar('roleAvatarUrl');">上传角色头像</button>
+                <input id="userRoleAvatarFile" class="file-input-proxy" type="file" accept="image/*" />
+              </div>
+            </article>
+
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Runtime</p>
+                  <h3>当前运行阶段</h3>
+                </div>
+              </div>
+              <p class="muted compact" id="runtimeStageText">当前阶段会根据全局运行态里的 temp 自动计算。</p>
+              <div class="button-row compact-buttons">
+                <button class="ghost-button" id="openWorkshopButton" data-nav="workshop" type="button" onclick="window.XuqiMobileApp && window.XuqiMobileApp.navigate && window.XuqiMobileApp.navigate('workshop');">打开创意工坊</button>
+              </div>
+            </article>
+
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Persona</p>
+                  <h3>当前加载人设摘要</h3>
+                </div>
+              </div>
+              <p class="muted compact">这里显示的是当前角色卡生成出来的人设摘要。PE 端按 PC 逻辑走，不再单独改这一份；需要编辑请去角色卡页面。</p>
+              <label for="personaName">角色名</label>
+              <input id="personaName" readonly />
+              <label for="personaGreeting">开场白</label>
+              <textarea id="personaGreeting" rows="4" readonly></textarea>
+              <label for="personaPrompt">系统设定</label>
+              <textarea id="personaPrompt" rows="8" readonly></textarea>
+              <div class="button-row compact-buttons">
+                <button class="ghost-button" id="openCardFromPersonaButton" data-nav="card" type="button">去角色卡页编辑</button>
+              </div>
+            </article>
+
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Soundtrack</p>
+                  <h3>剧情音乐</h3>
+                </div>
+              </div>
+
+              <label for="musicPresetSelect">音乐预设</label>
+              <select id="musicPresetSelect"></select>
+
+              <label for="musicUrlInput">自定义音乐 URL</label>
+              <input id="musicUrlInput" placeholder="可留空，优先使用预设" />
+
+              <div class="button-row">
+                <button class="ghost-button" id="playMusicButton" type="button">播放</button>
+                <button class="ghost-button" id="pauseMusicButton" type="button">暂停</button>
+                <button class="ghost-button" id="stopMusicButton" type="button">停止</button>
+              </div>
+            </article>
+
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Data</p>
+                  <h3>运行态备份与组合包</h3>
+                </div>
+              </div>
+              <p class="muted compact">运行态备份现在是完全独立的，只包含设置和全局运行态，不包含当前人设卡本体。角色卡、记忆、世界书、预设都能单独导入导出，组合包 ZIP 仍然会按当前人设一起打包。</p>
+              <div class="button-row stacked-buttons">
+                <button class="ghost-button" id="exportStateButton" type="button">导出运行态备份</button>
+                <button class="ghost-button" id="exportBundleButton" type="button">导出当前组合包 ZIP</button>
+                <label class="ghost-button fake-file-button">
+                  导入运行态备份
+                  <input id="importStateInput" type="file" accept="application/json" hidden />
+                </label>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="route-screen hidden" data-route="preset">
+          <div class="preset-grid">
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Preset</p>
+                  <h3>预设管理</h3>
+                </div>
+              </div>
+              <div class="stats-row">
+                <div class="stat-box">
+                  <span class="stat-label">当前预设</span>
+                  <strong id="activePresetLabel">默认预设</strong>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-label">状态</span>
+                  <strong id="activePresetState">启用</strong>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-label">预设总数</span>
+                  <strong id="presetCount">1</strong>
+                </div>
+              </div>
+            </article>
+
+            <div class="preset-layout">
+              <aside class="panel section-card preset-sidebar">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Library</p>
+                    <h3>预设列表</h3>
+                  </div>
+                </div>
+                <div class="button-row compact-buttons">
+                  <button class="ghost-button" id="createPresetButton" type="button">新增</button>
+                  <button class="ghost-button" id="duplicatePresetButton" type="button">复制</button>
+                </div>
+                <div class="button-row compact-buttons">
+                  <button class="ghost-button" id="activatePresetButton" type="button">设为当前</button>
+                  <button class="ghost-button danger-button" id="deletePresetButton" type="button">删除</button>
+                </div>
+                <div class="button-row compact-buttons">
+                  <button class="ghost-button" id="importPresetButton" type="button">导入预设库</button>
+                  <button class="ghost-button" id="exportPresetButton" type="button">导出预设库</button>
+                  <input id="importPresetFile" type="file" accept=".json,.jsonc,application/json,text/plain" hidden />
+                </div>
+                <div id="presetItems" class="preset-item-list"></div>
+              </aside>
+
+              <main class="preset-editor-stack">
+                <article class="panel section-card">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">Editor</p>
+                      <h3>当前预设</h3>
+                    </div>
+                    <p id="presetStatusText" class="muted compact">就绪</p>
+                  </div>
+                  <div class="preset-meta-grid">
+                    <div>
+                      <label for="presetName">预设名称</label>
+                      <input id="presetName" placeholder="例如 通用陪伴预设" />
+                    </div>
+                    <div>
+                      <label class="checkbox-row offset-top">
+                        <input id="presetEnabled" type="checkbox" />
+                        <span>启用当前预设</span>
+                      </label>
+                    </div>
+                  </div>
+                  <label for="baseSystemPrompt">基础系统提示</label>
+                  <textarea id="baseSystemPrompt" rows="8" placeholder="这里写每轮都要生效的系统规则。"></textarea>
+                </article>
+
+                <article class="panel section-card">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">Modules</p>
+                      <h3>常用模块</h3>
+                    </div>
+                  </div>
+                  <div class="field-chip-row">
+                    <label class="check-chip"><input class="preset-module" data-key="no_user_speaking" type="checkbox" /><span>防抢话</span></label>
+                    <label class="check-chip"><input class="preset-module" data-key="short_paragraph" type="checkbox" /><span>短段落</span></label>
+                    <label class="check-chip"><input class="preset-module" data-key="long_paragraph" type="checkbox" /><span>长段落</span></label>
+                    <label class="check-chip"><input class="preset-module" data-key="second_person" type="checkbox" /><span>第二人称</span></label>
+                    <label class="check-chip"><input class="preset-module" data-key="third_person" type="checkbox" /><span>第三人称</span></label>
+                    <label class="check-chip"><input class="preset-module" data-key="anti_repeat" type="checkbox" /><span>抗重复</span></label>
+                    <label class="check-chip"><input class="preset-module" data-key="no_closing_feel" type="checkbox" /><span>避免强收尾</span></label>
+                  </div>
+                </article>
+
+                <article class="panel section-card">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">Blocks</p>
+                      <h3>额外规则块</h3>
+                    </div>
+                  </div>
+                  <div class="block-actions">
+                    <div class="button-row compact-buttons">
+                      <button class="ghost-button" id="addPresetBlockButton" type="button">新增规则块</button>
+                      <button class="ghost-button" id="collapseAllPresetBlocks" type="button">全部折叠</button>
+                      <button class="ghost-button" id="expandAllPresetBlocks" type="button">全部展开</button>
+                    </div>
+                    <div class="preset-search-block">
+                      <label for="presetBlockSearch">搜索规则块</label>
+                      <input id="presetBlockSearch" type="text" placeholder="按标题或正文搜索" />
+                    </div>
+                  </div>
+                  <div id="presetBlockList" class="memory-list"></div>
+                </article>
+              </main>
+            </div>
+          </div>
+        </section>
+
+        <section class="route-screen hidden" data-route="card">
+          <article class="panel section-card">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Role Card</p>
+                <h3>角色卡编辑器</h3>
+              </div>
+              <div class="button-row compact-buttons">
+                <button class="ghost-button small-chip" id="applySingleTemplateButton" type="button">单人模板</button>
+                <button class="ghost-button small-chip" id="applyMultiTemplateButton" type="button">多人模板</button>
+                <label class="ghost-button fake-file-button">
+                  导入
+                  <input id="cardImportInput" type="file" accept=".json,.txt,application/json,text/plain" hidden />
+                </label>
+                <button class="ghost-button small-chip" id="exportCardButton" type="button">导出</button>
+              </div>
+            </div>
+            <label for="cardSourceName">保存文件名</label>
+            <input id="cardSourceName" placeholder="例如 my_role_card.json" />
+          </article>
+
+          <div class="card-grid">
+            <article class="panel section-card">
+              <details class="section-fold" open>
+                <summary class="section-summary">
+                  <span class="eyebrow">基础信息</span>
+                  <h3>角色卡基础字段</h3>
+                </summary>
+                <div class="section-fold-body">
+                  <label for="cardName">name（角色名称 / 显示名）</label>
+                  <input id="cardName" />
+                  <label for="cardTags">tags（标签，使用逗号分隔）</label>
+                  <input id="cardTags" />
+                  <label for="cardDescription">description（角色背景 / 基础介绍）</label>
+                  <textarea id="cardDescription" rows="5"></textarea>
+                  <label for="cardPersonality">personality（性格 / 说话风格）</label>
+                  <textarea id="cardPersonality" rows="6"></textarea>
+                  <label for="cardScenario">scenario（当前场景 / 相处设定）</label>
+                  <textarea id="cardScenario" rows="6"></textarea>
+                  <label for="cardFirstMes">first_mes（开场白 / 初始回复）</label>
+                  <textarea id="cardFirstMes" rows="5"></textarea>
+                  <label for="cardMesExample">mes_example（对话示例）</label>
+                  <textarea id="cardMesExample" rows="5"></textarea>
+                  <label for="cardCreatorNotes">creator_notes（仅给模型看的补充说明）</label>
+                  <textarea id="cardCreatorNotes" rows="6"></textarea>
+                </div>
+              </details>
+            </article>
+
+            <article class="panel section-card">
+              <details class="section-fold" open>
+                <summary class="section-summary with-action">
+                  <div>
+                    <p class="eyebrow">剧情阶段</p>
+                    <h3>plotStages 动态列表</h3>
+                  </div>
+                  <button class="ghost-button small-chip" id="addPlotStageButton" type="button">+ 阶段</button>
+                </summary>
+                <div class="section-fold-body">
+                  <div class="stack-list" id="plotStageList"></div>
+                </div>
+              </details>
+            </article>
+
+            <article class="panel section-card">
+              <details class="section-fold" open>
+                <summary class="section-summary with-action">
+                  <div>
+                    <p class="eyebrow">创意工坊</p>
+                    <h3>创意工坊入口</h3>
+                  </div>
+                  <button class="ghost-button small-chip" id="openWorkshopButtonCard" data-nav="workshop" type="button" onclick="window.XuqiMobileApp && window.XuqiMobileApp.navigate && window.XuqiMobileApp.navigate('workshop');">打开设置</button>
+                </summary>
+                <div class="section-fold-body">
+                  <p class="muted compact" id="workshopSummaryText">创意工坊会根据当前全局运行态的 temp 计算阶段，并触发角色卡里定义的动作。</p>
+                  <div class="button-row compact-buttons">
+                    <button class="ghost-button" id="openWorkshopButtonCard2" data-nav="workshop" type="button" onclick="window.XuqiMobileApp && window.XuqiMobileApp.navigate && window.XuqiMobileApp.navigate('workshop');">进入创意工坊</button>
+                  </div>
+                </div>
+              </details>
+            </article>
+          </div>
+
+          <article class="panel section-card">
+            <details class="section-fold" open>
+              <summary class="section-summary with-action">
+                <div>
+                  <p class="eyebrow">多人设</p>
+                  <h3>personas 动态列表</h3>
+                </div>
+                <button class="ghost-button small-chip" id="addPersonaButton" type="button">+ 角色</button>
+              </summary>
+              <div class="section-fold-body">
+                <div class="persona-grid" id="personaCardGrid"></div>
+              </div>
+            </details>
+          </article>
+        </section>
+
+        <section class="route-screen hidden" data-route="workshop">
+          <div class="config-grid">
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Runtime</p>
+                  <h3>阶段判定</h3>
+                </div>
+              </div>
+              <p class="muted compact" id="workshopRuntimeInfo">temp 绑定全局运行态，只会在结束当前对话时 +1；切换角色卡不会清零。</p>
+              <p class="muted compact">PC 端已有的阶段触发和自定义 Temp 区间触发，在 PE 端都会按同一套逻辑判定；A=0-2，B=3-5，C=6+。</p>
+            </article>
+
+            <article class="panel section-card">
+              <details class="section-fold" open>
+                <summary class="section-summary with-action">
+                  <div>
+                    <p class="eyebrow">创意工坊</p>
+                    <h3>阶段动作</h3>
+                  </div>
+                </summary>
+                <div class="section-fold-body">
+                  <label class="checkbox-row"><input id="workshopEnabled" type="checkbox" /> 启用创意工坊</label>
+                  <p class="muted compact">每条规则只允许一个动作：音乐或图片。添加资源时会自动调用系统文件选取。</p>
+                  <div class="button-row compact-buttons">
+                    <button class="ghost-button small-chip" id="addWorkshopRuleButton" type="button" onclick="return window.XuqiMobileApp && window.XuqiMobileApp.addWorkshopRule && window.XuqiMobileApp.addWorkshopRule();">+ 规则</button>
+                  </div>
+                  <div class="workshop-toolbar">
+                    <div class="button-row compact-buttons">
+                      <button class="ghost-button" id="collapseAllWorkshopRules" type="button" onclick="return window.XuqiMobileApp && window.XuqiMobileApp.collapseWorkshopRules && window.XuqiMobileApp.collapseWorkshopRules();">全部折叠</button>
+                      <button class="ghost-button" id="expandAllWorkshopRules" type="button" onclick="return window.XuqiMobileApp && window.XuqiMobileApp.expandWorkshopRules && window.XuqiMobileApp.expandWorkshopRules();">全部展开</button>
+                    </div>
+                    <div class="workshop-search-block">
+                      <label for="workshopRuleSearch">搜索规则</label>
+                      <input id="workshopRuleSearch" type="text" placeholder="按标题或备注搜索" />
+                    </div>
+                  </div>
+                  <div class="stack-list" id="workshopRuleList"></div>
+                </div>
+              </details>
+            </article>
+          </div>
+        </section>
+
+        <section class="route-screen hidden" data-route="memory">
+          <article class="panel section-card">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Memory</p>
+                <h3>记忆库</h3>
+                <p class="muted compact">这里管理的是全局运行态记忆。原记忆按原方式参与聊天；多选后可以合并成“合并后的记忆”，并同步写入大纲表。</p>
+              </div>
+              <div class="button-row compact-buttons">
+                <button class="ghost-button" id="importMemoryButton" type="button">导入记忆</button>
+                <button class="ghost-button" id="exportMemoryButton" type="button">导出记忆</button>
+                <button class="ghost-button" id="exportMergedMemoryButton" type="button">导出合并</button>
+                <button class="ghost-button" id="exportMemoryOutlineButton" type="button">导出大纲</button>
+                <button class="ghost-button" id="addMemoryButton" type="button">新增记忆</button>
+                <input id="importMemoryFile" type="file" accept=".json,.jsonc,application/json,text/plain" hidden />
+              </div>
+            </div>
+            <div class="stats-row memory-stats-row">
+              <div class="stat-box">
+                <span class="stat-label">原记忆</span>
+                <strong id="memoryCount">0</strong>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">合并记忆</span>
+                <strong id="mergedMemoryCount">0</strong>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">大纲表</span>
+                <strong id="memoryOutlineCount">0</strong>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">当前选中</span>
+                <strong id="selectedMemoryCount">0</strong>
+              </div>
+            </div>
+            <div class="memory-toolbar">
+              <div class="memory-search-block">
+                <label for="memorySearch">搜索记忆</label>
+                <input id="memorySearch" type="text" placeholder="按标题、正文、标签或备注搜索" />
+              </div>
+              <div class="button-row memory-toolbar-actions">
+                <button class="ghost-button" id="collapseAllMemories" type="button">全部折叠</button>
+                <button class="ghost-button" id="expandAllMemories" type="button">全部展开</button>
+              </div>
+            </div>
+            <div class="bulk-panel memory-merge-panel">
+              <div class="bulk-panel-head">
+                <span class="eyebrow">合并与大纲</span>
+                <span class="muted compact" id="memoryMergeModeText">准备就绪</span>
+              </div>
+              <div class="two-col">
+                <div>
+                  <label for="mergedMemoryTitleInput">合并记忆标题（可空）</label>
+                  <input id="mergedMemoryTitleInput" type="text" placeholder="例如：主角当前阶段总结" />
+                </div>
+                <div>
+                  <label for="memoryOutlineTitleInput">大纲表标题（可空）</label>
+                  <input id="memoryOutlineTitleInput" type="text" placeholder="例如：主线阶段大纲" />
+                </div>
+              </div>
+              <label class="checkbox-row"><input id="deleteMergedMemorySources" type="checkbox" checked /> 合并成功后删除原记忆</label>
+              <div class="button-row compact-buttons">
+                <button class="primary-button" id="mergeSelectedMemoriesButton" type="button">把选中记忆合并到大纲表</button>
+                <button class="ghost-button" id="selectVisibleMemoriesButton" type="button">选择可见</button>
+                <button class="ghost-button" id="clearSelectedMemoriesButton" type="button">清空选择</button>
+              </div>
+            </div>
+            <div class="stack-list" id="memoryList"></div>
+          </article>
+
+          <article class="panel section-card memory-outline-card">
+            <details class="section-fold" open>
+              <summary class="section-summary">
+                <span class="eyebrow">Outline Overview</span>
+                <h3>大纲表总览</h3>
+              </summary>
+              <div class="section-fold-body">
+                <div class="outline-table-scroll">
+                  <table class="outline-table">
+                    <thead>
+                      <tr>
+                        <th>时间</th>
+                        <th>标题</th>
+                        <th>角色</th>
+                        <th>关系推进</th>
+                        <th>关键事件</th>
+                      </tr>
+                    </thead>
+                    <tbody id="memoryOutlineTableBody"></tbody>
+                  </table>
+                </div>
+                <div id="memoryOutlineDetail" class="outline-detail-shell">
+                  <div class="outline-detail-empty">先完成一次记忆合并，或点击上方某一行查看详情。</div>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel section-card">
+            <details class="section-fold" open>
+              <summary class="section-summary">
+                <span class="eyebrow">Merged Memories</span>
+                <h3>合并后的记忆</h3>
+              </summary>
+              <div class="section-fold-body">
+                <div class="merged-list-grid" id="mergedMemoryList"></div>
+              </div>
+            </details>
+          </article>
+        </section>
+
+        <section class="route-screen hidden" data-route="worldbook">
+          <div class="config-grid">
+            <article class="panel section-card">
+              <details class="section-fold" open>
+                <summary class="section-summary">
+                  <span class="eyebrow">世界书设置</span>
+                  <h3>命中规则与注入限制</h3>
+                </summary>
+                <div class="section-fold-body">
+                  <label class="checkbox-row"><input id="worldbookEnabled" type="checkbox" /> 启用世界书</label>
+                  <label class="checkbox-row"><input id="worldbookDebugEnabled" type="checkbox" /> 启用调试信息</label>
+                  <p class="muted compact">“每轮最多注入条数”指的是单次回复里最多往 Prompt 里补多少条命中的世界书，不是世界书总词条数。</p>
+                  <div class="two-col">
+                    <div>
+                      <label for="worldbookMaxEntries">每轮最多注入条数</label>
+                      <input id="worldbookMaxEntries" type="number" min="1" max="20" step="1" />
+                      <p class="muted compact">数值越小越克制，数值越大模型拿到的世界书上下文越多。</p>
+                    </div>
+                    <div>
+                      <label for="worldbookDefaultMatchMode">主触发词默认逻辑</label>
+                      <select id="worldbookDefaultMatchMode">
+                        <option value="any">任意命中</option>
+                        <option value="all">全部命中</option>
+                      </select>
+                      <p class="muted compact">“任意命中”表示多个别名里命中一个就算；“全部命中”表示填的词都要同时出现。</p>
+                    </div>
+                  </div>
+                  <div class="two-col">
+                    <div>
+                      <label for="worldbookDefaultEntryType">默认词条类型</label>
+                      <select id="worldbookDefaultEntryType">
+                        <option value="keyword">关键词触发</option>
+                        <option value="constant">常驻注入</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="worldbookDefaultGroupOperator">主 / 辅触发关系</label>
+                      <select id="worldbookDefaultGroupOperator">
+                        <option value="and">同时满足</option>
+                        <option value="or">满足其一</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="two-col">
+                    <div>
+                      <label for="worldbookDefaultSecondaryMode">辅助触发词默认逻辑</label>
+                      <select id="worldbookDefaultSecondaryMode">
+                        <option value="any">任意命中</option>
+                        <option value="all">全部命中</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="worldbookDefaultChance">默认触发概率</label>
+                      <input id="worldbookDefaultChance" type="number" min="0" max="100" step="1" />
+                    </div>
+                  </div>
+                  <div class="two-col">
+                    <div>
+                      <label for="worldbookDefaultStickyTurns">默认黏着轮数</label>
+                      <input id="worldbookDefaultStickyTurns" type="number" min="0" max="999" step="1" />
+                    </div>
+                    <div>
+                      <label for="worldbookDefaultCooldownTurns">默认冷却轮数</label>
+                      <input id="worldbookDefaultCooldownTurns" type="number" min="0" max="999" step="1" />
+                    </div>
+                  </div>
+                  <div class="two-col">
+                    <div>
+                      <label for="worldbookDefaultInsertionPosition">默认注入位置</label>
+                      <select id="worldbookDefaultInsertionPosition">
+                        <option value="before_char_defs">角色卡前</option>
+                        <option value="after_char_defs">角色卡后</option>
+                        <option value="in_chat">聊天中</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="worldbookDefaultInjectionDepth">默认聊天深度</label>
+                      <input id="worldbookDefaultInjectionDepth" type="number" min="0" max="3" step="1" />
+                    </div>
+                  </div>
+                  <div class="two-col">
+                    <div>
+                      <label for="worldbookDefaultInjectionRole">默认注入角色</label>
+                      <select id="worldbookDefaultInjectionRole">
+                        <option value="system">system</option>
+                        <option value="user">user</option>
+                        <option value="assistant">assistant</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="worldbookDefaultInjectionOrder">默认注入排序</label>
+                      <input id="worldbookDefaultInjectionOrder" type="number" min="0" max="999999" step="1" />
+                    </div>
+                  </div>
+                  <div class="two-col">
+                    <div>
+                      <label class="checkbox-row"><input id="worldbookRecursiveScanEnabled" type="checkbox" /> 启用递归扫描</label>
+                    </div>
+                    <div>
+                      <label for="worldbookRecursionMaxDepth">递归最大深度</label>
+                      <input id="worldbookRecursionMaxDepth" type="number" min="0" max="5" step="1" />
+                    </div>
+                  </div>
+                  <label class="checkbox-row"><input id="worldbookCaseSensitive" type="checkbox" /> 默认区分大小写</label>
+                  <label class="checkbox-row"><input id="worldbookWholeWord" type="checkbox" /> 默认完整词匹配</label>
+                </div>
+              </details>
+            </article>
+
+            <article class="panel section-card">
+              <details class="section-fold" open>
+                <summary class="section-summary with-action">
+                  <div>
+                    <p class="eyebrow">世界书词条</p>
+                    <h3>词条动态列表</h3>
+                  </div>
+                  <div class="button-row compact-buttons">
+                    <button class="ghost-button" id="importWorldbookButton" type="button">导入世界书</button>
+                    <button class="ghost-button" id="exportWorldbookButton" type="button">导出世界书</button>
+                    <button class="ghost-button" id="addWorldbookButton" type="button">新增词条</button>
+                    <input id="importWorldbookFile" type="file" accept=".json,.jsonc,application/json,text/plain" hidden />
+                  </div>
+                </summary>
+                <div class="section-fold-body">
+                  <p class="muted compact">顺序数值越小越优先被选中；选中后再按注入位置和注入排序放进 Prompt。主触发词和辅助触发词都支持“任意命中 / 全部命中”。</p>
+                  <div class="memory-toolbar">
+                    <div class="memory-search-block">
+                      <label for="worldbookSearch">搜索词条</label>
+                      <input id="worldbookSearch" type="text" placeholder="按标题、触发词、正文、备注搜索" />
+                    </div>
+                    <div class="button-row memory-toolbar-actions">
+                      <button class="ghost-button" id="collapseAllWorldbook" type="button">全部折叠</button>
+                      <button class="ghost-button" id="expandAllWorldbook" type="button">全部展开</button>
+                    </div>
+                  </div>
+                  <div class="bulk-panel">
+                    <div class="bulk-panel-head">
+                      <span class="eyebrow">批量编辑</span>
+                      <span class="muted compact" id="selectedWorldbookCount">已选择 0 条</span>
+                    </div>
+                    <div class="button-row compact-buttons">
+                      <button class="ghost-button" id="selectAllVisibleWorldbook" type="button">选择可见</button>
+                      <button class="ghost-button" id="clearSelectedWorldbook" type="button">清空选择</button>
+                      <button class="ghost-button" id="bulkEnableSelected" type="button">启用选中</button>
+                      <button class="ghost-button" id="bulkDisableSelected" type="button">停用选中</button>
+                    </div>
+                    <div class="two-col">
+                      <div>
+                        <label for="bulkInsertionPosition">批量注入位置</label>
+                        <select id="bulkInsertionPosition">
+                          <option value="before_char_defs">角色卡前</option>
+                          <option value="after_char_defs">角色卡后</option>
+                          <option value="in_chat">聊天中</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="bulkInjectionDepth">批量聊天深度</label>
+                        <input id="bulkInjectionDepth" type="number" min="0" max="3" step="1" value="0" />
+                      </div>
+                    </div>
+                    <div class="two-col">
+                      <div>
+                        <label for="bulkInjectionOrder">批量注入排序</label>
+                        <input id="bulkInjectionOrder" type="number" min="0" max="999999" step="1" value="100" />
+                      </div>
+                      <div class="button-row compact-buttons align-end">
+                        <button class="primary-button" id="applyBulkInjection" type="button">应用注入设置</button>
+                      </div>
+                    </div>
+                    <div class="two-col">
+                      <label class="checkbox-row"><input id="bulkRecursiveEnabled" type="checkbox" checked /> 可被递归触发</label>
+                      <label class="checkbox-row"><input id="bulkPreventFurtherRecursion" type="checkbox" /> 阻止继续递归</label>
+                    </div>
+                    <div class="button-row compact-buttons">
+                      <button class="ghost-button" id="applyBulkRecursion" type="button">应用递归设置</button>
+                    </div>
+                  </div>
+                  <div class="stack-list" id="worldbookList"></div>
+                </div>
+              </details>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop hidden" id="modalBackdrop">
+      <div class="modal-card panel">
+        <div class="modal-head">
+          <h3 id="modalTitle">提示</h3>
+          <button class="ghost-button icon-button" id="closeModalButton" type="button">×</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-actions">
+          <button class="primary-button" id="confirmModalButton" type="button">我知道了</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden workshop-modal-backdrop" id="workshopModalBackdrop">
+      <div class="modal-card panel workshop-modal-card">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">创意工坊</p>
+            <h3 id="workshopModalTitle">图片弹窗</h3>
+          </div>
+          <button class="ghost-button icon-button" id="closeWorkshopModalButton" type="button">×</button>
+        </div>
+        <div class="workshop-modal-stage" id="workshopModalStage">触发阶段：A 阶段</div>
+        <div class="workshop-modal-body">
+          <img id="workshopModalImage" class="workshop-modal-image" loading="lazy" decoding="async" alt="创意工坊图片" />
+          <p id="workshopModalText" class="workshop-modal-text">这里会显示图片说明。</p>
+        </div>
+        <div class="modal-actions">
+          <button class="primary-button" id="confirmWorkshopModalButton" type="button">我知道了</button>
+        </div>
+      </div>
+    </div>
+
+    <audio id="bgmPlayer" preload="none"></audio>
+    <script src="./vendor/jszip.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
