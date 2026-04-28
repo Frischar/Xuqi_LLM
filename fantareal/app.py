@@ -1997,7 +1997,7 @@ def get_runtime_chat_config(runtime_overrides: dict[str, Any] | None = None) -> 
         "history_limit": overrides.get("history_limit") if runtime_overrides else settings.get("history_limit", 20),
         "request_timeout": overrides.get("request_timeout") if runtime_overrides else settings.get("request_timeout", 120),
         "demo_mode": overrides.get("demo_mode") if runtime_overrides else settings.get("demo_mode", False),
-        "sprite_enabled": False,
+        "sprite_enabled": overrides.get("sprite_enabled") if runtime_overrides else settings.get("sprite_enabled", False),
         "sprite_base_path": overrides.get("sprite_base_path") if runtime_overrides else settings.get("sprite_base_path", DEFAULT_SPRITE_BASE_PATH),
     }
 
@@ -3444,7 +3444,7 @@ async def stream_model_reply(
             accumulated_visible or accumulated_raw,
             worldbook_matches or [],
         ),
-        "sprite_tag": sprite_tag or ("骞抽潤" if llm_config.get("sprite_enabled", False) else ""),
+        "sprite_tag": sprite_tag or ("calm" if llm_config.get("sprite_enabled", False) else ""),
     }
     reply_result["full_reply"] = compose_full_reply(accumulated_think, str(reply_result["reply"]))
     reply_result["think"] = accumulated_think

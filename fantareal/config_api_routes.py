@@ -42,6 +42,19 @@ from .app_models import (
 )
 
 
+MAX_MEMORY_BUNDLE_UPLOAD_BYTES = 10 * 1024 * 1024
+MAX_MEMORY_BUNDLE_ENTRY_BYTES = 5 * 1024 * 1024
+MAX_MEMORY_BUNDLE_TOTAL_BYTES = 12 * 1024 * 1024
+MAX_MEMORY_BUNDLE_FILE_COUNT = 8
+MEMORY_BUNDLE_ALLOWED_FILENAMES = {
+    "memories.json",
+    "merged_memories.json",
+    "memory_outline.json",
+    "README.txt",
+    "导出说明.txt",
+}
+
+
 def strip_json_comments(raw_text: str) -> str:
     result: list[str] = []
     in_string = False
@@ -522,9 +535,36 @@ def register_config_api_routes(app: FastAPI, *, ctx: Any) -> None:
         if not filename.endswith(".zip"):
             raise HTTPException(status_code=400, detail="完整记忆包必须是 .zip 文件。")
 
-        raw_bytes = await file.read()
+        raw_bytes = await file.read(MAX_MEMORY_BUNDLE_UPLOAD_BYTES + 1)
         if not raw_bytes:
             raise HTTPException(status_code=400, detail="完整记忆包不能为空。")
+        if len(raw_bytes) > MAX_MEMORY_BUNDLE_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="完整记忆包不能大于 10 MB。")
+
+        def validate_bundle_archive(archive: ZipFile) -> None:
+            file_infos = [info for info in archive.infolist() if not info.is_dir()]
+            if len(file_infos) > MAX_MEMORY_BUNDLE_FILE_COUNT:
+                raise HTTPException(status_code=400, detail="完整记忆包内文件数量过多。")
+
+            total_size = 0
+            seen_entry_names: set[str] = set()
+            for info in file_infos:
+                raw_name = str(info.filename or "")
+                normalized_name = raw_name.replace("\\", "/").strip("/")
+                entry_name = Path(normalized_name).name
+                if normalized_name != entry_name:
+                    raise HTTPException(status_code=400, detail=f"完整记忆包不能包含子目录文件：{raw_name}")
+                if entry_name in seen_entry_names:
+                    raise HTTPException(status_code=400, detail=f"完整记忆包包含重复文件：{entry_name}")
+                seen_entry_names.add(entry_name)
+                if entry_name not in MEMORY_BUNDLE_ALLOWED_FILENAMES:
+                    raise HTTPException(status_code=400, detail=f"完整记忆包包含不支持的文件：{entry_name or info.filename}")
+                if info.file_size > MAX_MEMORY_BUNDLE_ENTRY_BYTES:
+                    raise HTTPException(status_code=413, detail=f"{entry_name} 不能大于 5 MB。")
+                total_size += int(info.file_size)
+
+            if total_size > MAX_MEMORY_BUNDLE_TOTAL_BYTES:
+                raise HTTPException(status_code=413, detail="完整记忆包解压后内容不能大于 12 MB。")
 
         def payload_items(payload: Any) -> list[Any]:
             if isinstance(payload, dict):
@@ -546,7 +586,10 @@ def register_config_api_routes(app: FastAPI, *, ctx: Any) -> None:
                 return []
             try:
                 with archive.open(candidates[0]) as handle:
-                    payload = json.loads(handle.read().decode("utf-8-sig"))
+                    entry_bytes = handle.read(MAX_MEMORY_BUNDLE_ENTRY_BYTES + 1)
+                    if len(entry_bytes) > MAX_MEMORY_BUNDLE_ENTRY_BYTES:
+                        raise HTTPException(status_code=413, detail=f"{entry_name} 不能大于 5 MB。")
+                    payload = json.loads(entry_bytes.decode("utf-8-sig"))
             except (OSError, UnicodeDecodeError, ValueError) as exc:
                 raise HTTPException(status_code=400, detail=f"完整记忆包中的 {entry_name} 读取失败。") from exc
             return payload_items(payload)
@@ -581,6 +624,7 @@ def register_config_api_routes(app: FastAPI, *, ctx: Any) -> None:
 
         try:
             with ZipFile(BytesIO(raw_bytes), "r") as archive:
+                validate_bundle_archive(archive)
                 imported_memories_raw = read_bundle_json(archive, "memories.json")
                 imported_merged_raw = read_bundle_json(archive, "merged_memories.json")
                 imported_outline_raw = read_bundle_json(archive, "memory_outline.json")

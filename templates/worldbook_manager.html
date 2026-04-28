@@ -519,6 +519,11 @@
         user-select: none;
       }
 
+      .worldbook-tool-card[data-tool-static="true"] .section-head {
+        padding-left: 0;
+        cursor: default;
+      }
+
       .worldbook-tool-card .section-head:hover h2 {
         color: var(--text);
       }
@@ -1741,7 +1746,7 @@
         </div>
 
         <div class="worldbook-control-grid">
-          <div class="panel config-panel worldbook-control-card worldbook-tool-card" data-tool-card="import">
+          <div class="panel config-panel worldbook-control-card worldbook-tool-card" data-tool-card="import" data-tool-static="true">
             <div class="section-head">
               <p class="eyebrow">Import</p>
             <h2>导入增强</h2>
@@ -1787,7 +1792,7 @@
           </div>
           </div>
 
-          <div class="panel config-panel worldbook-control-card worldbook-tool-card" data-tool-card="batch">
+          <div class="panel config-panel worldbook-control-card worldbook-tool-card" data-tool-card="batch" data-tool-static="true">
             <div class="section-head">
               <p class="eyebrow">Batch</p>
             <h2>批量编辑（V1）</h2>
@@ -2696,6 +2701,14 @@
               body.appendChild(head.nextSibling);
             }
             card.appendChild(body);
+          }
+
+          if (card.dataset.toolStatic === "true") {
+            card.classList.remove("is-collapsed");
+            card.dataset.collapsed = "false";
+            head.querySelector(".worldbook-tool-toggle")?.remove();
+            head.removeAttribute("tabindex");
+            return;
           }
 
           let button = head.querySelector(".worldbook-tool-toggle");
