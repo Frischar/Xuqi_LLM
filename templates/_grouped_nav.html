@@ -1,5 +1,5 @@
 {% set current_path = request.url.path %}
-{% set mod_state = namespace(has_worldbook_maker=false, has_tts_studio=false) %}
+{% set mod_state = namespace(has_worldbook_maker=false, has_tts_studio=false, has_status_panel=false) %}
 {% for mod in registered_mods or [] %}
   {% if mod.slug == 'worldbook-maker' %}
     {% set mod_state.has_worldbook_maker = true %}
@@ -7,9 +7,12 @@
   {% if mod.slug == 'tts-studio' %}
     {% set mod_state.has_tts_studio = true %}
   {% endif %}
+  {% if mod.slug == 'status-panel' %}
+    {% set mod_state.has_status_panel = true %}
+  {% endif %}
 {% endfor %}
 {% set settings_active = current_path == '/config' or current_path == '/config/user' or current_path == '/config/workshop' %}
-{% set persona_active = current_path == '/config/card' or current_path == '/config/preset' or current_path == '/config/memory' %}
+{% set persona_active = current_path == '/config/card' or current_path == '/config/preset' or current_path == '/config/memory' or current_path.startswith('/mods/status-panel') %}
 {% set worldbook_active = current_path.startswith('/config/worldbook') or current_path.startswith('/mods/worldbook-maker') %}
 {% set tts_active = current_path.startswith('/mods/tts-studio') %}
 
@@ -52,6 +55,9 @@
         <a class="navlink{% if current_path == '/config/card' %} active{% endif %}" href="/config/card">Card</a>
         <a class="navlink{% if current_path == '/config/preset' %} active{% endif %}" href="/config/preset">Preset</a>
         <a class="navlink{% if current_path == '/config/memory' %} active{% endif %}" href="/config/memory">Memory</a>
+        {% if mod_state.has_status_panel %}
+        <a class="navlink{% if current_path.startswith('/mods/status-panel') %} active{% endif %}" href="/mods/status-panel/app/">Status</a>
+        {% endif %}
       </div>
     </div>
   </details>

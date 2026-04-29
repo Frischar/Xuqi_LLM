@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>角色状态面板</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./static/status-panel.css?v=status-panel-v1-7-2-warmstyle" />
+</head>
+<body class="xsp-admin-page">
+  <main class="xsp-admin-shell">
+    <header class="xsp-admin-header">
+      <div>
+        <p class="xsp-kicker">Status Panel Mod</p>
+        <h1>角色状态面板</h1>
+        <p>扫描聊天、世界书、记忆、预设和当前角色卡里的状态块，提取成玩家能看的状态栏。聊天里的动态状态块会尽量从正文中纯隐藏，调试信息显示在状态栏面板内。</p>
+      </div>
+      <div class="xsp-admin-actions">
+        <a href="/chat" class="xsp-btn xsp-btn-ghost" target="_top">回到聊天</a>
+        <button id="xsp-scan-sources" class="xsp-btn" type="button">扫描资料</button>
+        <button id="xsp-add-character" class="xsp-btn" type="button">新增角色</button>
+        <button id="xsp-save" class="xsp-btn xsp-btn-primary" type="button">保存</button>
+      </div>
+    </header>
+
+    <section class="xsp-settings-card">
+      <label class="xsp-check-line">
+        <input id="xsp-enabled" type="checkbox" />
+        启用状态面板
+      </label>
+      <label class="xsp-check-line">
+        <input id="xsp-chat-panel-enabled" type="checkbox" />
+        在聊天页显示
+      </label>
+      <label class="xsp-check-line">
+        <input id="xsp-compact" type="checkbox" />
+        紧凑模式
+      </label>
+      <label>
+        标题
+        <input id="xsp-title" type="text" placeholder="角色状态" />
+      </label>
+      <label>
+        聊天页最多显示
+        <input id="xsp-max-visible" type="number" min="1" max="50" step="1" />
+      </label>
+      <label class="xsp-check-line">
+        <input id="xsp-hide-update-blocks" type="checkbox" />
+        隐藏聊天状态块
+      </label>
+      <label class="xsp-check-line">
+        <input id="xsp-show-update-debug-blocks" type="checkbox" />
+        在状态栏内显示调试信息
+      </label>
+      <label class="xsp-check-line">
+        <input id="xsp-show-pending-in-chat" type="checkbox" />
+        聊天页显示待确认
+      </label>
+      <label class="xsp-check-line">
+        <input id="xsp-hide-table-extras-in-detail" type="checkbox" />
+        详情隐藏表格扩展字段
+      </label>
+      <label>
+        自动应用状态更新
+        <select id="xsp-auto-apply-mode">
+          <option value="off">关闭，只加入待确认</option>
+          <option value="safe">安全字段自动应用</option>
+          <option value="all">全部字段自动应用</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="xsp-preview-card">
+      <div class="xsp-section-title">
+        <div>
+          <h2>聊天页表格列</h2>
+          <p>这里决定聊天页状态面板第一层显示哪些列。扩展字段填入角色资料后，可以在这里把它提升为表格列，不用手改 <code>field_schema.json</code>。默认情况下，展开详情仍会显示全部扩展字段；如果想避免重复，可在上方勾选“详情隐藏表格扩展字段”。</p>
+        </div>
+        <span id="xsp-schema-status"></span>
+      </div>
+
+      <div id="xsp-table-column-list" class="xsp-table-column-list"></div>
+
+      <div class="xsp-schema-add-row">
+        <label>
+          字段来源
+          <input id="xsp-new-column-key" type="text" placeholder="例如：extra.精神状态" />
+        </label>
+        <label>
+          表头名称
+          <input id="xsp-new-column-label" type="text" placeholder="例如：精神" />
+        </label>
+        <button id="xsp-add-table-column" class="xsp-btn" type="button">新增表格列</button>
+      </div>
+
+      <p class="xsp-muted xsp-schema-help">
+        常用固定字段：<code>name</code>、<code>alive_status</code>、<code>hp</code>、<code>mp</code>、<code>location</code>、<code>status_effects</code>。
+        扩展字段写法：<code>extra.腿部状态</code>、<code>extra.精神状态</code>、<code>extra.装备</code>。
+      </p>
+    </section>
+
+    <section class="xsp-preview-card">
+      <div class="xsp-section-title">
+        <div>
+          <h2>自动扫描结果</h2>
+          <p>只识别 <code>status_panel</code> / <code>status_panel_update</code> 状态块，为了避免误判，当前版本只识别标准代码块。点应用后才会写入状态栏。</p>
+        </div>
+        <span id="xsp-scan-status"></span>
+      </div>
+      <div class="xsp-source-toggles">
+        <label><input type="checkbox" data-source-toggle="history" checked /> 聊天</label>
+        <label><input type="checkbox" data-source-toggle="worldbook" checked /> 世界书</label>
+        <label><input type="checkbox" data-source-toggle="memories" checked /> 原记忆</label>
+        <label><input type="checkbox" data-source-toggle="merged_memories" checked /> 合并记忆</label>
+        <label><input type="checkbox" data-source-toggle="memory_outline" checked /> 大纲表</label>
+        <label><input type="checkbox" data-source-toggle="persona" checked /> 角色设定</label>
+        <label><input type="checkbox" data-source-toggle="cards" checked /> 当前角色卡</label>
+        <label><input type="checkbox" data-source-toggle="preset" checked /> 当前预设</label>
+      </div>
+      <div id="xsp-scan-results" class="xsp-scan-results">
+        <p class="xsp-muted">还没有扫描。可以先在世界书、角色卡、记忆或聊天里放入状态块，再点“扫描资料”。</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="xsp-section-title">
+        <div>
+          <h2>当前状态栏</h2>
+          <p>这里是已经写入的状态。聊天页底部的小状态栏会读取这份数据。</p>
+        </div>
+        <span id="xsp-save-status"></span>
+      </div>
+      <div id="xsp-character-list" class="xsp-character-list"></div>
+    </section>
+
+    <section class="xsp-preview-card">
+      <h2>状态摘要预览</h2>
+      <p>这段只是给你检查数据，不会自动塞回 Prompt。</p>
+      <pre id="xsp-summary-preview"></pre>
+    </section>
+
+    <section class="xsp-preview-card">
+      <h2>推荐状态块格式</h2>
+      <p>建议放到角色卡、世界书或记忆里。预设则用来要求模型在发生状态变化时输出 <code>status_panel_update</code>。动态更新块建议只写本轮发生变化的字段。</p>
+      <pre class="xsp-format-sample">```status_panel
+type: character
+id: lin_pianpian
+name: 林翩翩
+group: 主角团
+alive_status: 存活
+hp: 82/100
+mp: 34/60
+location: 雪巷客栈
+relationship: 长期同行
+effects: 旧伤, 疲惫
+summary: 雪巷捡回的少女，目前与玩家长期同行。
+```
+
+```status_panel_update
+type: character
+id: lin_pianpian
+name: 林翩翩
+location: 雪巷客栈二楼
+effects_add: 失血
+summary: 本轮冲突后旧伤加重，体力明显下降。
+```
+
+扩展字段示例：
+extra.腿部状态: 左腿轻微扭伤
+extra.精神状态: 稳定
+extra.装备: 平板电脑、画笔
+
+说明：HP / MP / 生死状态属于高风险字段，默认会进入待确认；位置、关系、状态增删、摘要和 extra.* 扩展字段会自动应用。表格列可在上方“聊天页表格列”里直接配置；进阶作者也可以继续改 data/field_schema.json。</pre>
+    </section>
+  </main>
+
+  <template id="xsp-character-template">
+    <article class="xsp-edit-card" data-character-id="">
+      <div class="xsp-edit-card-head">
+        <input data-field="name" class="xsp-name-input" placeholder="角色名" />
+        <label class="xsp-visible-label">
+          <input data-field="visible" type="checkbox" />
+          显示
+        </label>
+        <button data-action="delete" class="xsp-mini-danger" type="button">删除</button>
+      </div>
+
+      <div class="xsp-grid">
+        <label>分组<input data-field="group" placeholder="主角团 / 敌对 / 中立" /></label>
+        <label>生存状态<input data-field="alive_status" placeholder="存活 / 重伤 / 死亡 / 失踪" /></label>
+        <label>HP 当前<input data-field="hp_current" /></label>
+        <label>HP 上限<input data-field="hp_max" /></label>
+        <label>MP 当前<input data-field="mp_current" /></label>
+        <label>MP 上限<input data-field="mp_max" /></label>
+        <label>位置<input data-field="location" /></label>
+        <label>关系<input data-field="relationship" /></label>
+      </div>
+
+      <label class="xsp-full">
+        异常状态，用逗号隔开
+        <input data-field="status_effects" placeholder="旧伤, 疲惫, 中毒" />
+      </label>
+
+      <label class="xsp-full">
+        玩家可见简短摘要
+        <textarea data-field="short_summary" rows="2"></textarea>
+      </label>
+
+      <label class="xsp-full">
+        私有备注
+        <textarea data-field="private_note" rows="2"></textarea>
+      </label>
+
+      <label class="xsp-full">
+        扩展字段，每行一个“字段名: 字段值”
+        <textarea data-field="_extra_text" rows="3" placeholder="腿部状态: 轻微扭伤
+精神状态: 稳定"></textarea>
+      </label>
+    </article>
+  </template>
+
+  <script src="./static/status-panel-extractor.js?v=status-panel-v1-7-2-warmstyle"></script>
+  <script src="./static/status-panel-admin.js?v=status-panel-v1-7-2-warmstyle"></script>
+</body>
+</html>

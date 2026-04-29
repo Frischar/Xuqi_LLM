@@ -1641,6 +1641,57 @@
         }
       }
 
+      function getStatusPanelBridge() {
+        return window.XuqiStatusPanel || null;
+      }
+
+      function stripStatusPanelBlocksLocal(text) {
+        let value = String(text || "");
+        if (!value) return "";
+        // 本地兜底：状态栏脚本尚未 ready 时，也先把状态块从正文显示里清掉。
+        value = value.replace(/^[ \t]*```[ \t]*status_panel_update[^\n]*\n[\s\S]*?^[ \t]*```[ \t]*$/gim, "");
+        value = value.replace(/^[ \t]*~~~[ \t]*status_panel_update[^\n]*\n[\s\S]*?^[ \t]*~~~[ \t]*$/gim, "");
+        value = value.replace(/(?:^|\n)[ \t]*(?:```|~~~)?[ \t]*(?:status_panel_update|状态栏更新|状态更新)[ \t]*\n[\s\S]*$/i, "");
+        return value.replace(/\n{3,}/g, "\n\n").trim();
+      }
+
+      function isAssistantBubble(bubble) {
+        if (!bubble) return false;
+        const role = bubble.dataset?.role;
+        if (role) return role !== "user";
+        const message = bubble.closest?.(".message");
+        if (!message) return true;
+        return !message.classList.contains("user");
+      }
+
+      function sanitizeAssistantStatusBlocks(text, bubble = null) {
+        if (!isAssistantBubble(bubble)) return String(text || "");
+        const original = String(text || "");
+        const bridge = getStatusPanelBridge();
+        if (bridge && typeof bridge.sanitizeAssistantText === "function") {
+          try {
+            return stripStatusPanelBlocksLocal(bridge.sanitizeAssistantText(original));
+          } catch (error) {
+            console.warn("Status panel sanitize failed:", error);
+          }
+        }
+        return stripStatusPanelBlocksLocal(original);
+      }
+
+      function processAssistantStatusPanelText(text, context = {}) {
+        const original = String(text || "");
+        const bridge = getStatusPanelBridge();
+        if (bridge && typeof bridge.processAssistantText === "function") {
+          try {
+            const result = bridge.processAssistantText(original, context) || {};
+            const cleaned = typeof result.cleanedText === "string" ? result.cleanedText : original;
+            return stripStatusPanelBlocksLocal(cleaned);
+          } catch (error) {
+            console.warn("Status panel processing failed:", error);
+          }
+        }
+        return stripStatusPanelBlocksLocal(original);
+      }
       function renderBubbleContent(bubble, content) {
         if (!bubble) return;
         const state = typeof content === "object" && content !== null
@@ -1667,7 +1718,8 @@
           removeThinkNodes(bubble);
         }
 
-        const nextBodyText = state.visible || (state.think && state.thinking ? "" : "");
+        let nextBodyText = state.visible || (state.think && state.thinking ? "" : "");
+        nextBodyText = sanitizeAssistantStatusBlocks(nextBodyText, bubble);
         renderTtsVoiceBody(nodes.body, nextBodyText);
       }
 
@@ -1686,6 +1738,8 @@
 
         const bubble = document.createElement("div");
         bubble.className = "bubble";
+        bubble.dataset.role = role;
+        wrapper.dataset.role = role;
         renderBubbleContent(bubble, content);
 
         const meta = document.createElement("div");
@@ -2895,6 +2949,10 @@
             },
             onDone(data) {
               finalReply = typeof data.reply === "string" ? data.reply : finalReply;
+              finalReply = processAssistantStatusPanelText(finalReply, {
+                source: "chat_done",
+                userText: text,
+              });
               ensureFinalVisible(assistantEntry, finalReply);
               if (typeof data.think === "string") {
                 assistantEntry.state.think = data.think;

@@ -1,0 +1,58 @@
+{
+  "table_columns": [
+    {
+      "key": "name",
+      "label": "角色名"
+    },
+    {
+      "key": "alive_status",
+      "label": "存活状态"
+    },
+    {
+      "key": "hp",
+      "label": "HP"
+    },
+    {
+      "key": "mp",
+      "label": "MP"
+    },
+    {
+      "key": "location",
+      "label": "地点"
+    },
+    {
+      "key": "status_effects",
+      "label": "身体状态"
+    },
+    {
+      "key": "extra.腿部状态",
+      "label": "腿部"
+    }
+  ],
+  "detail_fields": [
+    {
+      "key": "group",
+      "label": "分组"
+    },
+    {
+      "key": "relationship",
+      "label": "关系"
+    },
+    {
+      "key": "short_summary",
+      "label": "摘要"
+    },
+    {
+      "key": "last_event",
+      "label": "最近变化"
+    },
+    {
+      "key": "updated_at",
+      "label": "更新时间"
+    },
+    {
+      "key": "extra.*",
+      "label": "扩展资料"
+    }
+  ]
+}
