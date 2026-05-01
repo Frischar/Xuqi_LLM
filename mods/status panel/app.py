@@ -24,9 +24,18 @@ def get_resource_dir() -> Path:
 
 APP_DIR = Path(__file__).resolve().parent
 RESOURCE_DIR = get_resource_dir()
-DATA_DIR = APP_DIR / "data"
+# Mod resources live in mods/status panel/, but runtime state should not be tied to
+# the mod package directory. Users often replace the whole mod folder during updates;
+# if characters.json lives inside that folder, the current play state can be reset to
+# initial scan data. Keep the mod-bundled data path as a legacy fallback, and migrate
+# runtime state into the project-level data/status_panel/ directory on first use.
+LEGACY_DATA_DIR = APP_DIR / "data"
+PROJECT_ROOT = APP_DIR.parent.parent if APP_DIR.parent.name.lower() == "mods" else APP_DIR.parent
+DATA_DIR = PROJECT_ROOT / "data" / "status_panel"
 STATE_PATH = DATA_DIR / "characters.json"
 SCHEMA_PATH = DATA_DIR / "field_schema.json"
+LEGACY_STATE_PATH = LEGACY_DATA_DIR / "characters.json"
+LEGACY_SCHEMA_PATH = LEGACY_DATA_DIR / "field_schema.json"
 STATIC_DIR = RESOURCE_DIR / "static"
 TEMPLATES_DIR = RESOURCE_DIR / "templates"
 
@@ -144,6 +153,28 @@ def write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def migrate_json_once(primary_path: Path, legacy_path: Path, default: Any) -> None:
+    """Copy legacy mod-local JSON into the project data dir only when needed.
+
+    This keeps current status persistent across mod folder replacement while still
+    honoring older installs that already have data/characters.json inside the mod.
+    """
+    if primary_path.exists() or not legacy_path.exists():
+        return
+    payload = read_json(legacy_path, default)
+    try:
+        write_json(primary_path, payload)
+    except OSError:
+        # If the new project data path cannot be written, the later read_json call
+        # will simply fall back to default. Do not break the chat page startup.
+        pass
+
+
+def ensure_runtime_data_paths() -> None:
+    migrate_json_once(STATE_PATH, LEGACY_STATE_PATH, DEFAULT_STATE)
+    migrate_json_once(SCHEMA_PATH, LEGACY_SCHEMA_PATH, DEFAULT_FIELD_SCHEMA)
+
+
 def now_string() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -176,6 +207,27 @@ def normalize_list(value: Any, *, keep_none: bool = False) -> list[str]:
         if text not in result:
             result.append(text)
     return result
+
+
+def normalize_aliases(value: Any) -> list[str]:
+    """User configured character aliases. Used for binding, not normal display."""
+    aliases = normalize_list(value)
+    return [item for item in aliases if item and not is_emptyish(item)]
+
+
+def normalize_mention_key(value: Any) -> str:
+    text = compact_text(value)
+    if not text:
+        return ""
+    for ch in " \t\r\n　“”\"'‘’「」『』（）()[]【】，。！？、,.!?~～—-…:：;；":
+        text = text.replace(ch, "")
+    return text.lower()
+
+
+def same_mention(left: Any, right: Any) -> bool:
+    a = normalize_mention_key(left)
+    b = normalize_mention_key(right)
+    return bool(a and b and a == b)
 
 
 def normalize_extra(value: Any) -> dict[str, str]:
@@ -235,11 +287,13 @@ def normalize_field_schema(raw: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def get_field_schema() -> dict[str, Any]:
+    ensure_runtime_data_paths()
     raw = read_json(SCHEMA_PATH, DEFAULT_FIELD_SCHEMA)
     return normalize_field_schema(raw)
 
 
 def save_field_schema(payload: dict[str, Any]) -> dict[str, Any]:
+    ensure_runtime_data_paths()
     current = get_field_schema()
     raw = {
         "table_columns": payload.get("table_columns", current.get("table_columns", [])),
@@ -278,6 +332,7 @@ def normalize_character(raw: dict[str, Any], index: int) -> dict[str, Any]:
     return {
         "id": char_id,
         "name": compact_text(raw.get("name")) or f"角色 {index}",
+        "aliases": normalize_aliases(raw.get("aliases", raw.get("alias", raw.get("别名", [])))),
         "group": compact_text(raw.get("group")) or "未分组",
         "visible": bool(raw.get("visible", True)),
         "alive_status": compact_text(raw.get("alive_status")) or "未知",
@@ -310,6 +365,7 @@ def normalize_settings(raw: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def get_state() -> dict[str, Any]:
+    ensure_runtime_data_paths()
     raw = read_json(STATE_PATH, DEFAULT_STATE)
     settings = normalize_settings(raw.get("settings") if isinstance(raw.get("settings"), dict) else None)
 
@@ -330,6 +386,7 @@ def get_state() -> dict[str, Any]:
 
 
 def save_state(payload: dict[str, Any]) -> dict[str, Any]:
+    ensure_runtime_data_paths()
     current = get_state()
     settings = normalize_settings(payload.get("settings") if isinstance(payload.get("settings"), dict) else current.get("settings"))
 
@@ -443,9 +500,12 @@ def find_character(characters: list[dict[str, Any]], update: dict[str, Any]) -> 
     for item in characters:
         item_id = compact_text(item.get("id"))
         item_name = compact_text(item.get("name"))
+        item_aliases = normalize_aliases(item.get("aliases", []))
         if update_id and item_id and update_id == item_id:
             return item
-        if update_name and item_name and update_name == item_name:
+        if update_name and item_name and same_mention(update_name, item_name):
+            return item
+        if update_name and any(same_mention(update_name, alias) for alias in item_aliases):
             return item
     return None
 
@@ -457,6 +517,7 @@ def ensure_character(characters: list[dict[str, Any]], update: dict[str, Any]) -
     target = {
         "id": compact_text(update.get("id")) or f"char-{uuid4().hex[:8]}",
         "name": compact_text(update.get("name")) or "未命名角色",
+        "aliases": normalize_aliases(update.get("aliases", [])),
         "group": compact_text(update.get("group")) or "自动更新",
         "visible": True,
         "alive_status": compact_text(update.get("alive_status")) or "未知",

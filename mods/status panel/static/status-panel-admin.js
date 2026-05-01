@@ -2,6 +2,7 @@
   const API_STATE = "/mods/status-panel/app/api/state";
   const API_SUMMARY = "/mods/status-panel/app/api/summary";
   const API_SCHEMA = "/mods/status-panel/app/api/field-schema";
+  const API_RESOLVE_PENDING = "/mods/status-panel/app/api/pending-updates/resolve";
 
   let state = { settings: {}, characters: [], pending_updates: [], processed_update_ids: [] };
   let fieldSchema = {
@@ -22,7 +23,10 @@
       { key: "extra.*", label: "扩展资料" },
     ],
   };
-  let latestScanCandidates = [];
+
+  let activeTab = "overview";
+  let selectedCharacterId = "";
+  let characterSearch = "";
 
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -32,7 +36,7 @@
   }
 
   function esc(value) {
-    return String(value || "")
+    return String(value ?? "")
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -50,6 +54,29 @@
       .filter(Boolean);
   }
 
+  function aliasesToText(value) {
+    return splitList(Array.isArray(value) ? value.join(",") : value).join("、");
+  }
+
+  function normalizeMentionKey(value) {
+    return String(value || "")
+      .trim()
+      .replace(/[\s\u3000]+/g, "")
+      .replace(/[“”\"'‘’「」『』（）()\[\]【】]/g, "")
+      .replace(/[，。！？、,.!?~～—\-…:：;；]/g, "")
+      .toLowerCase();
+  }
+
+  function sameMention(left, right) {
+    const a = normalizeMentionKey(left);
+    const b = normalizeMentionKey(right);
+    return !!a && !!b && a === b;
+  }
+
+  function textToAliases(value) {
+    return splitList(value);
+  }
+
   function joinList(value) {
     return splitList(value).join(", ");
   }
@@ -59,7 +86,9 @@
     const result = {};
     Object.entries(value).forEach(([key, rawVal]) => {
       const name = String(key || "").trim();
-      const text = Array.isArray(rawVal) ? rawVal.map((item) => String(item || "").trim()).filter(Boolean).join("、") : String(rawVal || "").trim();
+      const text = Array.isArray(rawVal)
+        ? rawVal.map((item) => String(item || "").trim()).filter(Boolean).join("、")
+        : String(rawVal || "").trim();
       if (name && text) result[name] = text;
     });
     return result;
@@ -86,11 +115,30 @@
     return new Date().toLocaleString("zh-CN", { hour12: false });
   }
 
+  function isEmptyValue(value) {
+    const text = String(value ?? "").trim();
+    return !text || ["?", "未知", "未记录", "未提取", "无", "无明显异常"].includes(text);
+  }
+
+  function hpText(item) {
+    return item?.hp_current || item?.hp_max ? `${item.hp_current || "?"}/${item.hp_max || "?"}` : "未记录";
+  }
+
+  function mpText(item) {
+    return item?.mp_current || item?.mp_max ? `${item.mp_current || "?"}/${item.mp_max || "?"}` : "未记录";
+  }
+
+  function statusText(item) {
+    const effects = splitList(item?.status_effects);
+    return effects.length ? effects.join("、") : "无明显异常";
+  }
+
   function normalizeSchema(schema) {
     const fallbackDetails = fieldSchema.detail_fields?.length ? fieldSchema.detail_fields : [
       { key: "group", label: "分组" },
       { key: "relationship", label: "关系" },
       { key: "short_summary", label: "摘要" },
+      { key: "last_event", label: "最近变化" },
       { key: "updated_at", label: "更新时间" },
       { key: "extra.*", label: "扩展资料" },
     ];
@@ -134,24 +182,34 @@
     const list = $("#xsp-table-column-list");
     if (!list) return;
     const columns = Array.isArray(fieldSchema.table_columns) ? fieldSchema.table_columns : [];
-    list.innerHTML = "";
+    list.innerHTML = `
+      <div class="xsp-field-table-header" aria-hidden="true">
+        <span class="xsp-field-table-handle">排序</span>
+        <span>字段来源</span>
+        <span>显示名称</span>
+        <span>操作</span>
+      </div>
+    `;
     columns.forEach((column, index) => {
       const row = document.createElement("div");
-      row.className = "xsp-column-row";
+      row.className = "xsp-column-row xsp-field-card xsp-field-table-row";
       row.dataset.index = String(index);
       row.innerHTML = `
-        <span class="xsp-column-order">${index + 1}</span>
-        <label>
-          字段来源
+        <div class="xsp-field-drag-cell xsp-field-order-cell" title="拖动排序，也可使用右侧上移/下移">
+          <button type="button" class="xsp-drag-handle" draggable="true" data-drag-index="${index}" aria-label="拖动调整顺序">⋮⋮</button>
+          <span class="xsp-column-order">${index + 1}</span>
+        </div>
+        <label class="xsp-field-source-cell">
+          <span>字段来源</span>
           <input data-column-field="key" value="${esc(column.key || "")}" placeholder="name 或 extra.腿部状态" />
         </label>
-        <label>
-          表头名称
+        <label class="xsp-field-label-cell">
+          <span>显示名称</span>
           <input data-column-field="label" value="${esc(column.label || column.key || "")}" placeholder="角色名 / 腿部" />
         </label>
-        <div class="xsp-column-actions">
-          <button type="button" class="xsp-mini-btn" data-column-action="up" ${index === 0 ? "disabled" : ""}>上移</button>
-          <button type="button" class="xsp-mini-btn" data-column-action="down" ${index === columns.length - 1 ? "disabled" : ""}>下移</button>
+        <div class="xsp-column-actions xsp-field-card-actions">
+          <button type="button" class="xsp-icon-btn" title="上移" data-column-action="up" ${index === 0 ? "disabled" : ""}>↑</button>
+          <button type="button" class="xsp-icon-btn" title="下移" data-column-action="down" ${index === columns.length - 1 ? "disabled" : ""}>↓</button>
           <button type="button" class="xsp-mini-danger" data-column-action="delete">删除</button>
         </div>
       `;
@@ -159,7 +217,13 @@
     });
 
     list.querySelectorAll("[data-column-field]").forEach((input) => {
-      input.addEventListener("input", collectFieldSchema);
+      input.addEventListener("input", () => {
+        collectFieldSchema();
+        const row = input.closest(".xsp-field-card");
+        const label = row?.querySelector('[data-column-field="label"]')?.value?.trim();
+        const key = row?.querySelector('[data-column-field="key"]')?.value?.trim();
+        row?.setAttribute("data-field-title", label || key || "未命名字段");
+      });
       input.addEventListener("change", collectFieldSchema);
     });
     list.querySelectorAll("[data-column-action]").forEach((button) => {
@@ -169,13 +233,56 @@
         if (!Number.isInteger(index) || index < 0) return;
         collectFieldSchema();
         const action = button.dataset.columnAction;
-        if (action === "delete") {
-          fieldSchema.table_columns.splice(index, 1);
-        } else if (action === "up" && index > 0) {
-          [fieldSchema.table_columns[index - 1], fieldSchema.table_columns[index]] = [fieldSchema.table_columns[index], fieldSchema.table_columns[index - 1]];
-        } else if (action === "down" && index < fieldSchema.table_columns.length - 1) {
-          [fieldSchema.table_columns[index + 1], fieldSchema.table_columns[index]] = [fieldSchema.table_columns[index], fieldSchema.table_columns[index + 1]];
+        if (action === "delete") fieldSchema.table_columns.splice(index, 1);
+        if (action === "up" && index > 0) [fieldSchema.table_columns[index - 1], fieldSchema.table_columns[index]] = [fieldSchema.table_columns[index], fieldSchema.table_columns[index - 1]];
+        if (action === "down" && index < fieldSchema.table_columns.length - 1) [fieldSchema.table_columns[index + 1], fieldSchema.table_columns[index]] = [fieldSchema.table_columns[index], fieldSchema.table_columns[index + 1]];
+        renderFieldSchema();
+      });
+    });
+
+    let dragSourceIndex = null;
+    list.querySelectorAll(".xsp-drag-handle").forEach((handle) => {
+      handle.addEventListener("dragstart", (event) => {
+        collectFieldSchema();
+        const row = handle.closest(".xsp-column-row");
+        dragSourceIndex = Number(row?.dataset?.index ?? -1);
+        if (!Number.isInteger(dragSourceIndex) || dragSourceIndex < 0) {
+          event.preventDefault();
+          dragSourceIndex = null;
+          return;
         }
+        row.classList.add("is-dragging");
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", String(dragSourceIndex));
+      });
+      handle.addEventListener("dragend", () => {
+        dragSourceIndex = null;
+        list.querySelectorAll(".xsp-column-row").forEach((row) => row.classList.remove("is-dragging", "is-drop-target"));
+      });
+    });
+
+    list.querySelectorAll(".xsp-column-row").forEach((row) => {
+      row.addEventListener("dragover", (event) => {
+        if (dragSourceIndex === null) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        row.classList.add("is-drop-target");
+      });
+      row.addEventListener("dragleave", () => row.classList.remove("is-drop-target"));
+      row.addEventListener("drop", (event) => {
+        if (dragSourceIndex === null) return;
+        event.preventDefault();
+        const targetIndex = Number(row.dataset.index ?? -1);
+        if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex === dragSourceIndex) {
+          row.classList.remove("is-drop-target");
+          return;
+        }
+        collectFieldSchema();
+        const nextColumns = [...fieldSchema.table_columns];
+        const [moved] = nextColumns.splice(dragSourceIndex, 1);
+        nextColumns.splice(targetIndex, 0, moved);
+        fieldSchema = { ...fieldSchema, table_columns: nextColumns };
+        dragSourceIndex = null;
         renderFieldSchema();
       });
     });
@@ -192,10 +299,7 @@
       seen.add(key);
       columns.push({ key, label: label || key });
     });
-    fieldSchema = {
-      ...fieldSchema,
-      table_columns: columns,
-    };
+    fieldSchema = { ...fieldSchema, table_columns: columns };
     return fieldSchema;
   }
 
@@ -236,12 +340,12 @@
       fieldSchema = normalizeSchema(data.schema || fieldSchema);
       renderFieldSchema();
       if (!quiet && status) {
-        status.textContent = "表格列已保存";
+        status.textContent = "显示字段已保存";
         setTimeout(() => { status.textContent = ""; }, 1600);
       }
       return true;
     } catch {
-      if (status) status.textContent = "表格列保存失败";
+      if (status) status.textContent = "显示字段保存失败";
       return false;
     }
   }
@@ -255,139 +359,338 @@
       pending_updates: Array.isArray(data.pending_updates) ? data.pending_updates : [],
       processed_update_ids: Array.isArray(data.processed_update_ids) ? data.processed_update_ids : [],
     };
+    ensureSelectedCharacter();
+    renderAll();
+    await renderSummary();
+  }
+
+  function renderAll() {
     renderSettings();
-    renderCharacters();
-    renderSummary();
-  }
-
-  function renderSettings() {
-    $("#xsp-enabled").checked = state.settings.enabled !== false;
-    $("#xsp-chat-panel-enabled").checked = state.settings.chat_panel_enabled !== false;
-    $("#xsp-compact").checked = state.settings.compact !== false;
-    $("#xsp-title").value = state.settings.title || "角色状态";
-    $("#xsp-max-visible").value = Number(state.settings.max_visible || 8);
-    $("#xsp-hide-update-blocks").checked = state.settings.hide_update_blocks !== false;
-    const debugToggle = $("#xsp-show-update-debug-blocks");
-    if (debugToggle) debugToggle.checked = state.settings.show_update_debug_blocks === true;
-    $("#xsp-show-pending-in-chat").checked = state.settings.show_pending_in_chat !== false;
-    $("#xsp-hide-table-extras-in-detail").checked = state.settings.hide_table_extras_in_detail === true;
-    $("#xsp-auto-apply-mode").value = state.settings.auto_apply_mode || "safe";
-  }
-
-  function collectSettings() {
-    state.settings = {
-      ...state.settings,
-      enabled: $("#xsp-enabled").checked,
-      chat_panel_enabled: $("#xsp-chat-panel-enabled").checked,
-      compact: $("#xsp-compact").checked,
-      title: $("#xsp-title").value.trim() || "角色状态",
-      max_visible: Math.max(1, Math.min(50, Number($("#xsp-max-visible").value || 8))),
-      hide_update_blocks: $("#xsp-hide-update-blocks").checked,
-      show_update_debug_blocks: $("#xsp-show-update-debug-blocks")?.checked === true,
-      show_pending_in_chat: $("#xsp-show-pending-in-chat").checked,
-      hide_table_extras_in_detail: $("#xsp-hide-table-extras-in-detail").checked,
-      auto_apply_mode: $("#xsp-auto-apply-mode").value || "safe",
-    };
-  }
-
-  function renderCharacters() {
-    const list = $("#xsp-character-list");
-    const template = $("#xsp-character-template");
-    list.innerHTML = "";
-
-    if (!state.characters.length) {
-      const empty = document.createElement("div");
-      empty.className = "xsp-empty-card";
-      empty.textContent = "当前还没有角色状态。你可以新增，也可以先扫描资料后应用候选。";
-      list.appendChild(empty);
-      renderSummaryLocal();
-      return;
-    }
-
-    state.characters.forEach((character) => {
-      const node = template.content.firstElementChild.cloneNode(true);
-      node.dataset.characterId = character.id || uid();
-
-      node.querySelectorAll("[data-field]").forEach((input) => {
-        const field = input.dataset.field;
-        if (field === "visible") {
-          input.checked = character.visible !== false;
-        } else if (field === "status_effects") {
-          input.value = joinList(character.status_effects);
-        } else if (field === "_extra_text") {
-          input.value = extraToText(character.extra || character.extras || character.custom || {});
-        } else {
-          input.value = character[field] || "";
-        }
-      });
-
-      node.querySelector("[data-action='delete']").addEventListener("click", () => {
-        state.characters = state.characters.filter((item) => String(item.id) !== String(node.dataset.characterId));
-        renderCharacters();
-        renderSummaryLocal();
-      });
-
-      node.addEventListener("input", () => {
-        collectCharacters();
-        renderSummaryLocal();
-      });
-      node.addEventListener("change", () => {
-        collectCharacters();
-        renderSummaryLocal();
-      });
-
-      list.appendChild(node);
-    });
-
+    renderDashboardStats();
+    renderPendingList();
+    renderOverviewCards();
+    renderCharacterNav();
+    renderCharacterEditor();
     renderSummaryLocal();
   }
 
-  function collectCharacters() {
-    state.characters = $$(".xsp-edit-card").map((card) => {
-      const item = { id: card.dataset.characterId || uid() };
-      card.querySelectorAll("[data-field]").forEach((input) => {
-        const field = input.dataset.field;
-        if (field === "visible") {
-          item[field] = input.checked;
-        } else if (field === "status_effects") {
-          item[field] = splitList(input.value);
-        } else if (field === "_extra_text") {
-          item.extra = parseExtraText(input.value);
-        } else {
-          item[field] = input.value.trim();
-        }
-      });
-      return item;
-    });
+  function renderSettings() {
+    const setChecked = (selector, value) => { const el = $(selector); if (el) el.checked = value; };
+    const setValue = (selector, value) => { const el = $(selector); if (el) el.value = value; };
+    setChecked("#xsp-enabled", state.settings.enabled !== false);
+    setChecked("#xsp-chat-panel-enabled", state.settings.chat_panel_enabled !== false);
+    setChecked("#xsp-compact", state.settings.compact !== false);
+    setChecked("#xsp-hide-update-blocks", state.settings.hide_update_blocks !== false);
+    setChecked("#xsp-show-update-debug-blocks", state.settings.show_update_debug_blocks === true);
+    setChecked("#xsp-show-pending-in-chat", state.settings.show_pending_in_chat !== false);
+    setChecked("#xsp-hide-table-extras-in-detail", state.settings.hide_table_extras_in_detail === true);
+    setValue("#xsp-title", state.settings.title || "角色状态");
+    setValue("#xsp-max-visible", Number(state.settings.max_visible || 8));
+    setValue("#xsp-auto-apply-mode", state.settings.auto_apply_mode || "safe");
   }
 
-  function renderSummaryLocal() {
+  function collectSettings() {
+    const checked = (selector, fallback = false) => $(selector)?.checked ?? fallback;
+    const value = (selector, fallback = "") => $(selector)?.value ?? fallback;
+    state.settings = {
+      ...state.settings,
+      enabled: checked("#xsp-enabled", true),
+      chat_panel_enabled: checked("#xsp-chat-panel-enabled", true),
+      compact: checked("#xsp-compact", true),
+      title: String(value("#xsp-title", "角色状态")).trim() || "角色状态",
+      max_visible: Math.max(1, Math.min(50, Number(value("#xsp-max-visible", 8) || 8))),
+      hide_update_blocks: checked("#xsp-hide-update-blocks", true),
+      show_update_debug_blocks: checked("#xsp-show-update-debug-blocks", false),
+      show_pending_in_chat: checked("#xsp-show-pending-in-chat", true),
+      hide_table_extras_in_detail: checked("#xsp-hide-table-extras-in-detail", false),
+      auto_apply_mode: value("#xsp-auto-apply-mode", "safe") || "safe",
+    };
+  }
+
+  function ensureSelectedCharacter() {
+    if (selectedCharacterId && state.characters.some((item) => String(item.id) === String(selectedCharacterId))) return;
+    selectedCharacterId = String(state.characters[0]?.id || "");
+  }
+
+  function selectedCharacter() {
+    return state.characters.find((item) => String(item.id) === String(selectedCharacterId));
+  }
+
+  function renderDashboardStats() {
+    const root = $("#xsp-dashboard-stats");
+    if (!root) return;
+    const visible = state.characters.filter((item) => item.visible !== false).length;
+    const hidden = Math.max(0, state.characters.length - visible);
+    const pending = state.pending_updates.length;
+    const latest = state.characters
+      .map((item) => item.updated_at)
+      .filter(Boolean)
+      .slice(-1)[0] || "暂无";
+    root.innerHTML = `
+      <article><strong>${state.characters.length}</strong><span>角色总数</span></article>
+      <article><strong>${visible}</strong><span>聊天页显示</span></article>
+      <article><strong>${hidden}</strong><span>已隐藏</span></article>
+      <article class="${pending ? "has-pending" : ""}"><strong>${pending}</strong><span>待确认</span></article>
+      <article class="is-wide"><strong>${esc(latest)}</strong><span>最近更新时间</span></article>
+    `;
+  }
+
+  function renderPendingList() {
+    const root = $("#xsp-pending-list");
+    const status = $("#xsp-pending-status");
+    if (!root) return;
+    if (status) status.textContent = state.pending_updates.length ? `${state.pending_updates.length} 条待处理` : "暂无待确认";
+    root.innerHTML = "";
+    if (!state.pending_updates.length) {
+      root.innerHTML = `<p class="xsp-muted">当前没有待确认状态变化。</p>`;
+      return;
+    }
+    for (const item of state.pending_updates) {
+      const update = item.update || {};
+      const fields = Array.isArray(item.pending_fields) ? item.pending_fields.join("、") : "all";
+      const card = document.createElement("article");
+      card.className = "xsp-admin-pending-card";
+      card.innerHTML = `
+        <div>
+          <strong>${esc(update.name || update.id || "未命名角色")}</strong>
+          <p>${esc(update.last_event || update.short_summary || update.summary || update.location || "有一条待确认更新")}</p>
+          <span>来源：${esc(item.source || "聊天")}｜字段：${esc(fields)}｜${esc(item.created_at || "")}</span>
+        </div>
+        <div class="xsp-pending-actions">
+          <button type="button" class="xsp-btn xsp-btn-primary" data-action="apply">应用</button>
+          <button type="button" class="xsp-btn xsp-btn-danger-soft" data-action="ignore">忽略</button>
+        </div>
+      `;
+      card.querySelector('[data-action="apply"]').addEventListener("click", () => resolvePending(item.update_id, "apply"));
+      card.querySelector('[data-action="ignore"]').addEventListener("click", () => resolvePending(item.update_id, "ignore"));
+      root.appendChild(card);
+    }
+  }
+
+  async function resolvePending(updateId, action) {
+    if (!updateId) return;
+    const status = $("#xsp-pending-status");
+    if (status) status.textContent = action === "ignore" ? "正在忽略..." : "正在应用...";
+    try {
+      const response = await fetch(API_RESOLVE_PENDING, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ update_id: updateId, action }),
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      await loadState();
+    } catch (error) {
+      if (status) status.textContent = `处理失败：${error.message || error}`;
+    }
+  }
+
+  function renderOverviewCards() {
+    const root = $("#xsp-overview-list");
+    if (!root) return;
+    root.innerHTML = "";
+    if (!state.characters.length) {
+      root.innerHTML = `<div class="xsp-empty-card">当前还没有角色状态。可以新增角色，也可以去“资料扫描”里导入初始化资料。</div>`;
+      return;
+    }
+    for (const item of state.characters) {
+      const card = document.createElement("article");
+      card.className = `xsp-overview-card ${item.visible === false ? "is-hidden" : ""}`;
+      card.innerHTML = `
+        <div class="xsp-overview-card-head">
+          <div>
+            <strong>${esc(item.name || "未命名角色")}</strong>
+            <span>${esc(item.group || "未分组")}</span>
+          </div>
+          <em>${item.visible === false ? "已隐藏" : "显示中"}</em>
+        </div>
+        <div class="xsp-overview-fields xsp-status-chip-row">
+          <span class="xsp-status-chip"><b>地点</b>${esc(item.location || "未记录")}</span>
+          <span class="xsp-status-chip"><b>身体</b>${esc(statusText(item))}</span>
+          <span class="xsp-status-chip"><b>HP</b>${esc(hpText(item))}</span>
+          <span class="xsp-status-chip"><b>MP</b>${esc(mpText(item))}</span>
+        </div>
+        <p class="xsp-overview-summary">${esc(item.last_event || item.short_summary || "暂无最近变化。")}</p>
+        <div class="xsp-overview-actions">
+          <button type="button" class="xsp-btn" data-edit>编辑</button>
+        </div>
+      `;
+      card.querySelector("[data-edit]").addEventListener("click", () => {
+        selectedCharacterId = item.id;
+        switchTab("editor");
+        renderCharacterNav();
+        renderCharacterEditor();
+      });
+      root.appendChild(card);
+    }
+  }
+
+  function renderCharacterNav() {
+    const root = $("#xsp-character-nav-list");
+    if (!root) return;
+    const keyword = characterSearch.trim().toLowerCase();
+    const filtered = state.characters.filter((item) => {
+      if (!keyword) return true;
+      return [item.name, item.group, item.location, item.relationship].some((value) => String(value || "").toLowerCase().includes(keyword));
+    });
+    root.innerHTML = "";
+    if (!filtered.length) {
+      root.innerHTML = `<p class="xsp-muted">没有匹配的角色。</p>`;
+      return;
+    }
+    for (const item of filtered) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `xsp-character-nav-item ${String(item.id) === String(selectedCharacterId) ? "is-active" : ""}`;
+      button.innerHTML = `
+        <strong>${esc(item.name || "未命名角色")}</strong>
+        <span>${esc(item.location || item.group || "未记录")}</span>
+      `;
+      button.addEventListener("click", () => {
+        collectActiveEditor();
+        selectedCharacterId = item.id;
+        renderCharacterNav();
+        renderCharacterEditor();
+      });
+      root.appendChild(button);
+    }
+  }
+
+  function renderCharacterEditor() {
+    const root = $("#xsp-character-editor");
+    const template = $("#xsp-character-editor-template");
+    if (!root || !template) return;
+    root.innerHTML = "";
+    ensureSelectedCharacter();
+    const character = selectedCharacter();
+    if (!character) {
+      root.innerHTML = `<div class="xsp-empty-card">还没有可编辑角色。点击左侧“新增”。</div>`;
+      return;
+    }
+    const node = template.content.firstElementChild.cloneNode(true);
+    node.dataset.characterId = character.id || uid();
+    node.querySelectorAll("[data-field]").forEach((input) => {
+      const field = input.dataset.field;
+      if (field === "visible") input.checked = character.visible !== false;
+      else if (field === "status_effects") input.value = joinList(character.status_effects);
+      else if (field === "_aliases_text") input.value = aliasesToText(character.aliases || []);
+      else if (field === "_extra_text") input.value = extraToText(character.extra || character.extras || character.custom || {});
+      else input.value = character[field] || "";
+    });
+
+    node.querySelector("[data-action='delete']").addEventListener("click", () => {
+      const name = character.name || "这个角色";
+      if (!window.confirm(`确认删除 ${name} 的状态吗？`)) return;
+      state.characters = state.characters.filter((item) => String(item.id) !== String(node.dataset.characterId));
+      selectedCharacterId = String(state.characters[0]?.id || "");
+      renderAll();
+    });
+
+    node.addEventListener("input", () => {
+      collectActiveEditor();
+      renderSummaryLocal();
+    });
+    node.addEventListener("change", () => {
+      collectActiveEditor();
+      renderCharacterNav();
+      renderDashboardStats();
+      renderSummaryLocal();
+    });
+
+    root.appendChild(node);
+  }
+
+  function collectActiveEditor() {
+    const card = $("#xsp-character-editor .xsp-edit-card");
+    if (!card) return;
+    const id = card.dataset.characterId || selectedCharacterId || uid();
+    let item = state.characters.find((character) => String(character.id) === String(id));
+    if (!item) {
+      item = { id };
+      state.characters.push(item);
+    }
+    item.id = id;
+    card.querySelectorAll("[data-field]").forEach((input) => {
+      const field = input.dataset.field;
+      if (field === "visible") item[field] = input.checked;
+      else if (field === "status_effects") item[field] = splitList(input.value);
+      else if (field === "_aliases_text") item.aliases = textToAliases(input.value);
+      else if (field === "_extra_text") item.extra = parseExtraText(input.value);
+      else item[field] = input.value.trim();
+    });
+    item.updated_at = item.updated_at || nowString();
+  }
+
+  function collectCharacters() {
+    collectActiveEditor();
+    return state.characters;
+  }
+
+  function buildSummaryTextLocal() {
     const lines = [];
     const visible = state.characters.filter((item) => item.visible !== false);
     if (visible.length) lines.push("【角色状态摘要】");
     for (const item of visible) {
-      const hp = item.hp_current || item.hp_max ? `HP ${item.hp_current || "?"}/${item.hp_max || "?"}` : "HP 未记录";
-      const mp = item.mp_current || item.mp_max ? `MP ${item.mp_current || "?"}/${item.mp_max || "?"}` : "MP 未记录";
-      const effects = splitList(item.status_effects).length ? splitList(item.status_effects).join("、") : "无明显异常";
       const parts = [
         `${item.name || "未命名角色"}：${item.alive_status || "未知"}`,
-        hp,
-        mp,
+        `HP ${hpText(item)}`,
+        `MP ${mpText(item)}`,
         item.location ? `位置：${item.location}` : "",
         item.relationship ? `关系：${item.relationship}` : "",
-        `状态：${effects}`,
+        `状态：${statusText(item)}`,
+        item.last_event ? `最近：${item.last_event}` : "",
         item.short_summary || "",
       ].filter(Boolean);
       lines.push(parts.join("，"));
     }
-    $("#xsp-summary-preview").textContent = lines.join("\n") || "暂无可见角色。";
+    return lines.join("\n") || "暂无可见角色。";
+  }
+
+  function renderSummaryPreview(rawText = "") {
+    const tableRoot = $("#xsp-summary-preview-table");
+    const rawRoot = $("#xsp-summary-preview-raw");
+    if (rawRoot) rawRoot.textContent = rawText || buildSummaryTextLocal();
+    if (!tableRoot) return;
+
+    const visible = state.characters.filter((item) => item.visible !== false);
+    if (!visible.length) {
+      tableRoot.innerHTML = `<div class="xsp-summary-empty">暂无可见角色。</div>`;
+      return;
+    }
+
+    tableRoot.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>角色</th><th>生存</th><th>HP</th><th>MP</th><th>地点</th><th>关系</th><th>状态</th><th>最近变化</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${visible.map((item) => `
+            <tr>
+              <th>${esc(item.name || "未命名角色")}</th>
+              <td>${esc(item.alive_status || "未知")}</td>
+              <td>${esc(hpText(item))}</td>
+              <td>${esc(mpText(item))}</td>
+              <td>${esc(item.location || "未记录")}</td>
+              <td>${esc(item.relationship || "未记录")}</td>
+              <td>${esc(statusText(item))}</td>
+              <td>${esc(item.last_event || item.short_summary || "未记录")}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderSummaryLocal() {
+    renderSummaryPreview(buildSummaryTextLocal());
   }
 
   async function renderSummary() {
     try {
       const response = await fetch(API_SUMMARY, { cache: "no-store" });
       const data = await response.json();
-      $("#xsp-summary-preview").textContent = data.summary || "暂无可见角色。";
+      renderSummaryPreview(data.summary || buildSummaryTextLocal());
     } catch {
       renderSummaryLocal();
     }
@@ -397,7 +700,7 @@
     collectSettings();
     collectCharacters();
     const status = $("#xsp-save-status");
-    if (!quiet) status.textContent = "保存中...";
+    if (!quiet && status) status.textContent = "保存中...";
 
     const response = await fetch(API_STATE, {
       method: "POST",
@@ -406,7 +709,7 @@
     });
 
     if (!response.ok) {
-      status.textContent = "保存失败";
+      if (status) status.textContent = "保存失败";
       return false;
     }
 
@@ -418,12 +721,12 @@
       pending_updates: Array.isArray(data.pending_updates) ? data.pending_updates : [],
       processed_update_ids: Array.isArray(data.processed_update_ids) ? data.processed_update_ids : [],
     };
-    renderSettings();
-    renderCharacters();
-    renderSummary();
+    ensureSelectedCharacter();
+    renderAll();
+    await renderSummary();
 
-    if (!quiet) {
-      status.textContent = schemaSaved ? "已保存" : "角色状态已保存，表格列保存失败";
+    if (!quiet && status) {
+      status.textContent = schemaSaved ? "已保存" : "状态已保存，显示字段保存失败";
       setTimeout(() => { status.textContent = ""; }, 1800);
     }
     return true;
@@ -431,9 +734,10 @@
 
   function addCharacter() {
     collectCharacters();
-    state.characters.push({
+    const item = {
       id: uid(),
       name: "",
+      aliases: [],
       group: "未分组",
       visible: true,
       alive_status: "存活",
@@ -445,11 +749,15 @@
       relationship: "",
       status_effects: [],
       short_summary: "",
+      last_event: "",
       private_note: "",
       extra: {},
       updated_at: nowString(),
-    });
-    renderCharacters();
+    };
+    state.characters.push(item);
+    selectedCharacterId = item.id;
+    switchTab("editor");
+    renderAll();
   }
 
   function findCharacter(candidate) {
@@ -458,17 +766,54 @@
     return state.characters.find((item) => {
       const itemId = String(item.id || "").trim();
       const itemName = String(item.name || "").trim();
-      return (id && itemId === id) || (name && itemName === name);
+      const aliases = textToAliases(Array.isArray(item.aliases) ? item.aliases.join(",") : item.aliases || "");
+      return (id && itemId === id)
+        || (name && sameMention(itemName, name))
+        || (name && aliases.some((alias) => sameMention(alias, name)));
     });
   }
 
-  function applyCandidate(candidate) {
+  const SCAN_FIELDS = [
+    ["name", "角色名"],
+    ["group", "分组"],
+    ["alive_status", "生存"],
+    ["hp_current", "HP 当前"],
+    ["hp_max", "HP 上限"],
+    ["mp_current", "MP 当前"],
+    ["mp_max", "MP 上限"],
+    ["location", "地点"],
+    ["relationship", "关系"],
+    ["short_summary", "长期摘要"],
+    ["last_event", "最近变化"],
+  ];
+
+  function candidateFieldValue(candidate, field) {
+    if (field === "status_effects") return joinList(candidate.status_effects || candidate.effects_add || []);
+    return String(candidate[field] ?? "").trim();
+  }
+
+  function characterFieldValue(character, field) {
+    if (field === "status_effects") return joinList(character.status_effects || []);
+    return String(character?.[field] ?? "").trim();
+  }
+
+  function hasCandidateValue(candidate, field) {
+    if (field === "status_effects") return splitList(candidate.status_effects || candidate.effects_add || []).length > 0;
+    return !isEmptyValue(candidateFieldValue(candidate, field));
+  }
+
+  function applyCandidate(candidate, mode = "fill") {
     collectCharacters();
     let target = findCharacter(candidate);
     if (!target) {
+      if (candidate.kind === "loose_memory") {
+        window.alert?.("记忆候选只能绑定已有角色。请先创建角色，或在角色的别名里加入这个称呼。");
+        return;
+      }
       target = {
         id: candidate.id || uid(),
         name: candidate.name || "未命名角色",
+        aliases: textToAliases(Array.isArray(candidate.aliases) ? candidate.aliases.join(",") : candidate.aliases || ""),
         group: candidate.group || "自动提取",
         visible: true,
         alive_status: "未知",
@@ -480,118 +825,187 @@
         relationship: "",
         status_effects: [],
         short_summary: "",
+        last_event: "",
         private_note: "",
         extra: {},
       };
       state.characters.push(target);
     }
 
-    const fields = ["name", "group", "alive_status", "hp_current", "hp_max", "mp_current", "mp_max", "location", "relationship", "short_summary"];
-    fields.forEach((field) => {
-      if (candidate[field]) target[field] = candidate[field];
-    });
-    if (candidate.extra && typeof candidate.extra === "object") {
-      target.extra = { ...(target.extra || {}), ...normalizeExtra(candidate.extra) };
+    if (Array.isArray(candidate.aliases) && candidate.aliases.length) {
+      const aliasSet = new Set(textToAliases(Array.isArray(target.aliases) ? target.aliases.join(",") : target.aliases || ""));
+      candidate.aliases.forEach((alias) => { if (alias) aliasSet.add(alias); });
+      target.aliases = Array.from(aliasSet);
     }
 
-    let effects = splitList(target.status_effects);
-    if (candidate.status_effects?.length) {
-      effects = splitList(candidate.status_effects);
-    }
-    if (candidate.effects_add?.length) {
-      for (const effect of splitList(candidate.effects_add)) {
-        if (!effects.includes(effect)) effects.push(effect);
+    for (const [field] of SCAN_FIELDS) {
+      if (!hasCandidateValue(candidate, field)) continue;
+      const nextValue = candidateFieldValue(candidate, field);
+      const currentValue = characterFieldValue(target, field);
+      if (mode === "overwrite" || isEmptyValue(currentValue)) {
+        target[field] = nextValue;
       }
     }
-    if (candidate.effects_remove?.length) {
-      const removeSet = new Set(splitList(candidate.effects_remove));
-      effects = effects.filter((effect) => !removeSet.has(effect));
-    }
-    target.status_effects = effects;
-    target.updated_at = nowString();
 
-    renderCharacters();
-    renderSummaryLocal();
+    const candidateEffects = splitList(candidate.status_effects);
+    if (candidateEffects.length && (mode === "overwrite" || !splitList(target.status_effects).length)) {
+      target.status_effects = candidateEffects;
+    } else if (mode === "overwrite") {
+      let effects = splitList(target.status_effects);
+      for (const effect of splitList(candidate.effects_add)) if (!effects.includes(effect)) effects.push(effect);
+      const remove = new Set(splitList(candidate.effects_remove));
+      if (remove.size) effects = effects.filter((effect) => !remove.has(effect));
+      target.status_effects = effects;
+    } else if (!splitList(target.status_effects).length && splitList(candidate.effects_add).length) {
+      target.status_effects = splitList(candidate.effects_add);
+    }
+
+    const nextExtra = normalizeExtra(candidate.extra || {});
+    if (Object.keys(nextExtra).length) {
+      const currentExtra = normalizeExtra(target.extra || {});
+      for (const [key, value] of Object.entries(nextExtra)) {
+        if (mode === "overwrite" || isEmptyValue(currentExtra[key])) currentExtra[key] = value;
+      }
+      target.extra = currentExtra;
+    }
+
+    target.updated_at = nowString();
+    selectedCharacterId = target.id;
+    renderAll();
     saveState({ quiet: true });
   }
 
   function sourceText(candidate) {
     if (Array.isArray(candidate.sources) && candidate.sources.length) {
-      return [...new Set(candidate.sources.map((item) => `${item.source}${item.kind === "status_panel_update" ? "·更新" : ""}`))].join(" / ");
+      return [...new Set(candidate.sources.map((item) => {
+        const title = item.source_title ? `｜${item.source_title}` : "";
+        return `${item.source || "未知来源"}${title}${item.kind === "status_panel_update" ? "·更新" : ""}`;
+      }))].join(" / ");
     }
-    return candidate.source || "未知来源";
+    return candidate.source_title ? `${candidate.source || "未知来源"}｜${candidate.source_title}` : (candidate.source || "未知来源");
+  }
+
+  function scanMode() {
+    return document.querySelector('input[name="xsp-scan-mode"]:checked')?.value || "safe";
+  }
+
+  function updateScanModeCards() {
+    const current = scanMode();
+    $$(".xsp-scan-mode-card").forEach((card) => {
+      const input = card.querySelector('input[name="xsp-scan-mode"]');
+      const selected = input?.value === current;
+      card.classList.toggle("is-selected", selected);
+      card.setAttribute("aria-checked", selected ? "true" : "false");
+    });
+  }
+
+  function renderDiffRows(candidate, existing) {
+    const rows = [];
+    for (const [field, label] of [...SCAN_FIELDS, ["status_effects", "身体状态"]]) {
+      if (!hasCandidateValue(candidate, field)) continue;
+      const current = existing ? characterFieldValue(existing, field) : "";
+      const scanned = candidateFieldValue(candidate, field);
+      let badge = "可补入";
+      if (!existing) badge = "新角色";
+      else if (isEmptyValue(current)) badge = "可补入";
+      else if (current === scanned) badge = "无变化";
+      else badge = "冲突";
+      rows.push(`
+        <tr class="${badge === "冲突" ? "is-conflict" : badge === "无变化" ? "is-same" : ""}">
+          <th>${esc(label)}</th>
+          <td>${esc(current || "空")}</td>
+          <td>${esc(scanned || "空")}</td>
+          <td><span class="xsp-diff-badge" data-diff-badge="${esc(badge)}">${esc(badge)}</span></td>
+        </tr>
+      `);
+    }
+
+    const extra = normalizeExtra(candidate.extra || {});
+    for (const [key, scanned] of Object.entries(extra)) {
+      const current = existing ? normalizeExtra(existing.extra || {})[key] : "";
+      let badge = !existing ? "新角色" : isEmptyValue(current) ? "可补入" : current === scanned ? "无变化" : "冲突";
+      rows.push(`
+        <tr class="${badge === "冲突" ? "is-conflict" : badge === "无变化" ? "is-same" : ""}">
+          <th>${esc(key)}</th>
+          <td>${esc(current || "空")}</td>
+          <td>${esc(scanned || "空")}</td>
+          <td><span class="xsp-diff-badge" data-diff-badge="${esc(badge)}">${esc(badge)}</span></td>
+        </tr>
+      `);
+    }
+
+    return rows.join("") || `<tr><td colspan="4">没有可展示字段。</td></tr>`;
   }
 
   function renderScanResults(candidates, sourceResults = []) {
-    latestScanCandidates = candidates;
     const root = $("#xsp-scan-results");
+    if (!root) return;
     root.innerHTML = "";
 
     const sourceLine = document.createElement("div");
     sourceLine.className = "xsp-source-result-line";
     sourceLine.innerHTML = sourceResults.map((item) => {
       const cls = item.ok ? "is-ok" : "is-fail";
+      if (item.isInfo) return `<span class="${cls} xsp-source-index-chip">${esc(item.label)}</span>`;
       return `<span class="${cls}">${esc(item.label)}：${item.ok ? `${item.count} 条` : "读取失败"}</span>`;
     }).join("");
     root.appendChild(sourceLine);
 
     if (!candidates.length) {
-      const empty = document.createElement("p");
-      empty.className = "xsp-muted";
-      empty.textContent = "没有扫描到可用状态信息。当前版本只识别 status_panel / status_panel_update 代码块。";
-      root.appendChild(empty);
+      root.insertAdjacentHTML("beforeend", `<p class="xsp-muted">没有扫描到可用状态信息。标准状态块最稳定；原记忆区会尝试提取自然语言候选，但不会直接覆盖当前状态。</p>`);
       return;
     }
 
     for (const candidate of candidates) {
-      const card = document.createElement("article");
-      card.className = `xsp-candidate-card ${candidate.kind === "status_panel_update" ? "is-update" : ""}`;
-      const effects = splitList(candidate.status_effects).length ? splitList(candidate.status_effects).join("、") : "未提取";
-      const addEffects = splitList(candidate.effects_add).join("、");
-      const removeEffects = splitList(candidate.effects_remove).join("、");
       const existing = findCharacter(candidate);
-      const modeText = candidate.kind === "status_panel_update" ? "动态更新" : candidate.kind === "status_panel" ? "状态资料" : "兼容识别";
-
+      const modeText = candidate.kind === "status_panel_update" ? "动态更新" : candidate.kind === "status_panel" ? "初始化资料" : candidate.kind === "loose_memory" ? "记忆候选" : "兼容识别";
+      const card = document.createElement("article");
+      card.className = `xsp-candidate-card xsp-clean-candidate ${candidate.kind === "status_panel_update" ? "is-update" : ""}`;
       card.innerHTML = `
         <div class="xsp-candidate-head">
           <div>
             <strong>${esc(candidate.name || "未命名角色")}</strong>
             <span class="xsp-candidate-badge">${esc(modeText)}</span>
-            ${existing ? `<span class="xsp-candidate-badge is-existing">将覆盖已有角色</span>` : `<span class="xsp-candidate-badge">新角色</span>`}
+            ${existing ? `<span class="xsp-candidate-badge is-existing">已有角色</span>` : `<span class="xsp-candidate-badge">新角色</span>`}
+            ${candidate.matched_alias ? `<span class="xsp-candidate-badge is-existing">匹配别名：${esc(candidate.matched_alias)}</span>` : ""}
+            ${candidate.source_title ? `<span class="xsp-candidate-badge">来源：${esc(candidate.source_title)}</span>` : ""}
           </div>
           <span>${esc(sourceText(candidate))}</span>
         </div>
-        <div class="xsp-candidate-grid">
-          <span>生存：${esc(candidate.alive_status || "未提取")}</span>
-          <span>HP：${esc(candidate.hp_current || "?")}/${esc(candidate.hp_max || "?")}</span>
-          <span>MP：${esc(candidate.mp_current || "?")}/${esc(candidate.mp_max || "?")}</span>
-          <span>位置：${esc(candidate.location || "未提取")}</span>
-          <span>关系：${esc(candidate.relationship || "未提取")}</span>
-          <span>状态：${esc(effects)}</span>
-          ${addEffects ? `<span>新增状态：${esc(addEffects)}</span>` : ""}
-          ${removeEffects ? `<span>移除状态：${esc(removeEffects)}</span>` : ""}
-        </div>
-        ${candidate.short_summary ? `<p>${esc(candidate.short_summary)}</p>` : ""}
-        <details class="xsp-raw-details">
-          <summary>查看来源片段</summary>
-          <pre>${esc((candidate.sources?.[0]?.raw_text || candidate.raw_text || "").slice(0, 1200))}</pre>
-        </details>
-        <div class="xsp-candidate-actions">
-          <button type="button" class="xsp-btn xsp-btn-primary" data-apply>应用到状态栏</button>
-          <button type="button" class="xsp-btn" data-ignore>忽略</button>
+        <table class="xsp-scan-diff-table">
+          <thead><tr><th>字段</th><th>当前状态</th><th>扫描结果</th><th>建议</th></tr></thead>
+          <tbody>${renderDiffRows(candidate, existing)}</tbody>
+        </table>
+        <div class="xsp-candidate-operation-bar">
+          <details class="xsp-raw-details">
+            <summary>查看来源片段</summary>
+            <pre>${esc((candidate.sources?.[0]?.raw_text || candidate.raw_text || "").slice(0, 1200))}</pre>
+          </details>
+          <div class="xsp-candidate-actions">
+            <span class="xsp-action-label">建议操作</span>
+            <button type="button" class="xsp-btn xsp-btn-primary" data-apply-fill>只补空字段</button>
+            <button type="button" class="xsp-btn xsp-btn-warning" data-apply-overwrite>覆盖当前状态</button>
+            <button type="button" class="xsp-btn xsp-btn-danger-soft" data-ignore>忽略</button>
+          </div>
         </div>
       `;
-
-      card.querySelector("[data-apply]").addEventListener("click", () => {
-        applyCandidate(candidate);
+      const currentMode = scanMode();
+      if (currentMode === "overwrite") {
+        card.querySelector("[data-apply-overwrite]").classList.add("is-default-warning");
+      }
+      card.querySelector("[data-apply-fill]").addEventListener("click", () => {
+        applyCandidate(candidate, "fill");
         card.classList.add("is-applied");
-        card.querySelector("[data-apply]").textContent = "已应用";
-        card.querySelector("[data-apply]").disabled = true;
+        card.querySelector("[data-apply-fill]").textContent = "已补入";
+        card.querySelector("[data-apply-fill]").disabled = true;
       });
-      card.querySelector("[data-ignore]").addEventListener("click", () => {
-        card.remove();
+      card.querySelector("[data-apply-overwrite]").addEventListener("click", () => {
+        applyCandidate(candidate, "overwrite");
+        card.classList.add("is-applied");
+        card.querySelector("[data-apply-overwrite]").textContent = "已覆盖";
+        card.querySelector("[data-apply-overwrite]").disabled = true;
       });
-
+      card.querySelector("[data-ignore]").addEventListener("click", () => card.remove());
       root.appendChild(card);
     }
   }
@@ -602,6 +1016,60 @@
       .map((input) => input.dataset.sourceToggle);
   }
 
+
+  function mergeFreshCharacterAliasesForScan(freshCharacters = []) {
+    const freshList = Array.isArray(freshCharacters) ? freshCharacters : [];
+    if (!freshList.length) return state.characters;
+    const normalizeKey = (value) => String(value || "").trim().replace(/[\s\u3000]+/g, "").toLowerCase();
+    const currentById = new Map();
+    const currentByName = new Map();
+    state.characters.forEach((item) => {
+      const id = normalizeKey(item.id);
+      const name = normalizeKey(item.name);
+      if (id) currentById.set(id, item);
+      if (name) currentByName.set(name, item);
+    });
+    freshList.forEach((fresh) => {
+      const id = normalizeKey(fresh?.id);
+      const name = normalizeKey(fresh?.name);
+      let target = (id && currentById.get(id)) || (name && currentByName.get(name));
+      if (!target) {
+        target = { ...(fresh || {}) };
+        target.aliases = textToAliases(Array.isArray(fresh?.aliases) ? fresh.aliases.join(",") : fresh?.aliases || "");
+        state.characters.push(target);
+        if (id) currentById.set(id, target);
+        if (name) currentByName.set(name, target);
+        return;
+      }
+      const aliasSet = new Set(textToAliases(Array.isArray(target.aliases) ? target.aliases.join(",") : target.aliases || ""));
+      textToAliases(Array.isArray(fresh?.aliases) ? fresh.aliases.join(",") : fresh?.aliases || "").forEach((alias) => aliasSet.add(alias));
+      target.aliases = Array.from(aliasSet).filter(Boolean);
+    });
+    return state.characters;
+  }
+
+  async function refreshCharactersForScan() {
+    try {
+      const response = await fetch(API_STATE, { cache: "no-store" });
+      if (!response.ok) return state.characters;
+      const data = await response.json();
+      const freshCharacters = Array.isArray(data.characters) ? data.characters : [];
+      return mergeFreshCharacterAliasesForScan(freshCharacters);
+    } catch (error) {
+      console.warn("Status panel scan state refresh failed:", error);
+      return state.characters;
+    }
+  }
+
+  function scanRoleIndexSummary(characters = []) {
+    const list = Array.isArray(characters) ? characters : [];
+    if (!list.length) return "角色索引：空";
+    return "角色索引：" + list.map((item) => {
+      const aliases = textToAliases(Array.isArray(item.aliases) ? item.aliases.join(",") : item.aliases || "");
+      return `${item.name || item.id || "未命名"}${aliases.length ? `（别名：${aliases.join("、")}）` : ""}`;
+    }).join("；");
+  }
+
   async function scanSources() {
     const button = $("#xsp-scan-sources");
     const status = $("#xsp-scan-status");
@@ -610,7 +1078,11 @@
     status.textContent = "正在读取资料";
 
     try {
-      const result = await window.XuqiStatusPanelExtractor.scan({ enabledSources: getEnabledSources() });
+      collectCharacters();
+      const scanCharacters = await refreshCharactersForScan();
+      const result = await window.XuqiStatusPanelExtractor.scan({ enabledSources: getEnabledSources(), characters: scanCharacters });
+      result.sourceResults = Array.isArray(result.sourceResults) ? result.sourceResults : [];
+      result.sourceResults.unshift({ key: "role_index", label: scanRoleIndexSummary(scanCharacters), ok: true, count: scanCharacters.length, isInfo: true });
       renderScanResults(result.candidates || [], result.sourceResults || []);
       status.textContent = `找到 ${(result.candidates || []).length} 个候选`;
     } catch (error) {
@@ -622,18 +1094,66 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    $("#xsp-add-character").addEventListener("click", addCharacter);
-    $("#xsp-save").addEventListener("click", () => saveState());
-    $("#xsp-scan-sources").addEventListener("click", scanSources);
-    $("#xsp-add-table-column")?.addEventListener("click", addTableColumn);
+  function switchTab(name) {
+    activeTab = name || "overview";
+    $$('[data-xsp-tab-button]').forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.xspTabButton === activeTab);
+    });
+    $$('[data-xsp-tab-panel]').forEach((panel) => {
+      const active = panel.dataset.xspTabPanel === activeTab;
+      panel.classList.toggle("is-active", active);
+      panel.hidden = !active;
+    });
+  }
 
-    ["#xsp-enabled", "#xsp-chat-panel-enabled", "#xsp-compact", "#xsp-title", "#xsp-max-visible", "#xsp-hide-update-blocks", "#xsp-show-pending-in-chat", "#xsp-hide-table-extras-in-detail", "#xsp-auto-apply-mode"].forEach((selector) => {
+  function bindEvents() {
+    $$('[data-xsp-tab-button]').forEach((button) => {
+      button.addEventListener("click", () => {
+        collectCharacters();
+        switchTab(button.dataset.xspTabButton);
+      });
+    });
+
+    $$('[data-xsp-tab-jump]').forEach((button) => {
+      button.addEventListener("click", () => switchTab(button.dataset.xspTabJump));
+    });
+
+    $$('input[name="xsp-scan-mode"]').forEach((input) => {
+      input.addEventListener("change", updateScanModeCards);
+    });
+
+    $("#xsp-add-character")?.addEventListener("click", addCharacter);
+    $("#xsp-add-character-rail")?.addEventListener("click", addCharacter);
+    $("#xsp-save")?.addEventListener("click", () => saveState());
+    $("#xsp-scan-sources")?.addEventListener("click", scanSources);
+    $("#xsp-add-table-column")?.addEventListener("click", addTableColumn);
+    $("#xsp-character-search")?.addEventListener("input", (event) => {
+      characterSearch = event.target.value || "";
+      renderCharacterNav();
+    });
+
+    [
+      "#xsp-enabled",
+      "#xsp-chat-panel-enabled",
+      "#xsp-compact",
+      "#xsp-title",
+      "#xsp-max-visible",
+      "#xsp-hide-update-blocks",
+      "#xsp-show-update-debug-blocks",
+      "#xsp-show-pending-in-chat",
+      "#xsp-hide-table-extras-in-detail",
+      "#xsp-auto-apply-mode",
+    ].forEach((selector) => {
       const element = $(selector);
+      if (!element) return;
       element.addEventListener("input", collectSettings);
       element.addEventListener("change", collectSettings);
     });
+  }
 
+  document.addEventListener("DOMContentLoaded", () => {
+    bindEvents();
+    updateScanModeCards();
     Promise.all([loadFieldSchema(), loadState()]);
   });
 })();

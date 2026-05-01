@@ -1,0 +1,305 @@
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-chat-toggle.is-ball-toggle {
+  border-color: color-mix(in srgb, var(--accent, var(--xsp-accent)) 32%, var(--xsp-border)) !important;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--panel-strong, var(--xsp-bg-strong)) 92%, transparent 8%),
+      color-mix(in srgb, var(--panel, var(--xsp-bg)) 74%, var(--accent, var(--xsp-accent)) 9%)
+    ) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+}
+.xsp-ball-glyph {
+  font-size: 17px !important;
+  font-weight: 950 !important;
+  color: color-mix(in srgb, var(--accent, var(--xsp-accent)) 82%, var(--xsp-text) 18%) !important;
+}
+.xsp-floating-badge {
+  min-width: 18px !important;
+  height: 18px !important;
+  border-color: color-mix(in srgb, var(--panel-strong, var(--xsp-bg-strong)) 90%, transparent 10%) !important;
+  box-shadow: 0 8px 18px rgba(239, 68, 68, 0.36) !important;
+}
+.xsp-chat-panel.xsp-floating-widget.is-open {
+  width: min(880px, calc(100vw - 32px)) !important;
+  max-height: min(74vh, 720px) !important;
+  border: 1px solid color-mix(in srgb, var(--border, var(--xsp-border)) 72%, transparent 28%) !important;
+  border-radius: 1.15rem !important;
+  background: color-mix(in srgb, var(--panel-strong, var(--xsp-bg-strong)) 94%, transparent 6%) !important;
+  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.30) !important;
+  backdrop-filter: blur(18px) saturate(1.04) !important;
+  overflow: hidden !important;
+}
+.xsp-chat-panel.xsp-floating-widget.is-open .xsp-chat-toggle.is-panel-toggle {
+  min-height: 3rem !important;
+  padding: 0.65rem 0.82rem !important;
+  gap: 0.55rem !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border, var(--xsp-border)) 70%, transparent 30%) !important;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--panel, var(--xsp-bg)) 72%, transparent 28%),
+    color-mix(in srgb, var(--input-bg, var(--xsp-soft)) 46%, transparent 54%)
+  ) !important;
+}
+.xsp-chat-title {
+  font-weight: 900 !important;
+  letter-spacing: 0.01em;
+}
+.xsp-chat-brief {
+  color: color-mix(in srgb, var(--muted, var(--xsp-muted)) 88%, var(--xsp-text) 12%) !important;
+  font-size: 0.82rem !important;
+}
+.xsp-chat-mini-badge,
+.xsp-chat-count,
+.xsp-chat-pending-badge,
+.xsp-chat-caret {
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--accent, var(--xsp-accent)) 32%, var(--border, var(--xsp-border))) !important;
+  background: color-mix(in srgb, var(--accent, var(--xsp-accent)) 11%, transparent 89%) !important;
+  color: color-mix(in srgb, var(--accent, var(--xsp-accent)) 86%, var(--xsp-text) 14%) !important;
+  font-weight: 800 !important;
+}
+.xsp-chat-panel.xsp-floating-widget .xsp-chat-body {
+  padding: 0.72rem !important;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--panel-strong, var(--xsp-bg-strong)) 54%, transparent 46%),
+    color-mix(in srgb, var(--panel, var(--xsp-bg)) 30%, transparent 70%)
+  ) !important;
+}
+.xsp-chat-panel.xsp-floating-widget.is-compact .xsp-chat-body {
+  padding: 0.58rem !important;
+}
+.xsp-chat-mode-line {
+  display: inline-flex !important;
+  align-items: center !important;
+  max-width: 100%;
+  margin: 0 0 0.62rem !important;
+  padding: 0.28rem 0.62rem !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--border, var(--xsp-border)) 76%, transparent 24%) !important;
+  background: color-mix(in srgb, var(--input-bg, var(--xsp-soft)) 64%, transparent 36%) !important;
+  color: color-mix(in srgb, var(--muted, var(--xsp-muted)) 88%, var(--xsp-text) 12%) !important;
+  font-size: 0.76rem !important;
+  line-height: 1.35 !important;
+}
+.xsp-chat-panel .xsp-table-wrap {
+  border-radius: 0.95rem !important;
+  border: 1px solid color-mix(in srgb, var(--border, var(--xsp-border)) 76%, transparent 24%) !important;
+  background: color-mix(in srgb, var(--input-bg, var(--xsp-soft)) 58%, transparent 42%) !important;
+  overflow: auto !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+.xsp-chat-panel .xsp-status-table {
+  min-width: 720px !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  color: var(--xsp-text) !important;
+}
+.xsp-chat-panel .xsp-status-table th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 2 !important;
+  padding: 0.58rem 0.7rem !important;
+  background: color-mix(in srgb, var(--panel-strong, var(--xsp-bg-strong)) 82%, var(--input-bg, var(--xsp-soft)) 18%) !important;
+  color: color-mix(in srgb, var(--xsp-text) 86%, var(--muted, var(--xsp-muted)) 14%) !important;
+  font-size: 0.76rem !important;
+  font-weight: 900 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border, var(--xsp-border)) 74%, transparent 26%) !important;
+}
+.xsp-chat-panel .xsp-status-table td {
+  padding: 0.56rem 0.7rem !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border, var(--xsp-border)) 56%, transparent 44%) !important;
+  background: transparent !important;
+  color: color-mix(in srgb, var(--xsp-text) 88%, var(--muted, var(--xsp-muted)) 12%) !important;
+}
+.xsp-chat-panel .xsp-status-row:hover td,
+.xsp-chat-panel .xsp-status-row.is-expanded td {
+  background: color-mix(in srgb, var(--accent, var(--xsp-accent)) 8%, transparent 92%) !important;
+}
+.xsp-chat-panel .xsp-row-name {
+  color: var(--xsp-text) !important;
+  font-weight: 950 !important;
+}
+.xsp-chat-panel .xsp-effect-chip {
+  max-width: 11rem !important;
+  border-color: color-mix(in srgb, var(--accent, var(--xsp-accent)) 32%, var(--border, var(--xsp-border))) !important;
+  background: color-mix(in srgb, var(--accent, var(--xsp-accent)) 12%, transparent 88%) !important;
+  color: color-mix(in srgb, var(--xsp-text) 86%, var(--accent, var(--xsp-accent)) 14%) !important;
+  font-weight: 760 !important;
+}
+.xsp-chat-panel .xsp-effect-chip.is-empty {
+  border-color: color-mix(in srgb, var(--border, var(--xsp-border)) 70%, transparent 30%) !important;
+  background: color-mix(in srgb, var(--input-bg, var(--xsp-soft)) 60%, transparent 40%) !important;
+  color: var(--muted, var(--xsp-muted)) !important;
+}
+.xsp-chat-panel .xsp-detail-row td {
+  padding: 0.62rem !important;
+  background: color-mix(in srgb, var(--accent, var(--xsp-accent)) 5%, transparent 95%) !important;
+}
+.xsp-chat-panel .xsp-detail-grid {
+  gap: 0.5rem !important;
+}
+.xsp-chat-panel .xsp-detail-item {
+  border-radius: 0.78rem !important;
+  border-color: color-mix(in srgb, var(--border, var(--xsp-border)) 66%, transparent 34%) !important;
+  background: color-mix(in srgb, var(--panel-strong, var(--xsp-bg-strong)) 64%, transparent 36%) !important;
+}
+.xsp-chat-panel .xsp-detail-item span {
+  color: var(--muted, var(--xsp-muted)) !important;
+  font-weight: 760 !important;
+}
+.xsp-chat-panel .xsp-candidate-box,
+.xsp-chat-panel .xsp-pending-box,
+.xsp-chat-panel .xsp-panel-debug-box {
+  margin: 0 0 0.64rem !important;
+  padding: 0.62rem !important;
+  border-radius: 0.95rem !important;
+  border: 1px solid color-mix(in srgb, var(--accent, var(--xsp-accent)) 24%, var(--border, var(--xsp-border))) !important;
+  background: color-mix(in srgb, var(--accent, var(--xsp-accent)) 7%, transparent 93%) !important;
+}
+.xsp-chat-panel .xsp-candidate-title,
+.xsp-chat-panel .xsp-pending-title,
+.xsp-chat-panel .xsp-panel-debug-head {
+  color: var(--xsp-text) !important;
+  font-weight: 900 !important;
+}
+.xsp-chat-panel .xsp-candidate-row,
+.xsp-chat-panel .xsp-pending-row,
+.xsp-chat-panel .xsp-panel-debug-item {
+  border: 1px solid color-mix(in srgb, var(--border, var(--xsp-border)) 64%, transparent 36%) !important;
+  border-radius: 0.82rem !important;
+  background: color-mix(in srgb, var(--panel-strong, var(--xsp-bg-strong)) 68%, transparent 32%) !important;
+}
+.xsp-chat-panel .xsp-candidate-main > span,
+.xsp-chat-panel .xsp-candidate-reason,
+.xsp-chat-panel .xsp-candidate-source,
+.xsp-chat-panel .xsp-pending-row span {
+  color: color-mix(in srgb, var(--muted, var(--xsp-muted)) 88%, var(--xsp-text) 12%) !important;
+}
+.xsp-chat-panel .xsp-candidate-confidence {
+  border-color: color-mix(in srgb, var(--accent, var(--xsp-accent)) 34%, var(--border, var(--xsp-border))) !important;
+  background: color-mix(in srgb, var(--accent, var(--xsp-accent)) 10%, transparent 90%) !important;
+  color: color-mix(in srgb, var(--accent, var(--xsp-accent)) 86%, var(--xsp-text) 14%) !important;
+  font-weight: 800 !important;
+}
+.xsp-chat-panel .xsp-candidate-actions button,
+.xsp-chat-panel .xsp-pending-actions button {
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--border, var(--xsp-border)) 76%, transparent 24%) !important;
+  background: color-mix(in srgb, var(--panel-strong, var(--xsp-bg-strong)) 72%, transparent 28%) !important;
+  color: var(--xsp-text) !important;
+  font-weight: 820 !important;
+}
+.xsp-chat-panel .xsp-candidate-actions button:hover,
+.xsp-chat-panel .xsp-pending-actions button:hover {
+  border-color: color-mix(in srgb, var(--accent, var(--xsp-accent)) 44%, var(--border, var(--xsp-border))) !important;
+  background: color-mix(in srgb, var(--accent, var(--xsp-accent)) 10%, transparent 90%) !important;
+}
+.xsp-chat-panel .xsp-candidate-actions button[data-xsp-candidate-action="apply"],
+.xsp-chat-panel .xsp-candidate-actions button[data-xsp-candidate-action="save"],
+.xsp-chat-panel .xsp-pending-actions button[data-xsp-pending-action="apply"] {
+  border-color: transparent !important;
+  background: var(--accent, var(--xsp-accent)) !important;
+  color: #06231f !important;
+}
+.xsp-chat-panel .xsp-candidate-actions button[data-xsp-candidate-action="ignore"],
+.xsp-chat-panel .xsp-pending-actions button[data-xsp-pending-action="ignore"] {
+  border-color: color-mix(in srgb, #ef4444 48%, var(--border, var(--xsp-border))) !important;
+  background: rgba(239, 68, 68, 0.10) !important;
+  color: #fecaca !important;
+}
+.xsp-chat-panel .xsp-candidate-edit-box input,
+.xsp-chat-panel .xsp-candidate-edit-box textarea,
+.xsp-chat-panel .xsp-candidate-edit-field input,
+.xsp-chat-panel .xsp-candidate-edit-field textarea {
+  border-color: color-mix(in srgb, var(--border, var(--xsp-border)) 78%, transparent 22%) !important;
+  background: color-mix(in srgb, var(--input-bg, var(--xsp-bg)) 86%, transparent 14%) !important;
+  color: var(--xsp-text) !important;
+}
+.xsp-chat-panel.xsp-floating-widget .xsp-chat-footer {
+  margin-top: 0.58rem !important;
+  padding: 0.56rem 0.18rem 0 !important;
+  border-top: 1px dashed color-mix(in srgb, var(--border, var(--xsp-border)) 54%, transparent 46%) !important;
+  color: var(--muted, var(--xsp-muted)) !important;
+}
+.xsp-chat-panel .xsp-chat-footer a {
+  color: color-mix(in srgb, var(--accent, var(--xsp-accent)) 84%, var(--xsp-text) 16%) !important;
+}
+@media (max-width: 760px) {
+  .xsp-chat-panel.xsp-floating-widget.is-open {
+    width: calc(100vw - 24px) !important;
+    max-height: 70vh !important;
+  }
+  .xsp-chat-panel.xsp-floating-widget .xsp-chat-body {
+    padding: 0.55rem !important;
+  }
+  .xsp-chat-panel .xsp-status-table {
+    min-width: 680px !important;
+  }
+  .xsp-chat-panel .xsp-chat-mode-line {
+    display: flex !important;
+    width: fit-content;
+    max-width: 100%;
+    white-space: normal;
+  }
+}
+/* v1.7.4 css trim hotfix：聊天页折叠状态球修正 */
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) {
+  width: 54px !important;
+  height: 54px !important;
+  min-width: 54px !important;
+  max-width: 54px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  overflow: visible !important;
+}
+
+/* 折叠时隐藏面板内容 */
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-chat-body,
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-chat-footer,
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-chat-subtitle,
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-chat-count,
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-drag-hint,
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-chat-title {
+  display: none !important;
+}
+
+/* 折叠时按钮本体只保留圆球 */
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-chat-toggle {
+  width: 54px !important;
+  height: 54px !important;
+  min-width: 54px !important;
+  max-width: 54px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 999px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
+}
+
+/* 防止标题文字残留成竖排 */
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-chat-toggle * {
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+/* 只显示原本的球内字，不再额外 ::before 加一个 */
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-ball-glyph {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 54px !important;
+  height: 54px !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  color: inherit !important;
+  white-space: nowrap !important;
+}
+
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-ball-glyph::before,
+.xsp-chat-panel.xsp-floating-widget:not(.is-open) .xsp-ball-glyph::after {
+  content: none !important;
+}
