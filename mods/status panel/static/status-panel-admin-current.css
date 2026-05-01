@@ -1,0 +1,1720 @@
+body.xsp-admin-page .xsp-admin-clean-header {
+  align-items: flex-start;
+}
+.xsp-admin-quickbar,
+.xsp-admin-tabs,
+.xsp-dashboard-stats article,
+.xsp-overview-card,
+.xsp-character-rail,
+.xsp-editor-main,
+.xsp-admin-pending-card,
+.xsp-scan-mode-card {
+  border: 1px solid rgba(166, 116, 72, 0.22);
+  background: rgba(255, 250, 244, 0.86);
+  box-shadow: 0 14px 34px rgba(114, 74, 38, 0.08);
+}
+.xsp-admin-quickbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1rem;
+  border-radius: 1.1rem;
+  margin-bottom: 0.9rem;
+}
+.xsp-switch-line,
+.xsp-inline-setting {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.42rem 0.7rem;
+  border: 1px solid rgba(166, 116, 72, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: #704622;
+}
+.xsp-switch-line input,
+.xsp-inline-setting input {
+  accent-color: #d98432;
+}
+.xsp-inline-setting select {
+  min-width: 6.5rem;
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  color: #7a4b24;
+  outline: none;
+}
+.xsp-save-chip {
+  margin-left: auto;
+  min-height: 1.5rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #9a5b20;
+}
+.xsp-admin-tabs {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  padding: 0.45rem;
+  border-radius: 1.1rem;
+  margin-bottom: 1rem;
+}
+.xsp-tab-button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.72rem 1rem;
+  background: transparent;
+  color: #7a5430;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.xsp-tab-button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.72);
+}
+.xsp-tab-button.is-active {
+  color: #6f3906;
+  background: linear-gradient(180deg, #ffe6c6, #ffd39b);
+  box-shadow: 0 8px 18px rgba(205, 122, 43, 0.18);
+}
+.xsp-tab-panel[hidden] {
+  display: none !important;
+}
+.xsp-tab-panel {
+  display: grid;
+  gap: 1rem;
+}
+.xsp-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(12rem, 1.4fr);
+  gap: 0.75rem;
+}
+.xsp-dashboard-stats article {
+  border-radius: 1rem;
+  padding: 0.95rem 1rem;
+}
+.xsp-dashboard-stats strong {
+  display: block;
+  color: #6f3906;
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+.xsp-dashboard-stats span {
+  display: block;
+  margin-top: 0.3rem;
+  color: #8c6848;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.xsp-dashboard-stats .has-pending {
+  border-color: rgba(221, 126, 31, 0.42);
+  background: rgba(255, 240, 218, 0.95);
+}
+.xsp-overview-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.9rem;
+}
+.xsp-overview-card {
+  border-radius: 1.1rem;
+  padding: 1rem;
+}
+.xsp-overview-card.is-hidden {
+  opacity: 0.68;
+}
+.xsp-overview-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: flex-start;
+  margin-bottom: 0.8rem;
+}
+.xsp-overview-card-head strong {
+  display: block;
+  color: #5f3510;
+  font-size: 1.05rem;
+}
+.xsp-overview-card-head span,
+.xsp-overview-card-head em {
+  display: inline-flex;
+  align-items: center;
+  color: #936846;
+  font-size: 0.78rem;
+  font-style: normal;
+}
+.xsp-overview-card-head em {
+  border: 1px solid rgba(166, 116, 72, 0.22);
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  background: rgba(255, 255, 255, 0.66);
+  white-space: nowrap;
+}
+.xsp-overview-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+.xsp-overview-fields span {
+  border: 1px solid rgba(166, 116, 72, 0.18);
+  border-radius: 0.75rem;
+  padding: 0.45rem 0.55rem;
+  background: rgba(255, 255, 255, 0.62);
+  font-size: 0.82rem;
+  color: #76502c;
+  word-break: break-word;
+}
+.xsp-overview-card p,
+.xsp-admin-pending-card p {
+  margin: 0.3rem 0 0;
+  color: #7c6147;
+  line-height: 1.55;
+}
+.xsp-overview-actions,
+.xsp-scan-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-top: 0.9rem;
+}
+.xsp-admin-pending-list {
+  display: grid;
+  gap: 0.7rem;
+}
+.xsp-admin-pending-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  border-radius: 1rem;
+  padding: 0.85rem 0.95rem;
+}
+.xsp-admin-pending-card strong {
+  color: #6f3906;
+}
+.xsp-admin-pending-card span {
+  display: block;
+  margin-top: 0.28rem;
+  color: #9a7557;
+  font-size: 0.78rem;
+}
+.xsp-editor-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.xsp-character-rail,
+.xsp-editor-main {
+  border-radius: 1.15rem;
+  padding: 1rem;
+}
+.xsp-character-rail {
+  position: sticky;
+  top: 1rem;
+}
+.xsp-rail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
+}
+.xsp-rail-head strong {
+  color: #5f3510;
+}
+.xsp-character-search {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+.xsp-character-nav-list {
+  display: grid;
+  gap: 0.5rem;
+}
+.xsp-character-nav-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(166, 116, 72, 0.18);
+  border-radius: 0.9rem;
+  padding: 0.7rem 0.75rem;
+  background: rgba(255, 255, 255, 0.58);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.xsp-character-nav-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(217, 132, 50, 0.45);
+}
+.xsp-character-nav-item.is-active {
+  border-color: rgba(217, 132, 50, 0.55);
+  background: rgba(255, 228, 196, 0.9);
+}
+.xsp-character-nav-item strong,
+.xsp-character-nav-item span {
+  display: block;
+}
+.xsp-character-nav-item strong {
+  color: #66390f;
+  font-size: 0.92rem;
+}
+.xsp-character-nav-item span {
+  margin-top: 0.18rem;
+  color: #936846;
+  font-size: 0.78rem;
+}
+.xsp-clean-edit-card {
+  box-shadow: none !important;
+  background: rgba(255, 255, 255, 0.58) !important;
+}
+.xsp-clean-edit-head {
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(166, 116, 72, 0.16);
+  padding-bottom: 0.9rem;
+  margin-bottom: 0.9rem;
+}
+.xsp-clean-edit-head .xsp-name-input {
+  min-width: min(32rem, 100%);
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+.xsp-edit-head-actions {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.xsp-editor-section {
+  border: 1px solid rgba(166, 116, 72, 0.14);
+  border-radius: 0.95rem;
+  padding: 0.85rem;
+  margin-top: 0.85rem;
+  background: rgba(255, 250, 244, 0.54);
+}
+.xsp-editor-section h3 {
+  margin: 0 0 0.7rem;
+  color: #6f3906;
+  font-size: 0.96rem;
+}
+.xsp-scan-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+.xsp-scan-mode-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 0.6rem;
+  border-radius: 1rem;
+  padding: 0.85rem 0.95rem;
+  cursor: pointer;
+}
+.xsp-scan-mode-card input {
+  grid-row: span 2;
+  margin-top: 0.18rem;
+  accent-color: #d98432;
+}
+.xsp-scan-mode-card strong {
+  color: #653710;
+}
+.xsp-scan-mode-card span {
+  color: #8d6848;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+.xsp-scan-mode-card.is-recommended {
+  border-color: rgba(217, 132, 50, 0.38);
+}
+.xsp-scan-mode-card.is-danger-mode {
+  border-color: rgba(177, 66, 47, 0.22);
+}
+.xsp-scan-diff-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid rgba(166, 116, 72, 0.18);
+  border-radius: 0.9rem;
+  margin: 0.75rem 0;
+  font-size: 0.82rem;
+}
+.xsp-scan-diff-table th,
+.xsp-scan-diff-table td {
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid rgba(166, 116, 72, 0.14);
+  text-align: left;
+  vertical-align: top;
+  color: #72502f;
+}
+.xsp-scan-diff-table thead th {
+  background: rgba(255, 232, 204, 0.72);
+  color: #673809;
+  font-weight: 800;
+}
+.xsp-scan-diff-table tbody tr:last-child th,
+.xsp-scan-diff-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.xsp-scan-diff-table tr.is-conflict td:last-child {
+  color: #b25220;
+  font-weight: 800;
+}
+.xsp-scan-diff-table tr.is-same {
+  opacity: 0.68;
+}
+.xsp-clean-candidate .xsp-candidate-actions {
+  justify-content: flex-end;
+}
+
+@media (max-width: 900px) {
+  .xsp-dashboard-stats,
+  .xsp-scan-mode-grid,
+  .xsp-editor-layout {
+    grid-template-columns: 1fr;
+  }
+  .xsp-character-rail {
+    position: static;
+  }
+  .xsp-admin-pending-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .xsp-save-chip {
+    margin-left: 0;
+  }
+}
+@media (max-width: 640px) {
+  .xsp-dashboard-stats {
+    gap: 0.55rem;
+  }
+  .xsp-overview-fields {
+    grid-template-columns: 1fr;
+  }
+  .xsp-tab-button,
+  .xsp-switch-line,
+  .xsp-inline-setting {
+    width: 100%;
+    justify-content: center;
+  }
+  .xsp-clean-edit-head,
+  .xsp-edit-head-actions {
+    display: grid;
+    justify-content: stretch;
+  }
+}
+html[data-theme="dark"] body.xsp-admin-page .xsp-admin-quickbar,
+html[data-theme="dark"] body.xsp-admin-page .xsp-admin-tabs,
+html[data-theme="dark"] body.xsp-admin-page .xsp-dashboard-stats article,
+html[data-theme="dark"] body.xsp-admin-page .xsp-overview-card,
+html[data-theme="dark"] body.xsp-admin-page .xsp-character-rail,
+html[data-theme="dark"] body.xsp-admin-page .xsp-editor-main,
+html[data-theme="dark"] body.xsp-admin-page .xsp-admin-pending-card,
+html[data-theme="dark"] body.xsp-admin-page .xsp-scan-mode-card {
+  border-color: rgba(182, 132, 82, 0.22);
+  background: rgba(24, 32, 42, 0.88);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+}
+html[data-theme="dark"] .xsp-switch-line,
+html[data-theme="dark"] .xsp-inline-setting,
+html[data-theme="dark"] .xsp-overview-fields span,
+html[data-theme="dark"] .xsp-character-nav-item,
+html[data-theme="dark"] .xsp-editor-section {
+  border-color: rgba(182, 132, 82, 0.18);
+  background: rgba(15, 22, 31, 0.72);
+  color: #ead2b8;
+}
+html[data-theme="dark"] .xsp-tab-button,
+html[data-theme="dark"] .xsp-dashboard-stats span,
+html[data-theme="dark"] .xsp-overview-card p,
+html[data-theme="dark"] .xsp-admin-pending-card p,
+html[data-theme="dark"] .xsp-scan-mode-card span,
+html[data-theme="dark"] .xsp-overview-fields span {
+  color: #c7a482;
+}
+html[data-theme="dark"] .xsp-tab-button.is-active {
+  color: #2d1a08;
+  background: linear-gradient(180deg, #ffd39b, #e79a48);
+}
+html[data-theme="dark"] .xsp-dashboard-stats strong,
+html[data-theme="dark"] .xsp-overview-card-head strong,
+html[data-theme="dark"] .xsp-character-nav-item strong,
+html[data-theme="dark"] .xsp-editor-section h3,
+html[data-theme="dark"] .xsp-scan-mode-card strong {
+  color: #ffd9ad;
+}
+body.xsp-admin-page {
+  --xsp-admin-panel: var(--xsp-bg-strong);
+  --xsp-admin-panel-soft: var(--xsp-bg);
+  --xsp-admin-fill: var(--xsp-soft);
+  --xsp-admin-fill-strong: rgba(255, 255, 255, 0.72);
+  --xsp-admin-text: var(--xsp-text);
+  --xsp-admin-muted: var(--xsp-muted);
+  --xsp-admin-border: var(--xsp-border);
+  --xsp-admin-accent: #b4692e;
+  --xsp-admin-accent-strong: #8a4b18;
+  --xsp-admin-accent-soft: rgba(211, 132, 57, 0.16);
+  --xsp-admin-danger: #b2523e;
+  --xsp-admin-shadow: 0 14px 32px rgba(96, 64, 36, 0.08);
+}
+@media (prefers-color-scheme: dark) {
+  body.xsp-admin-page {
+    --xsp-admin-panel: rgba(17, 24, 35, 0.92);
+    --xsp-admin-panel-soft: rgba(19, 28, 40, 0.82);
+    --xsp-admin-fill: rgba(148, 163, 184, 0.10);
+    --xsp-admin-fill-strong: rgba(31, 42, 58, 0.82);
+    --xsp-admin-text: #f8fafc;
+    --xsp-admin-muted: #cbd5e1;
+    --xsp-admin-border: rgba(148, 163, 184, 0.26);
+    --xsp-admin-accent: #68d8c2;
+    --xsp-admin-accent-strong: #8df0df;
+    --xsp-admin-accent-soft: rgba(104, 216, 194, 0.14);
+    --xsp-admin-danger: #f2a08f;
+    --xsp-admin-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+  }
+}
+body.xsp-admin-page .xsp-admin-quickbar,
+body.xsp-admin-page .xsp-admin-tabs,
+body.xsp-admin-page .xsp-dashboard-stats article,
+body.xsp-admin-page .xsp-overview-card,
+body.xsp-admin-page .xsp-character-rail,
+body.xsp-admin-page .xsp-editor-main,
+body.xsp-admin-page .xsp-admin-pending-card,
+body.xsp-admin-page .xsp-scan-mode-card {
+  border-color: var(--xsp-admin-border) !important;
+  background: var(--xsp-admin-panel) !important;
+  box-shadow: var(--xsp-admin-shadow) !important;
+}
+body.xsp-admin-page .xsp-switch-line,
+body.xsp-admin-page .xsp-inline-setting,
+body.xsp-admin-page .xsp-overview-fields span,
+body.xsp-admin-page .xsp-character-nav-item,
+body.xsp-admin-page .xsp-editor-section,
+body.xsp-admin-page .xsp-clean-edit-card,
+body.xsp-admin-page .xsp-scan-diff-table {
+  border-color: var(--xsp-admin-border) !important;
+  background: var(--xsp-admin-fill) !important;
+  color: var(--xsp-admin-text) !important;
+}
+body.xsp-admin-page .xsp-inline-setting select {
+  color: var(--xsp-admin-text) !important;
+}
+body.xsp-admin-page .xsp-inline-setting select option {
+  color: #172033;
+}
+body.xsp-admin-page .xsp-tab-button {
+  color: var(--xsp-admin-muted) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+body.xsp-admin-page .xsp-tab-button:hover {
+  background: var(--xsp-admin-fill) !important;
+  color: var(--xsp-admin-text) !important;
+}
+body.xsp-admin-page .xsp-tab-button.is-active {
+  color: var(--xsp-admin-accent-strong) !important;
+  background: var(--xsp-admin-accent-soft) !important;
+  border: 1px solid color-mix(in srgb, var(--xsp-admin-accent) 38%, transparent) !important;
+  box-shadow: none !important;
+}
+body.xsp-admin-page .xsp-dashboard-stats strong,
+body.xsp-admin-page .xsp-overview-card-head strong,
+body.xsp-admin-page .xsp-character-nav-item strong,
+body.xsp-admin-page .xsp-admin-pending-card strong,
+body.xsp-admin-page .xsp-editor-section h3,
+body.xsp-admin-page .xsp-scan-mode-card strong,
+body.xsp-admin-page .xsp-rail-head strong {
+  color: var(--xsp-admin-text) !important;
+}
+body.xsp-admin-page .xsp-dashboard-stats span,
+body.xsp-admin-page .xsp-overview-card-head span,
+body.xsp-admin-page .xsp-overview-card-head em,
+body.xsp-admin-page .xsp-overview-card p,
+body.xsp-admin-page .xsp-admin-pending-card p,
+body.xsp-admin-page .xsp-admin-pending-card span,
+body.xsp-admin-page .xsp-character-nav-item span,
+body.xsp-admin-page .xsp-scan-mode-card span,
+body.xsp-admin-page .xsp-overview-fields span,
+body.xsp-admin-page .xsp-save-chip {
+  color: var(--xsp-admin-muted) !important;
+}
+body.xsp-admin-page .xsp-overview-card-head em,
+body.xsp-admin-page .xsp-character-nav-item.is-active,
+body.xsp-admin-page .xsp-scan-mode-card.is-recommended {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 38%, transparent) !important;
+  background: var(--xsp-admin-accent-soft) !important;
+}
+body.xsp-admin-page .xsp-dashboard-stats .has-pending {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 46%, transparent) !important;
+  background: var(--xsp-admin-accent-soft) !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-danger-mode {
+  border-color: color-mix(in srgb, var(--xsp-admin-danger) 36%, transparent) !important;
+}
+body.xsp-admin-page .xsp-scan-diff-table th,
+body.xsp-admin-page .xsp-scan-diff-table td {
+  border-bottom-color: var(--xsp-admin-border) !important;
+  color: var(--xsp-admin-muted) !important;
+}
+body.xsp-admin-page .xsp-scan-diff-table thead th {
+  background: var(--xsp-admin-fill-strong) !important;
+  color: var(--xsp-admin-text) !important;
+}
+body.xsp-admin-page .xsp-scan-diff-table tr.is-conflict td:last-child {
+  color: var(--xsp-admin-danger) !important;
+}
+body.xsp-admin-page {
+  --xsp-admin-panel: rgba(17, 24, 35, 0.92);
+  --xsp-admin-panel-soft: rgba(19, 28, 40, 0.82);
+  --xsp-admin-fill: rgba(148, 163, 184, 0.10);
+  --xsp-admin-fill-strong: rgba(31, 42, 58, 0.82);
+  --xsp-admin-text: #f8fafc;
+  --xsp-admin-muted: #cbd5e1;
+  --xsp-admin-faint: #94a3b8;
+  --xsp-admin-border: rgba(148, 163, 184, 0.26);
+  --xsp-admin-border-strong: rgba(148, 163, 184, 0.42);
+  --xsp-admin-accent: #68d8c2;
+  --xsp-admin-accent-strong: #8df0df;
+  --xsp-admin-accent-soft: rgba(104, 216, 194, 0.14);
+  --xsp-admin-warning: #f0b66f;
+  --xsp-admin-warning-soft: rgba(240, 182, 111, 0.14);
+  --xsp-admin-danger: #f2a08f;
+  --xsp-admin-danger-soft: rgba(242, 160, 143, 0.13);
+  --xsp-admin-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+}
+body.xsp-admin-page .xsp-admin-clean-shell {
+  max-width: 1180px;
+}
+body.xsp-admin-page .xsp-admin-quickbar,
+body.xsp-admin-page .xsp-admin-tabs,
+body.xsp-admin-page .xsp-preview-card,
+body.xsp-admin-page .xsp-dashboard-stats article,
+body.xsp-admin-page .xsp-overview-card,
+body.xsp-admin-page .xsp-character-rail,
+body.xsp-admin-page .xsp-editor-main,
+body.xsp-admin-page .xsp-admin-pending-card,
+body.xsp-admin-page .xsp-scan-mode-card,
+body.xsp-admin-page .xsp-field-add-panel,
+body.xsp-admin-page .xsp-fields-list-panel,
+body.xsp-admin-page .xsp-format-guide-card {
+  border-color: var(--xsp-admin-border) !important;
+  background: var(--xsp-admin-panel) !important;
+  color: var(--xsp-admin-text) !important;
+  box-shadow: var(--xsp-admin-shadow) !important;
+}
+body.xsp-admin-page input,
+body.xsp-admin-page textarea,
+body.xsp-admin-page select {
+  border: 1px solid var(--xsp-admin-border) !important;
+  background: rgba(8, 13, 21, 0.42) !important;
+  color: var(--xsp-admin-text) !important;
+  border-radius: 0.72rem !important;
+}
+body.xsp-admin-page input:focus,
+body.xsp-admin-page textarea:focus,
+body.xsp-admin-page select:focus {
+  outline: none !important;
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 55%, var(--xsp-admin-border)) !important;
+  box-shadow: 0 0 0 3px var(--xsp-admin-accent-soft) !important;
+}
+body.xsp-admin-page .xsp-switch-toolbar {
+  gap: 0.7rem;
+  padding: 0.72rem 0.85rem;
+}
+body.xsp-admin-page .xsp-setting-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.25rem;
+  padding: 0.36rem 0.68rem;
+  border: 1px solid var(--xsp-admin-border);
+  border-radius: 999px;
+  background: var(--xsp-admin-fill);
+  color: var(--xsp-admin-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color .16s ease, background .16s ease, color .16s ease, transform .16s ease;
+}
+body.xsp-admin-page .xsp-setting-switch:hover {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 42%, var(--xsp-admin-border));
+  color: var(--xsp-admin-text);
+}
+body.xsp-admin-page .xsp-setting-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+body.xsp-admin-page .xsp-switch-visual {
+  position: relative;
+  width: 2.38rem;
+  height: 1.26rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid var(--xsp-admin-border-strong);
+  background: rgba(15, 23, 42, 0.76);
+  transition: background .18s ease, border-color .18s ease;
+}
+body.xsp-admin-page .xsp-switch-visual::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.16rem;
+  width: 0.86rem;
+  height: 0.86rem;
+  border-radius: 999px;
+  transform: translateY(-50%);
+  background: var(--xsp-admin-faint);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .3);
+  transition: left .18s ease, background .18s ease;
+}
+body.xsp-admin-page .xsp-setting-switch input:checked + .xsp-switch-visual {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 60%, transparent);
+  background: var(--xsp-admin-accent-soft);
+}
+body.xsp-admin-page .xsp-setting-switch input:checked + .xsp-switch-visual::after {
+  left: 1.22rem;
+  background: var(--xsp-admin-accent-strong);
+}
+body.xsp-admin-page .xsp-setting-switch:has(input:checked) {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 42%, var(--xsp-admin-border));
+  color: var(--xsp-admin-text);
+  background: rgba(104, 216, 194, 0.08);
+}
+body.xsp-admin-page .xsp-policy-select {
+  min-height: 2.25rem;
+  background: var(--xsp-admin-fill) !important;
+  color: var(--xsp-admin-text) !important;
+}
+body.xsp-admin-page .xsp-policy-select select {
+  min-width: 6.25rem;
+  padding: 0.15rem 0.5rem !important;
+  border-radius: 999px !important;
+}
+body.xsp-admin-page .xsp-fields-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.36fr);
+  gap: 1rem;
+  align-items: start;
+  margin-top: 0.9rem;
+}
+body.xsp-admin-page .xsp-fields-list-panel,
+body.xsp-admin-page .xsp-field-add-panel {
+  border: 1px solid var(--xsp-admin-border);
+  border-radius: 1rem;
+  padding: 0.9rem;
+}
+body.xsp-admin-page .xsp-subsection-head {
+  display: grid;
+  gap: 0.18rem;
+  margin-bottom: 0.75rem;
+}
+body.xsp-admin-page .xsp-subsection-head strong {
+  font-size: 0.95rem;
+  color: var(--xsp-admin-text);
+}
+body.xsp-admin-page .xsp-subsection-head span {
+  font-size: 0.8rem;
+  color: var(--xsp-admin-muted);
+}
+body.xsp-admin-page .xsp-field-card-list {
+  display: grid;
+  gap: 0.65rem;
+}
+body.xsp-admin-page .xsp-field-card {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.72rem 0.8rem !important;
+  border-radius: 0.95rem !important;
+  border: 1px solid var(--xsp-admin-border) !important;
+  background: var(--xsp-admin-fill) !important;
+}
+
+body.xsp-admin-page .xsp-column-order {
+  display: inline-flex;
+  width: 1.55rem;
+  height: 1.55rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--xsp-admin-text);
+  font-weight: 800;
+}
+
+body.xsp-admin-page .xsp-field-add-panel label,
+body.xsp-admin-page .xsp-setting-row label {
+  display: grid;
+  gap: 0.32rem;
+  font-size: 0.78rem;
+  color: var(--xsp-admin-muted);
+  font-weight: 700;
+}
+body.xsp-admin-page .xsp-field-add-panel input {
+  min-height: 2.18rem;
+  padding: 0.45rem 0.6rem !important;
+}
+body.xsp-admin-page .xsp-field-card-actions {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 0.38rem;
+}
+body.xsp-admin-page .xsp-field-add-panel {
+  display: grid;
+  gap: 0.7rem;
+  position: sticky;
+  top: 1rem;
+}
+body.xsp-admin-page .xsp-common-field-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+  color: var(--xsp-admin-muted);
+  font-size: 0.8rem;
+}
+body.xsp-admin-page .xsp-common-field-chips code,
+body.xsp-admin-page .xsp-format-guide-card code {
+  border: 1px solid var(--xsp-admin-border);
+  border-radius: 999px;
+  padding: 0.18rem 0.46rem;
+  background: var(--xsp-admin-fill);
+  color: var(--xsp-admin-text);
+}
+body.xsp-admin-page .xsp-scan-mode-grid {
+  gap: 0.72rem;
+}
+body.xsp-admin-page .xsp-scan-mode-card {
+  position: relative;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  gap: 0.28rem 0.62rem;
+  padding: 0.88rem 0.95rem 0.92rem !important;
+  overflow: hidden;
+}
+body.xsp-admin-page .xsp-scan-mode-card::after {
+  content: "";
+  position: absolute;
+  left: 0.85rem;
+  right: 0.85rem;
+  bottom: 0;
+  height: 3px;
+  border-radius: 999px 999px 0 0;
+  background: transparent;
+}
+body.xsp-admin-page .xsp-scan-mode-card input {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-top: 0.22rem;
+  accent-color: var(--xsp-admin-accent);
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-selected {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 52%, var(--xsp-admin-border)) !important;
+  background: rgba(104, 216, 194, 0.09) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18) !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-selected::after {
+  background: var(--xsp-admin-accent);
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-selected strong {
+  color: var(--xsp-admin-accent-strong) !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-danger-mode.is-selected {
+  border-color: color-mix(in srgb, var(--xsp-admin-danger) 52%, var(--xsp-admin-border)) !important;
+  background: var(--xsp-admin-danger-soft) !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-danger-mode.is-selected::after {
+  background: var(--xsp-admin-danger);
+}
+body.xsp-admin-page .xsp-source-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.9rem 0;
+}
+body.xsp-admin-page .xsp-source-chip {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.42rem 0.68rem !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--xsp-admin-border) !important;
+  background: var(--xsp-admin-fill) !important;
+  color: var(--xsp-admin-muted) !important;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, color .16s ease;
+}
+body.xsp-admin-page .xsp-source-chip input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+body.xsp-admin-page .xsp-source-chip span::before {
+  content: "";
+  display: inline-block;
+  width: 0.48rem;
+  height: 0.48rem;
+  margin-right: 0.38rem;
+  border-radius: 999px;
+  border: 1px solid var(--xsp-admin-border-strong);
+  background: transparent;
+  vertical-align: 0.06rem;
+}
+body.xsp-admin-page .xsp-source-chip:has(input:checked) {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 46%, var(--xsp-admin-border)) !important;
+  background: var(--xsp-admin-accent-soft) !important;
+  color: var(--xsp-admin-text) !important;
+}
+body.xsp-admin-page .xsp-source-chip:has(input:checked) span::before {
+  border-color: var(--xsp-admin-accent);
+  background: var(--xsp-admin-accent);
+  box-shadow: 0 0 0 3px var(--xsp-admin-accent-soft);
+}
+body.xsp-admin-page .xsp-debug-compact-card {
+  display: grid !important;
+  gap: 0.85rem !important;
+  padding: 0.85rem !important;
+}
+body.xsp-admin-page .xsp-setting-row-inline {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(140px, 0.35fr);
+  gap: 0.75rem;
+}
+body.xsp-admin-page .xsp-setting-row input {
+  min-height: 2.1rem;
+  padding: 0.45rem 0.6rem !important;
+}
+
+body.xsp-admin-page .xsp-advanced-settings {
+  border-top: 1px dashed var(--xsp-admin-border);
+  padding-top: 0.72rem;
+}
+body.xsp-admin-page .xsp-advanced-settings summary {
+  cursor: pointer;
+  color: var(--xsp-admin-muted);
+  font-weight: 800;
+  margin-bottom: 0.66rem;
+}
+body.xsp-admin-page .xsp-summary-preview-table {
+  overflow-x: auto;
+  border: 1px solid var(--xsp-admin-border);
+  border-radius: 0.9rem;
+  background: var(--xsp-admin-fill);
+}
+body.xsp-admin-page .xsp-summary-preview-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 760px;
+}
+body.xsp-admin-page .xsp-summary-preview-table th,
+body.xsp-admin-page .xsp-summary-preview-table td {
+  padding: 0.58rem 0.65rem;
+  border-bottom: 1px solid var(--xsp-admin-border);
+  text-align: left;
+  vertical-align: top;
+  color: var(--xsp-admin-muted);
+  font-size: 0.82rem;
+}
+body.xsp-admin-page .xsp-summary-preview-table thead th {
+  color: var(--xsp-admin-text);
+  background: var(--xsp-admin-fill-strong);
+  font-weight: 800;
+}
+body.xsp-admin-page .xsp-summary-preview-table tbody th {
+  color: var(--xsp-admin-text);
+  font-weight: 800;
+}
+body.xsp-admin-page .xsp-summary-preview-table tbody tr:last-child th,
+body.xsp-admin-page .xsp-summary-preview-table tbody tr:last-child td {
+  border-bottom: none;
+}
+body.xsp-admin-page .xsp-summary-empty {
+  padding: 0.9rem;
+  color: var(--xsp-admin-muted);
+}
+body.xsp-admin-page .xsp-summary-raw-details {
+  margin-top: 0.72rem;
+}
+body.xsp-admin-page .xsp-summary-raw-details summary {
+  cursor: pointer;
+  color: var(--xsp-admin-muted);
+  font-weight: 800;
+}
+body.xsp-admin-page .xsp-summary-raw-details pre,
+body.xsp-admin-page .xsp-format-sample {
+  margin-top: 0.65rem;
+  border: 1px solid var(--xsp-admin-border) !important;
+  border-radius: 0.9rem !important;
+  background: rgba(8, 13, 21, 0.42) !important;
+  color: var(--xsp-admin-text) !important;
+  padding: 0.85rem !important;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+body.xsp-admin-page .xsp-format-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.78rem;
+  margin-top: 0.85rem;
+}
+body.xsp-admin-page .xsp-format-guide-card {
+  border: 1px solid var(--xsp-admin-border);
+  border-radius: 1rem;
+  padding: 0.86rem;
+}
+body.xsp-admin-page .xsp-format-guide-card summary {
+  display: grid;
+  gap: 0.28rem;
+  cursor: pointer;
+}
+body.xsp-admin-page .xsp-format-guide-card strong {
+  color: var(--xsp-admin-text);
+  font-size: 1rem;
+}
+body.xsp-admin-page .xsp-format-guide-card span,
+body.xsp-admin-page .xsp-format-guide-card dd {
+  color: var(--xsp-admin-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+body.xsp-admin-page .xsp-format-guide-card dl {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.75rem 0 0;
+}
+body.xsp-admin-page .xsp-format-guide-card dl div {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 0.55rem;
+}
+body.xsp-admin-page .xsp-format-guide-card dt {
+  color: var(--xsp-admin-faint);
+  font-weight: 800;
+  font-size: 0.78rem;
+}
+body.xsp-admin-page .xsp-format-guide-card dd {
+  margin: 0;
+}
+body.xsp-admin-page .xsp-format-guide-link-card {
+  display: grid;
+  align-content: space-between;
+  gap: 0.78rem;
+}
+body.xsp-admin-page .xsp-candidate-operation-bar {
+  display: grid;
+  gap: 0.68rem;
+  margin-top: 0.72rem;
+  padding-top: 0.72rem;
+  border-top: 1px dashed var(--xsp-admin-border);
+}
+body.xsp-admin-page .xsp-candidate-operation-bar .xsp-raw-details summary {
+  color: var(--xsp-admin-muted);
+  cursor: pointer;
+  font-weight: 800;
+}
+body.xsp-admin-page .xsp-candidate-actions {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end !important;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+body.xsp-admin-page .xsp-action-label {
+  margin-right: auto;
+  color: var(--xsp-admin-muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+body.xsp-admin-page .xsp-btn-warning {
+  border-color: color-mix(in srgb, var(--xsp-admin-warning) 48%, var(--xsp-admin-border)) !important;
+  background: var(--xsp-admin-warning-soft) !important;
+  color: var(--xsp-admin-warning) !important;
+}
+body.xsp-admin-page .xsp-btn-ghost {
+  background: transparent !important;
+  border-color: var(--xsp-admin-border) !important;
+  color: var(--xsp-admin-muted) !important;
+}
+body.xsp-admin-page .xsp-mini-btn,
+body.xsp-admin-page .xsp-mini-danger {
+  border-color: var(--xsp-admin-border) !important;
+  background: var(--xsp-admin-fill) !important;
+  color: var(--xsp-admin-muted) !important;
+}
+body.xsp-admin-page .xsp-mini-danger {
+  color: var(--xsp-admin-danger) !important;
+}
+@media (max-width: 980px) {
+  body.xsp-admin-page .xsp-fields-layout,
+  body.xsp-admin-page .xsp-format-guide-grid {
+    grid-template-columns: 1fr;
+  }
+  body.xsp-admin-page .xsp-field-add-panel {
+    position: static;
+  }
+}
+@media (max-width: 720px) {
+  body.xsp-admin-page .xsp-field-card {
+    grid-template-columns: 1fr !important;
+  }
+  body.xsp-admin-page .xsp-field-card-inputs,
+  body.xsp-admin-page .xsp-setting-row-inline {
+    grid-template-columns: 1fr;
+  }
+  body.xsp-admin-page .xsp-field-card-actions,
+  body.xsp-admin-page .xsp-candidate-actions {
+    justify-content: flex-start !important;
+  }
+  body.xsp-admin-page .xsp-action-label {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+body.xsp-admin-page .xsp-field-card-list {
+  gap: 0.42rem !important;
+}
+body.xsp-admin-page .xsp-field-table-header,
+body.xsp-admin-page .xsp-field-table-row {
+  display: grid !important;
+  grid-template-columns: 4.25rem minmax(180px, 1fr) minmax(180px, 1fr) auto !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+}
+body.xsp-admin-page .xsp-field-table-header {
+  padding: 0.2rem 0.72rem 0.28rem !important;
+  color: var(--xsp-admin-muted) !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+}
+body.xsp-admin-page .xsp-field-table-handle {
+  text-align: center;
+}
+body.xsp-admin-page .xsp-field-table-row {
+  padding: 0.58rem 0.68rem !important;
+  border-radius: 0.82rem !important;
+}
+body.xsp-admin-page .xsp-field-drag-cell {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.36rem !important;
+  min-width: 0 !important;
+}
+body.xsp-admin-page .xsp-field-drag-cell .xsp-drag-mark {
+  width: 1.35rem;
+  height: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.48rem;
+  border: 1px solid var(--xsp-admin-border);
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--xsp-admin-muted) !important;
+  cursor: grab;
+}
+body.xsp-admin-page .xsp-field-source-cell,
+body.xsp-admin-page .xsp-field-label-cell {
+  display: grid !important;
+  gap: 0.22rem !important;
+  margin: 0 !important;
+  font-size: 0.74rem !important;
+  color: var(--xsp-admin-muted) !important;
+  font-weight: 800 !important;
+}
+body.xsp-admin-page .xsp-field-source-cell span,
+body.xsp-admin-page .xsp-field-label-cell span {
+  display: none;
+}
+body.xsp-admin-page .xsp-field-source-cell input,
+body.xsp-admin-page .xsp-field-label-cell input {
+  width: 100% !important;
+  min-height: 2.08rem !important;
+  padding: 0.42rem 0.58rem !important;
+  border-radius: 0.64rem !important;
+}
+body.xsp-admin-page .xsp-icon-btn {
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--xsp-admin-border) !important;
+  background: var(--xsp-admin-fill) !important;
+  color: var(--xsp-admin-text) !important;
+  font-weight: 900;
+  cursor: pointer;
+}
+body.xsp-admin-page .xsp-icon-btn:disabled {
+  opacity: 0.36;
+  cursor: not-allowed;
+}
+body.xsp-admin-page .xsp-field-card-actions {
+  align-items: center !important;
+}
+body.xsp-admin-page .xsp-overview-fields.xsp-status-chip-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.48rem !important;
+  margin: 0.75rem 0 0.62rem !important;
+}
+body.xsp-admin-page .xsp-overview-fields .xsp-status-chip {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.36rem !important;
+  padding: 0.36rem 0.62rem !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+  background: var(--xsp-admin-fill) !important;
+  border-color: var(--xsp-admin-border) !important;
+}
+body.xsp-admin-page .xsp-overview-fields .xsp-status-chip b {
+  color: var(--xsp-admin-faint);
+  font-size: 0.78rem;
+}
+body.xsp-admin-page .xsp-overview-summary {
+  margin-top: 0.45rem !important;
+  line-height: 1.65 !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-recommended:not(.is-selected) {
+  border-color: var(--xsp-admin-border) !important;
+  background: var(--xsp-admin-panel) !important;
+  box-shadow: var(--xsp-admin-shadow) !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-recommended:not(.is-selected)::after {
+  background: transparent !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-selected {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 62%, var(--xsp-admin-border)) !important;
+  background: rgba(104, 216, 194, 0.11) !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card:not(.is-selected):hover {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 28%, var(--xsp-admin-border)) !important;
+  background: var(--xsp-admin-panel) !important;
+}
+body.xsp-admin-page .xsp-mode-tag {
+  margin-left: 0.35rem;
+  padding: 0.08rem 0.38rem;
+  border-radius: 999px;
+  border: 1px solid var(--xsp-admin-border);
+  color: var(--xsp-admin-muted);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 800;
+  vertical-align: 0.08rem;
+}
+body.xsp-admin-page .xsp-mode-tag.is-danger {
+  border-color: color-mix(in srgb, var(--xsp-admin-danger) 42%, var(--xsp-admin-border));
+  color: var(--xsp-admin-danger);
+}
+body.xsp-admin-page .xsp-btn-danger-soft {
+  border-color: color-mix(in srgb, var(--xsp-admin-danger) 52%, var(--xsp-admin-border)) !important;
+  background: var(--xsp-admin-danger-soft) !important;
+  color: color-mix(in srgb, var(--xsp-admin-danger) 88%, #ffffff) !important;
+  font-weight: 800 !important;
+}
+body.xsp-admin-page .xsp-btn-warning.is-default-warning {
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12) !important;
+}
+body.xsp-admin-page .xsp-settings-clean-card {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.62fr) !important;
+  align-items: start !important;
+  gap: 0.85rem 1rem !important;
+}
+body.xsp-admin-page .xsp-settings-block {
+  border: 1px solid var(--xsp-admin-border);
+  border-radius: 0.9rem;
+  padding: 0.8rem;
+  background: rgba(8, 13, 21, 0.18);
+}
+body.xsp-admin-page .xsp-settings-block h3 {
+  margin: 0 0 0.58rem;
+  font-size: 0.9rem;
+  color: var(--xsp-admin-text);
+}
+body.xsp-admin-page .xsp-settings-clean-card .xsp-advanced-settings {
+  grid-column: 1 / -1;
+  border-top: 0 !important;
+  padding-top: 0.8rem !important;
+}
+body.xsp-admin-page .xsp-setting-switch-list {
+  display: grid;
+  gap: 0.5rem;
+}
+body.xsp-admin-page .xsp-setting-switch-line {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  min-height: 2.35rem !important;
+  padding: 0.42rem 0.62rem !important;
+  border-radius: 0.72rem !important;
+  width: 100% !important;
+}
+body.xsp-admin-page .xsp-setting-switch-line .xsp-switch-text {
+  min-width: 0;
+}
+body.xsp-admin-page .xsp-format-guide-grid-main {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+body.xsp-admin-page .xsp-format-extra-note {
+  margin-top: 0.78rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--xsp-admin-border);
+  border-radius: 1rem;
+  padding: 0.82rem 0.9rem;
+  background: var(--xsp-admin-fill);
+}
+body.xsp-admin-page .xsp-format-extra-note div {
+  display: grid;
+  gap: 0.2rem;
+}
+body.xsp-admin-page .xsp-format-extra-note strong {
+  color: var(--xsp-admin-text);
+}
+body.xsp-admin-page .xsp-format-extra-note span {
+  color: var(--xsp-admin-muted);
+  font-size: 0.82rem;
+}
+body.xsp-admin-page .xsp-format-extra-note code {
+  border: 1px solid var(--xsp-admin-border);
+  border-radius: 999px;
+  padding: 0.24rem 0.56rem;
+  background: rgba(8, 13, 21, 0.35);
+  color: var(--xsp-admin-text);
+  white-space: nowrap;
+}
+@media (max-width: 980px) {
+  body.xsp-admin-page .xsp-field-table-header {
+    display: none !important;
+  }
+  body.xsp-admin-page .xsp-field-table-row {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+  }
+  body.xsp-admin-page .xsp-field-card-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start !important;
+  }
+  body.xsp-admin-page .xsp-field-source-cell span,
+  body.xsp-admin-page .xsp-field-label-cell span {
+    display: inline;
+  }
+  body.xsp-admin-page .xsp-settings-clean-card,
+  body.xsp-admin-page .xsp-format-guide-grid-main,
+  body.xsp-admin-page .xsp-format-extra-note {
+    grid-template-columns: 1fr !important;
+  }
+}
+body.xsp-admin-page .xsp-field-table-header,
+body.xsp-admin-page .xsp-field-table-row {
+  grid-template-columns: 4.4rem minmax(220px, 0.95fr) minmax(220px, 0.95fr) 7.8rem !important;
+  column-gap: 1rem !important;
+  row-gap: 0.45rem !important;
+}
+body.xsp-admin-page .xsp-field-table-header {
+  padding: 0.24rem 0.96rem 0.32rem !important;
+}
+body.xsp-admin-page .xsp-field-table-row {
+  padding: 0.56rem 0.82rem !important;
+  background: rgba(148, 163, 184, 0.075) !important;
+  border-color: rgba(148, 163, 184, 0.18) !important;
+}
+body.xsp-admin-page .xsp-field-table-row:hover {
+  background: rgba(148, 163, 184, 0.105) !important;
+  border-color: rgba(148, 163, 184, 0.28) !important;
+}
+body.xsp-admin-page .xsp-field-order-cell {
+  justify-content: flex-start !important;
+  gap: 0 !important;
+}
+body.xsp-admin-page .xsp-field-drag-cell .xsp-drag-mark {
+  display: none !important;
+}
+body.xsp-admin-page .xsp-column-order {
+  width: 1.65rem !important;
+  height: 1.65rem !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(148, 163, 184, 0.14) !important;
+  color: var(--xsp-admin-text) !important;
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+}
+body.xsp-admin-page .xsp-field-source-cell input,
+body.xsp-admin-page .xsp-field-label-cell input {
+  min-height: 2.35rem !important;
+  padding: 0.48rem 0.62rem !important;
+  border-color: rgba(148, 163, 184, 0.34) !important;
+  background: rgba(6, 10, 17, 0.46) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.025) !important;
+}
+body.xsp-admin-page .xsp-column-actions,
+body.xsp-admin-page .xsp-field-card-actions {
+  justify-content: flex-end !important;
+  gap: 0.34rem !important;
+  min-width: 0 !important;
+}
+body.xsp-admin-page .xsp-column-actions .xsp-icon-btn {
+  width: 1.9rem !important;
+  min-width: 1.9rem !important;
+  height: 1.9rem !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+}
+body.xsp-admin-page .xsp-column-actions .xsp-mini-danger {
+  min-height: 1.9rem !important;
+  padding: 0.28rem 0.52rem !important;
+  border-radius: 999px !important;
+}
+body.xsp-admin-page .xsp-clean-candidate .xsp-candidate-actions {
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.46rem !important;
+}
+body.xsp-admin-page .xsp-clean-candidate .xsp-candidate-actions .xsp-action-label {
+  margin-right: auto !important;
+}
+body.xsp-admin-page .xsp-clean-candidate .xsp-candidate-actions .xsp-btn,
+body.xsp-admin-page .xsp-clean-candidate .xsp-candidate-actions button.xsp-btn {
+  min-height: 2.1rem !important;
+  padding: 0.46rem 0.76rem !important;
+  border-radius: 999px !important;
+  font-weight: 900 !important;
+  box-shadow: none !important;
+}
+body.xsp-admin-page .xsp-clean-candidate .xsp-candidate-actions .xsp-btn-primary,
+body.xsp-admin-page .xsp-clean-candidate .xsp-candidate-actions button.xsp-btn-primary,
+body.xsp-admin-page .xsp-candidate-actions button[data-apply-fill] {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 60%, var(--xsp-admin-border)) !important;
+  background: var(--xsp-admin-accent) !important;
+  color: #06231f !important;
+}
+body.xsp-admin-page .xsp-clean-candidate .xsp-candidate-actions .xsp-btn-warning,
+body.xsp-admin-page .xsp-clean-candidate .xsp-candidate-actions button.xsp-btn-warning,
+body.xsp-admin-page .xsp-candidate-actions button[data-apply-overwrite] {
+  border-color: color-mix(in srgb, var(--xsp-admin-warning) 62%, var(--xsp-admin-border)) !important;
+  background: color-mix(in srgb, var(--xsp-admin-warning-soft) 72%, transparent) !important;
+  color: color-mix(in srgb, var(--xsp-admin-warning) 88%, #fff) !important;
+}
+body.xsp-admin-page .xsp-clean-candidate .xsp-candidate-actions .xsp-btn-danger-soft,
+body.xsp-admin-page .xsp-clean-candidate .xsp-candidate-actions button.xsp-btn-danger-soft,
+body.xsp-admin-page .xsp-candidate-actions button[data-ignore] {
+  border-color: color-mix(in srgb, var(--xsp-admin-danger) 62%, var(--xsp-admin-border)) !important;
+  background: color-mix(in srgb, var(--xsp-admin-danger-soft) 78%, transparent) !important;
+  color: color-mix(in srgb, var(--xsp-admin-danger) 82%, #fff) !important;
+}
+body.xsp-admin-page .xsp-settings-clean-card {
+  gap: 0.85rem 1rem !important;
+}
+body.xsp-admin-page .xsp-settings-block {
+  background: rgba(8, 13, 21, 0.08) !important;
+  border-color: rgba(148, 163, 184, 0.18) !important;
+}
+body.xsp-admin-page .xsp-setting-switch-line {
+  background: transparent !important;
+  border-color: transparent !important;
+  padding: 0.34rem 0 !important;
+  min-height: 2rem !important;
+}
+body.xsp-admin-page .xsp-setting-switch-line:has(input:checked) {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+body.xsp-admin-page .xsp-setting-switch-line + .xsp-setting-switch-line {
+  border-top: 1px solid rgba(148, 163, 184, 0.12) !important;
+}
+body.xsp-admin-page .xsp-editor-layout {
+  grid-template-columns: minmax(300px, 340px) minmax(0, 1fr) !important;
+}
+body.xsp-admin-page .xsp-character-search {
+  width: 100% !important;
+  min-height: 2.35rem !important;
+  padding: 0.52rem 0.7rem !important;
+  margin-bottom: 0.85rem !important;
+  box-sizing: border-box !important;
+}
+body.xsp-admin-page .xsp-character-rail {
+  padding: 1rem 1rem 1.05rem !important;
+}
+@media (max-width: 980px) {
+  body.xsp-admin-page .xsp-field-table-row {
+    grid-template-columns: 2rem minmax(0, 1fr) !important;
+  }
+  body.xsp-admin-page .xsp-field-source-cell,
+  body.xsp-admin-page .xsp-field-label-cell,
+  body.xsp-admin-page .xsp-field-card-actions {
+    grid-column: 2 / -1 !important;
+  }
+  body.xsp-admin-page .xsp-editor-layout {
+    grid-template-columns: 1fr !important;
+  }
+}
+body.xsp-admin-page .xsp-field-table-header,
+body.xsp-admin-page .xsp-field-table-row {
+  grid-template-columns: 4rem minmax(108px, 260px) minmax(160px, 240px) minmax(7.2rem, auto) !important;
+  column-gap: 1.25rem !important;
+  align-items: center !important;
+}
+body.xsp-admin-page .xsp-field-source-cell,
+body.xsp-admin-page .xsp-field-label-cell {
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+body.xsp-admin-page .xsp-field-source-cell input,
+body.xsp-admin-page .xsp-field-label-cell input {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+body.xsp-admin-page .xsp-column-actions,
+body.xsp-admin-page .xsp-field-card-actions {
+  min-width: 7.2rem !important;
+  justify-content: flex-end !important;
+}
+body.xsp-admin-page .xsp-settings-advanced,
+body.xsp-admin-page .xsp-advanced-settings,
+body.xsp-admin-page details.xsp-settings-advanced {
+  border: 1px solid rgba(148, 163, 184, 0.28) !important;
+  background: rgba(15, 23, 42, 0.32) !important;
+  border-radius: 1rem !important;
+}
+body.xsp-admin-page .xsp-settings-advanced summary,
+body.xsp-admin-page .xsp-advanced-settings summary,
+body.xsp-admin-page details.xsp-settings-advanced summary {
+  padding: 0.8rem 0.95rem !important;
+  color: rgba(226, 232, 240, 0.92) !important;
+  font-weight: 700 !important;
+}
+
+body.xsp-admin-page .xsp-settings-panel,
+body.xsp-admin-page .xsp-settings-clean-card,
+body.xsp-admin-page .xsp-settings-card {
+  overflow: visible !important;
+}
+body.xsp-admin-page .xsp-settings-advanced,
+body.xsp-admin-page .xsp-advanced-settings,
+body.xsp-admin-page details.xsp-settings-advanced {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-top: 1rem !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  clear: both !important;
+  border: 1px solid rgba(148, 163, 184, 0.32) !important;
+  border-radius: 1rem !important;
+  background: rgba(15, 23, 42, 0.24) !important;
+}
+body.xsp-admin-page .xsp-settings-advanced summary,
+body.xsp-admin-page .xsp-advanced-settings summary,
+body.xsp-admin-page details.xsp-settings-advanced summary {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 3rem !important;
+  padding: 0.85rem 1rem !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0.32rem !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card input[type="radio"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card strong {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.55rem !important;
+  min-width: 0 !important;
+}
+body.xsp-admin-page .xsp-scan-mode-card strong::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.78rem;
+  height: 0.78rem;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--xsp-admin-muted) 72%, transparent 28%);
+  background: transparent;
+  box-shadow: none;
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-selected strong::before {
+  border-color: var(--xsp-admin-accent);
+  background: var(--xsp-admin-accent);
+  box-shadow: 0 0 0 3px var(--xsp-admin-accent-soft);
+}
+body.xsp-admin-page .xsp-scan-mode-card.is-danger-mode.is-selected strong::before {
+  border-color: var(--xsp-admin-danger);
+  background: var(--xsp-admin-danger);
+  box-shadow: 0 0 0 3px var(--xsp-admin-danger-soft);
+}
+body.xsp-admin-page .xsp-scan-mode-card > span {
+  margin-left: 1.35rem !important;
+}
+body.xsp-admin-page .xsp-field-order-cell {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.42rem !important;
+}
+body.xsp-admin-page .xsp-drag-handle {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--xsp-admin-border);
+  border-radius: 0.62rem;
+  background: rgba(148, 163, 184, 0.10);
+  color: var(--xsp-admin-muted);
+  cursor: grab;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.18em;
+  padding: 0 0.12rem 0 0;
+}
+body.xsp-admin-page .xsp-drag-handle:hover {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 46%, var(--xsp-admin-border));
+  color: var(--xsp-admin-text);
+  background: var(--xsp-admin-accent-soft);
+}
+body.xsp-admin-page .xsp-drag-handle:active {
+  cursor: grabbing;
+}
+body.xsp-admin-page .xsp-field-table-row.is-dragging {
+  opacity: 0.58;
+}
+body.xsp-admin-page .xsp-field-table-row.is-drop-target {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 52%, var(--xsp-admin-border)) !important;
+  background: rgba(104, 216, 194, 0.08) !important;
+}
+body.xsp-admin-page .xsp-scan-diff-table {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+body.xsp-admin-page .xsp-scan-diff-table th:first-child,
+body.xsp-admin-page .xsp-scan-diff-table td:first-child {
+  width: 7.2rem !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+}
+body.xsp-admin-page .xsp-scan-diff-table th:last-child,
+body.xsp-admin-page .xsp-scan-diff-table td:last-child {
+  width: 5.8rem !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+body.xsp-admin-page .xsp-scan-diff-table td:nth-child(2),
+body.xsp-admin-page .xsp-scan-diff-table td:nth-child(3) {
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.55 !important;
+}
+body.xsp-admin-page .xsp-diff-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.85rem;
+  border: 1px solid var(--xsp-admin-border);
+  border-radius: 999px;
+  padding: 0.18rem 0.48rem;
+  background: rgba(148, 163, 184, 0.10);
+  color: var(--xsp-admin-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+body.xsp-admin-page .xsp-diff-badge[data-diff-badge="冲突"] {
+  border-color: color-mix(in srgb, var(--xsp-admin-warning) 56%, var(--xsp-admin-border));
+  background: var(--xsp-admin-warning-soft);
+  color: var(--xsp-admin-warning);
+}
+body.xsp-admin-page .xsp-diff-badge[data-diff-badge="可补入"],
+body.xsp-admin-page .xsp-diff-badge[data-diff-badge="新角色"] {
+  border-color: color-mix(in srgb, var(--xsp-admin-accent) 52%, var(--xsp-admin-border));
+  background: var(--xsp-admin-accent-soft);
+  color: var(--xsp-admin-accent-strong);
+}
+body.xsp-admin-page .xsp-diff-badge[data-diff-badge="无变化"] {
+  opacity: 0.76;
+}
+@media (max-width: 760px) {
+  body.xsp-admin-page .xsp-scan-diff-table {
+    min-width: 680px;
+  }
+}
+body.xsp-admin-page .xsp-advanced-settings-standalone {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  margin-top: 1rem !important;
+  padding: 0 !important;
+  border: 1px solid var(--xsp-admin-border) !important;
+  border-radius: 1rem !important;
+  background: rgba(8, 13, 21, 0.16) !important;
+  overflow: hidden !important;
+}
+body.xsp-admin-page .xsp-advanced-settings-standalone summary {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 2.75rem !important;
+  padding: 0.72rem 0.95rem !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid transparent !important;
+  color: var(--xsp-admin-text) !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+}
+body.xsp-admin-page .xsp-advanced-settings-standalone[open] summary {
+  border-bottom-color: rgba(148, 163, 184, 0.14) !important;
+}
+body.xsp-admin-page .xsp-advanced-settings-standalone .xsp-setting-switch-list {
+  padding: 0.55rem 0.72rem 0.72rem !important;
+  gap: 0.42rem !important;
+}
+body.xsp-admin-page .xsp-advanced-settings-standalone .xsp-setting-switch-line {
+  background: transparent !important;
+  border-color: rgba(148, 163, 184, 0.14) !important;
+  min-height: 2.35rem !important;
+}
+body.xsp-admin-page .xsp-advanced-settings-standalone .xsp-setting-switch-line + .xsp-setting-switch-line {
+  border-top-color: rgba(148, 163, 184, 0.10) !important;
+}
+body.xsp-admin-page .xsp-source-result-line .xsp-source-index-chip {
+  flex-basis: 100%;
+  justify-content: flex-start;
+  white-space: normal;
+  line-height: 1.55;
+  border-style: dashed;
+  opacity: 0.92;
+}

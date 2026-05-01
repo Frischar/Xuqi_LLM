@@ -166,7 +166,7 @@
                           <label for="entryType">词条类型</label>
                           <select id="entryType">
                             <option value="keyword">关键词触发</option>
-                            <option value="constant">常量注入</option>
+                            <option value="constant">常驻</option>
                           </select>
                         </div>
                         <div>
@@ -177,7 +177,7 @@
 
                       <div class="mini-grid">
                         <div>
-                          <label for="entryOrder">排序值</label>
+                          <label for="entryOrder">顺序</label>
                           <input id="entryOrder" type="number" min="0" max="999999" />
                         </div>
                         <div>
@@ -191,25 +191,25 @@
                       <h3>触发规则</h3>
                       <div class="mini-grid">
                         <div>
-                          <label for="entryTrigger">主触发词</label>
+                          <label for="entryTrigger">主关键词</label>
                           <input id="entryTrigger" type="text" />
                         </div>
                         <div>
-                          <label for="entrySecondaryTrigger">辅助触发词</label>
+                          <label for="entrySecondaryTrigger">副关键词</label>
                           <input id="entrySecondaryTrigger" type="text" />
                         </div>
                       </div>
 
                       <div class="mini-grid">
                         <div>
-                          <label for="entryGroupOperator">组运算符</label>
+                          <label for="entryGroupOperator">主副关系</label>
                           <select id="entryGroupOperator">
-                            <option value="and">全部匹配 (AND)</option>
-                            <option value="or">任一匹配 (OR)</option>
+                            <option value="and">与所有 (AND)</option>
+                            <option value="or">与任意 (OR)</option>
                           </select>
                         </div>
                         <div>
-                          <label for="entryMatchMode">主触发匹配</label>
+                          <label for="entryMatchMode">主关键词匹配</label>
                           <select id="entryMatchMode">
                             <option value="any">任意命中</option>
                             <option value="all">全部命中</option>
@@ -219,7 +219,7 @@
 
                       <div class="mini-grid">
                         <div>
-                          <label for="entrySecondaryMode">辅助触发匹配</label>
+                          <label for="entrySecondaryMode">副关键词匹配</label>
                           <select id="entrySecondaryMode">
                             <option value="all">全部命中</option>
                             <option value="any">任意命中</option>
@@ -284,11 +284,11 @@
                         <div>
                           <label for="entryPromptLayer">提示层级</label>
                           <select id="entryPromptLayer">
-                            <option value="follow_position">跟随位置</option>
+                            <option value="follow_position">跟随注入位置</option>
                             <option value="stable">稳定层</option>
                             <option value="current_state">当前状态</option>
                             <option value="dynamic">动态层</option>
-                            <option value="output_guard">输出守卫</option>
+                            <option value="output_guard">输出协议区</option>
                           </select>
                         </div>
                         <div></div>
@@ -299,11 +299,11 @@
                       <h3>高级控制</h3>
                       <div class="mini-grid">
                         <div>
-                          <label for="entryStickyTurns">粘性轮数</label>
+                          <label for="entryStickyTurns">粘性</label>
                           <input id="entryStickyTurns" type="number" min="0" max="999" />
                         </div>
                         <div>
-                          <label for="entryCooldownTurns">冷却轮数</label>
+                          <label for="entryCooldownTurns">冷却</label>
                           <input id="entryCooldownTurns" type="number" min="0" max="999" />
                         </div>
                       </div>

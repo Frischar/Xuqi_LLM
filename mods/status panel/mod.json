@@ -2,10 +2,10 @@
   "label": "角色状态面板",
   "hooks": {
     "chat_styles": [
-      "/static/status-panel.css?v=status-panel-v1-7-3-hotfix1"
+      "/static/status-panel.css?v=status-panel-v1-7-4-css-trim-v5"
     ],
     "chat_scripts": [
-      "/static/status-panel-chat.js?v=status-panel-v1-7-3-hotfix1"
+      "/static/status-panel-chat.js?v=status-panel-v1-7-4-css-trim-v5"
     ]
   }
 }

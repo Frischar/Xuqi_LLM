@@ -1,0 +1,142 @@
+.xsp-chat-panel {
+  position: fixed;
+  left: 50%;
+  bottom: 92px;
+  z-index: 80;
+  width: min(840px, calc(100vw - 28px));
+  transform: translateX(-50%);
+  color: var(--xsp-text);
+  border: 1px solid var(--xsp-border);
+  border-radius: 18px;
+  background: var(--xsp-bg);
+  box-shadow: var(--xsp-shadow);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+.xsp-chat-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.xsp-chat-title {
+  font-weight: 800;
+}
+.xsp-chat-brief {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--xsp-muted);
+  font-size: 13px;
+}
+.xsp-chat-count {
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: var(--xsp-primary-soft);
+  color: var(--xsp-primary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.xsp-chat-body {
+  display: none;
+  border-top: 1px solid var(--xsp-border);
+  padding: 8px;
+}
+.xsp-chat-panel.is-open .xsp-chat-body {
+  display: block;
+}
+
+.xsp-chat-footer {
+  padding: 7px 8px 2px;
+  text-align: right;
+  font-size: 12px;
+}
+.xsp-chat-footer a {
+  color: var(--xsp-primary);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* css-trim-v5: chat structural rules moved out of legacy */
+.xsp-chat-mode-line { padding: 4px 8px 8px; color: var(--xsp-muted); font-size: 12px; }
+.xsp-chat-pending-badge { justify-self: end; border: 1px solid rgba(79, 70, 229, 0.35); border-radius: 999px; padding: 2px 8px; background: rgba(79, 70, 229, 0.15); color: var(--xsp-primary); font-size: 12px; white-space: nowrap; }
+.xsp-chat-panel.xsp-floating-widget { left: auto; right: 24px; bottom: 92px; width: auto; max-width: calc(100vw - 24px); min-width: 250px; transform: none; overflow: visible; border-radius: 18px; user-select: none; }
+.xsp-chat-panel.xsp-floating-widget.is-open { width: min(920px, calc(100vw - 32px)); max-height: min(74vh, 720px); overflow: hidden; user-select: text; }
+.xsp-chat-panel.xsp-floating-widget .xsp-chat-toggle { display: flex; grid-template-columns: none; width: 100%; min-width: 250px; max-width: 420px; align-items: center; gap: 8px; padding: 10px 12px; cursor: grab; touch-action: none; }
+.xsp-chat-panel.xsp-floating-widget.is-open .xsp-chat-toggle { max-width: none; border-bottom: 1px solid var(--xsp-border); }
+.xsp-chat-panel.xsp-floating-widget.is-dragging .xsp-chat-toggle { cursor: grabbing; }
+.xsp-drag-dot { color: var(--xsp-muted); font-size: 13px; line-height: 1; letter-spacing: -4px; transform: rotate(90deg); opacity: 0.85; }
+.xsp-chat-panel.xsp-floating-widget .xsp-chat-title { flex: 0 0 auto; white-space: nowrap; }
+.xsp-chat-panel.xsp-floating-widget .xsp-chat-brief { flex: 1 1 auto; min-width: 0; }
+.xsp-chat-mini-badge, .xsp-chat-caret { border-radius: 999px; padding: 2px 7px; border: 1px solid var(--xsp-border); color: var(--xsp-muted); background: var(--xsp-soft); font-size: 12px; white-space: nowrap; }
+.xsp-chat-caret { color: var(--xsp-primary); background: var(--xsp-primary-soft); border-color: rgba(79, 70, 229, 0.26); }
+.xsp-chat-panel.xsp-floating-widget .xsp-chat-body { max-height: calc(min(74vh, 720px) - 48px); overflow: auto; padding: 10px; }
+.xsp-table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--xsp-border); border-radius: 14px; background: rgba(15, 23, 42, 0.04); }
+@media (prefers-color-scheme: dark) { .xsp-table-wrap { background: rgba(15, 23, 42, 0.34); } }
+.xsp-status-table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 13px; }
+.xsp-status-table th, .xsp-status-table td { padding: 9px 10px; border-bottom: 1px solid var(--xsp-border); text-align: left; vertical-align: middle; white-space: nowrap; }
+.xsp-status-table th { position: sticky; top: 0; z-index: 1; background: var(--xsp-bg-strong); color: var(--xsp-muted); font-weight: 800; font-size: 12px; }
+.xsp-status-table tbody tr:last-child td { border-bottom: 0; }
+.xsp-status-row { cursor: pointer; }
+.xsp-status-row:hover, .xsp-status-row.is-expanded { background: var(--xsp-primary-soft); }
+.xsp-col-name { font-weight: 800; }
+.xsp-row-name { border: 0; padding: 0; color: inherit; background: transparent; font: inherit; font-weight: 900; cursor: pointer; }
+.xsp-effect-cell { white-space: normal !important; min-width: 150px; }
+.xsp-effect-chip { display: inline-flex; align-items: center; max-width: 180px; margin: 2px 4px 2px 0; padding: 2px 7px; border-radius: 999px; border: 1px solid rgba(79, 70, 229, 0.28); background: var(--xsp-primary-soft); color: var(--xsp-text); font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+.xsp-effect-chip.is-empty { border-color: var(--xsp-border); background: var(--xsp-soft); color: var(--xsp-muted); }
+.xsp-detail-row { display: none; background: rgba(148, 163, 184, 0.09); }
+.xsp-detail-row.is-open { display: table-row; }
+.xsp-detail-row td { white-space: normal; padding: 10px; }
+.xsp-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.xsp-detail-item { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 8px; align-items: start; padding: 7px 8px; border: 1px solid var(--xsp-border); border-radius: 12px; background: var(--xsp-bg); }
+.xsp-detail-item span { color: var(--xsp-muted); font-size: 12px; }
+.xsp-detail-item strong { min-width: 0; color: var(--xsp-text); font-weight: 650; line-height: 1.55; white-space: normal; word-break: break-word; }
+.xsp-empty-mini { padding: 12px; color: var(--xsp-muted); }
+.xsp-chat-panel.xsp-floating-widget .xsp-chat-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 2px 0; color: var(--xsp-muted); }
+.xsp-chat-panel.xsp-floating-widget .xsp-chat-footer span { font-size: 12px; }
+.xsp-pending-box, .xsp-candidate-box, .xsp-panel-debug-box { margin: 8px 8px 10px; border: 1px solid var(--xsp-border); border-radius: 14px; background: rgba(148, 163, 184, 0.1); overflow: hidden; }
+.xsp-pending-box, .xsp-candidate-box { padding: 8px; }
+.xsp-pending-title, .xsp-candidate-title { margin-bottom: 6px; font-size: 12px; color: var(--xsp-muted); }
+.xsp-candidate-title { display: flex; justify-content: space-between; gap: 8px; }
+.xsp-candidate-title span { color: var(--xsp-primary); font-weight: 700; }
+.xsp-pending-row, .xsp-candidate-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px; border-radius: 12px; background: rgba(148, 163, 184, 0.12); margin-top: 6px; }
+.xsp-pending-row strong, .xsp-candidate-head strong { font-size: 13px; }
+.xsp-pending-row span, .xsp-candidate-main > span, .xsp-candidate-reason { display: block; color: var(--xsp-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xsp-pending-actions, .xsp-candidate-actions { display: inline-flex; gap: 6px; }
+.xsp-pending-actions button, .xsp-candidate-actions button { border: 1px solid var(--xsp-border); border-radius: 999px; padding: 5px 9px; background: var(--xsp-bg); color: var(--xsp-text); cursor: pointer; font-size: 12px; }
+.xsp-pending-actions button:first-child, .xsp-candidate-actions button:first-child { border-color: transparent; background: var(--xsp-primary); color: #fff; }
+.xsp-candidate-head { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+.xsp-candidate-confidence { display: inline-flex; align-items: center; border: 1px solid rgba(79, 70, 229, 0.35); border-radius: 999px; padding: 1px 6px; color: var(--xsp-primary); font-size: 11px; }
+.xsp-candidate-reason { margin-top: 2px; opacity: 0.85; }
+.xsp-candidate-source { display: block; color: var(--xsp-primary); font-size: 11px; margin-top: 2px; opacity: 0.9; }
+.xsp-panel-debug-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--xsp-border); font-size: 12px; }
+.xsp-panel-debug-head span { color: var(--xsp-muted); }
+.xsp-panel-debug-list { display: grid; gap: 6px; padding: 8px; max-height: 220px; overflow: auto; }
+.xsp-panel-debug-item { border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 10px; background: rgba(15, 23, 42, 0.04); }
+.xsp-panel-debug-item summary { display: flex; gap: 8px; align-items: center; cursor: pointer; padding: 7px 8px; font-size: 12px; }
+.xsp-panel-debug-item summary span { color: var(--xsp-muted); font-variant-numeric: tabular-nums; }
+.xsp-panel-debug-item summary strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xsp-panel-debug-item p { margin: 0; padding: 0 8px 8px; color: var(--xsp-muted); font-size: 12px; }
+.xsp-panel-debug-item pre { margin: 0; padding: 8px; max-height: 180px; overflow: auto; white-space: pre-wrap; word-break: break-word; border-top: 1px solid rgba(148, 163, 184, 0.2); font-size: 12px; line-height: 1.55; }
+.xsp-update-debug-block { margin-top: 10px; border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 12px; background: rgba(30, 41, 59, 0.72); color: var(--xsp-text); overflow: hidden; }
+.xsp-update-debug-block summary { cursor: pointer; padding: 8px 10px; font-weight: 700; color: #c7d2fe; user-select: none; }
+.xsp-update-debug-block[open] summary { border-bottom: 1px solid rgba(99, 102, 241, 0.28); }
+.xsp-update-debug-block pre { margin: 0; padding: 10px; max-height: 280px; overflow: auto; white-space: pre-wrap; word-break: break-word; font-size: 12px; line-height: 1.55; background: rgba(15, 23, 42, 0.36); }
+@media (max-width: 760px) {
+  .xsp-chat-panel.xsp-floating-widget { right: 12px; bottom: 84px; min-width: 220px; max-width: calc(100vw - 24px); }
+  .xsp-chat-panel.xsp-floating-widget.is-open { width: calc(100vw - 24px); max-height: 70vh; }
+  .xsp-chat-panel.xsp-floating-widget .xsp-chat-toggle { min-width: 220px; max-width: calc(100vw - 24px); }
+  .xsp-chat-panel.xsp-floating-widget .xsp-chat-count, .xsp-chat-panel.xsp-floating-widget .xsp-chat-mini-badge { display: none; }
+  .xsp-detail-grid, .xsp-pending-row, .xsp-candidate-row { grid-template-columns: 1fr; }
+  .xsp-pending-actions, .xsp-candidate-actions { justify-content: flex-start; }
+  .xsp-chat-panel.xsp-floating-widget .xsp-chat-footer { display: block; }
+}

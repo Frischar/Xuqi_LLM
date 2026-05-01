@@ -7,6 +7,11 @@
     "姓名": "name",
     "角色名": "name",
     "人物名": "name",
+    "aliases": "aliases",
+    "alias": "aliases",
+    "别名": "aliases",
+    "常用称呼": "aliases",
+    "称呼": "aliases",
     "group": "group",
     "分组": "group",
     "alive_status": "alive_status",
@@ -79,7 +84,14 @@
       url: "/api/memories/outline",
       pickTexts(data) {
         const rows = Array.isArray(data?.items) ? data.items : [];
-        return rows.map((item, index) => ({ text: flattenObjectText(item), source: "记忆大纲", source_key: "memory_outline", source_index: index }));
+        return rows.map((item, index) => ({
+          text: flattenObjectText(item),
+          source: "记忆大纲",
+          source_key: "memory_outline",
+          source_index: index,
+          source_id: item?.id || `memory_outline-${index}`,
+          source_title: item?.title || item?.name || `记忆大纲 ${index + 1}`,
+        }));
       },
     },
     {
@@ -89,7 +101,14 @@
       url: "/api/memories/merged",
       pickTexts(data) {
         const rows = Array.isArray(data?.items) ? data.items : [];
-        return rows.map((item, index) => ({ text: flattenObjectText(item), source: "合并记忆", source_key: "merged_memories", source_index: index }));
+        return rows.map((item, index) => ({
+          text: flattenObjectText(item),
+          source: "合并记忆",
+          source_key: "merged_memories",
+          source_index: index,
+          source_id: item?.id || `merged_memory-${index}`,
+          source_title: item?.title || item?.name || `合并记忆 ${index + 1}`,
+        }));
       },
     },
     {
@@ -99,7 +118,14 @@
       url: "/api/memories",
       pickTexts(data) {
         const rows = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
-        return rows.map((item, index) => ({ text: flattenObjectText(item), source: "原记忆", source_key: "memories", source_index: index }));
+        return rows.map((item, index) => ({
+          text: flattenObjectText(item),
+          source: "原记忆",
+          source_key: "memories",
+          source_index: index,
+          source_id: item?.id || `memory-${index}`,
+          source_title: item?.title || `原记忆 ${index + 1}`,
+        }));
       },
     },
     {
@@ -175,6 +201,9 @@
   }
 
   function splitList(value) {
+    if (Array.isArray(value)) {
+      return value.map((item) => compact(item)).filter(Boolean).filter((item) => !/^(无|none|null)$/i.test(item));
+    }
     const text = compact(value);
     if (!text || text === "无" || text === "none" || text === "None") return [];
     return text
@@ -183,6 +212,30 @@
       .map((item) => compact(item))
       .filter(Boolean)
       .filter((item) => !/^(无|none|null)$/i.test(item));
+  }
+
+  function normalizeAliases(value) {
+    return splitList(value).filter((item) => item && !isPlaceholderText(item));
+  }
+
+  function normalizeMentionKey(value) {
+    return compact(value)
+      .replace(/[\s\u3000]+/g, "")
+      .replace(/[“”\"'‘’「」『』（）()\[\]【】]/g, "")
+      .replace(/[，。！？、,.!?~～—\-…:：;；]/g, "")
+      .toLowerCase();
+  }
+
+  function textContainsMention(haystack, needle) {
+    const source = compact(haystack);
+    const target = compact(needle);
+    if (!source || !target) return false;
+    const latin = /[A-Za-z0-9]/.test(target);
+    if (latin) {
+      return source.toLowerCase().includes(target.toLowerCase())
+        || normalizeMentionKey(source).includes(normalizeMentionKey(target));
+    }
+    return source.includes(target) || normalizeMentionKey(source).includes(normalizeMentionKey(target));
   }
 
   function splitPair(value) {
@@ -238,10 +291,13 @@
       source: meta.source || raw.source || "未知来源",
       source_key: meta.source_key || raw.source_key || "",
       source_index: meta.source_index ?? raw.source_index ?? 0,
+      source_id: compact(meta.source_id || raw.source_id || ""),
+      source_title: compact(meta.source_title || raw.source_title || ""),
       weight: Number(meta.weight || raw.weight || 0),
       raw_text: meta.raw_text || raw.raw_text || "",
       id: compact(raw.id),
       name: compact(raw.name),
+      aliases: normalizeAliases(raw.aliases || raw.alias || raw["别名"] || []),
       group: compact(raw.group),
       visible: true,
       alive_status: compact(raw.alive_status),
@@ -584,6 +640,163 @@
     return candidates;
   }
 
+  function cleanMemoryProseText(text) {
+    const raw = normalizeText(text);
+    if (!raw) return "";
+    const titleMatch = raw.match(/(?:^|\n|\s)title\s*:\s*([\s\S]*?)(?=(?:\n|\s)content\s*:|$)/i);
+    const contentMatch = raw.match(/(?:^|\n|\s)content\s*:\s*([\s\S]*)/i);
+    const parts = [];
+    if (titleMatch?.[1]) parts.push(cleanTail(titleMatch[1]));
+    if (contentMatch?.[1]) parts.push(cleanTail(contentMatch[1]));
+    const cleaned = parts.length ? parts.join("\n") : raw;
+    return cleaned
+      .replace(/(?:^|\n)id\s*:\s*[^\n]+/gi, "")
+      .replace(/(?:^|\n)created_at\s*:\s*[^\n]+/gi, "")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
+  function characterMatchTokens(character) {
+    const tokens = [];
+    const seen = new Set();
+    const add = (value, type = "name") => {
+      const text = compact(value);
+      if (!text) return;
+      if (isInvalidCandidateName(text) || isPlaceholderText(text)) return;
+      if (text.length < 2 && !/[A-Za-z0-9]/.test(text)) return;
+      const key = `${type}:${normalizeMentionKey(text)}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      tokens.push({ text, type, key: normalizeMentionKey(text), character });
+    };
+    add(character.name, "name");
+    normalizeAliases(character.aliases || character.alias || []).forEach((alias) => add(alias, "alias"));
+    const id = compact(character.id);
+    if (id && !/^char-[a-f0-9]{6,}$/i.test(id)) add(id, "id");
+    return tokens;
+  }
+
+  function findExistingCharacterMention(text, characters = []) {
+    const normalized = normalizeText(text);
+    if (!normalized || !Array.isArray(characters) || !characters.length) return null;
+    const tokens = characters.flatMap(characterMatchTokens).sort((a, b) => b.text.length - a.text.length);
+    const normalizedKey = normalizeMentionKey(normalized);
+    for (const token of tokens) {
+      if (textContainsMention(normalized, token.text) || (token.key && normalizedKey.includes(token.key))) {
+        return { character: token.character, matched: token.text, match_type: token.type };
+      }
+    }
+    return null;
+  }
+
+  function extractMemoryProseCandidates(text, meta) {
+    const sourceKey = meta?.source_key || meta?.sourceKey || "";
+    if (!["memories", "merged_memories", "memory_outline"].includes(sourceKey)) return [];
+    const normalized = cleanMemoryProseText(text);
+    if (!normalized || normalized.length < 6) return [];
+    const notesMatch = normalized.match(/(?:^|\n|\s)notes\s*:\s*([\s\S]*?)(?=(?:\n|\s)(?:title|content|tags|id)\s*:|$)/i);
+    const noteText = notesMatch?.[1] ? cleanTail(notesMatch[1]) : "";
+    const scanText = noteText ? `${noteText}\n${normalized}` : normalized;
+
+    // 原记忆区是自然语言：只能绑定已有角色或 aliases，不能自动新建角色。
+    const mention = findExistingCharacterMention(normalized, meta?.existingCharacters || []);
+    if (!mention?.character) return [];
+    const existing = mention.character;
+    const name = compact(existing.name) || compact(mention.matched);
+
+    const candidate = normalizeCandidateFields({ id: existing.id || "", name, aliases: existing.aliases || [] }, {
+      ...meta,
+      kind: "loose_memory",
+      raw_text: normalized.slice(0, 1200),
+      confidence: "低",
+    });
+    candidate.matched_alias = mention.match_type === "alias" ? mention.matched : "";
+    candidate.matched_name = mention.matched || "";
+
+    let match = scanText.match(/(?:当前所在位置|所在位置|当前位置|地点|位置)\s*[:：]?\s*([^,，。；\n]{1,38})/);
+    if (match?.[1]) candidate.location = cleanTail(match[1]);
+
+    if (!candidate.location) match = scanText.match(new RegExp(`${escapeRegExp(mention.matched)}\\s*(?:在|位于|当前位于|地点在)\\s*([^,，。；\\n]{1,28})`, "i"));
+    if (match?.[1] && !candidate.location) {
+      let location = cleanTail(match[1])
+        .replace(/(?:等待|等候|坐在|站在|坐着|站着|拿|取|研究|开始|正在|并|和|,|，|。).*$/g, "")
+        .trim();
+      if (location && location.length <= 18) candidate.location = location;
+    }
+
+    if (!candidate.location) {
+      match = scanText.match(new RegExp(`${escapeRegExp(mention.matched)}[^,，。；\\n]{0,16}(?:走到|走进|进入|来到|移动到|转移到|抵达|到达)\\s*([^,，。；\\n]{1,28})`, "i"));
+      if (match?.[1]) {
+        candidate.location = cleanTail(match[1]).replace(/(?:等待|等候|坐在|站在|拿|取|开始|正在|并|和|,|，|。).*$/g, "").trim();
+      }
+    }
+
+    match = scanText.match(/(?:地点|位置)\s*[:：]?\s*([^,，。；\n]{1,28})/);
+    if (match?.[1] && !candidate.location) candidate.location = cleanTail(match[1]);
+
+    match = scanText.match(/(?:HP|hp|血量|生命值?)\s*[:：]?\s*([0-9]+)\s*\/\s*([0-9]+)/i);
+    if (match) {
+      candidate.hp_current = match[1];
+      candidate.hp_max = match[2];
+    } else {
+      match = scanText.match(/(?:HP|hp|血量|生命值?)(?:和|与|及)?(?:MP|mp|魔力|灵力|法力)?[^,，。；\n]{0,12}(?:恢复至|恢复到|变为|变成|降到|下降到|减少到|消耗至|为|=|：|:)\s*([0-9]{1,4})(?:\s*\/\s*([0-9]{1,4}))?/i);
+      if (match) {
+        candidate.hp_current = match[1];
+        candidate.hp_max = match[2] || candidate.hp_max || match[1];
+      }
+    }
+
+    match = scanText.match(/(?:MP|mp|魔力|灵力|法力)\s*[:：]?\s*([0-9]+)\s*\/\s*([0-9]+)/i);
+    if (match) {
+      candidate.mp_current = match[1];
+      candidate.mp_max = match[2];
+    } else {
+      match = scanText.match(/(?:HP|hp|血量|生命值?)?[^,，。；\n]{0,8}(?:MP|mp|魔力|灵力|法力)[^,，。；\n]{0,12}(?:恢复至|恢复到|变为|变成|降到|下降到|减少到|消耗至|为|=|：|:)\s*([0-9]{1,4})(?:\s*\/\s*([0-9]{1,4}))?/i);
+      if (match) {
+        candidate.mp_current = match[1];
+        candidate.mp_max = match[2] || candidate.mp_max || "100";
+      }
+    }
+
+    match = scanText.match(/(?:装备|携带物|持有物|配备)(?:有|为|是|[:：])?\s*([^,，。；\n]{1,40})/);
+    if (!match) match = scanText.match(/(?:抱着|拿着|手里拿着)\s*([^,，。；\n]{1,28})/);
+    if (match?.[1]) {
+      candidate.extra = candidate.extra || {};
+      candidate.extra["装备"] = cleanTail(match[1]).replace(/[。；；]+$/g, "");
+    }
+
+    match = scanText.match(/(?:当前目标|目标|后续)\s*[:：]?\s*([^,，。；\n]{1,42})/);
+    if (match?.[1]) {
+      candidate.extra = candidate.extra || {};
+      candidate.extra["当前目标"] = cleanTail(match[1]);
+    }
+
+    match = scanText.match(/(?:情绪|精神状态|心情)\s*[:：]?\s*([^,，。；\n]{1,24})/);
+    if (match?.[1]) {
+      candidate.extra = candidate.extra || {};
+      candidate.extra["精神状态"] = cleanTail(match[1]);
+    } else if (/情绪(?:愉快|稳定|低落|紧张|平静|开心|放松)/.test(normalized)) {
+      const mood = matchOne(normalized, /情绪(愉快|稳定|低落|紧张|平静|开心|放松)/);
+      if (mood) {
+        candidate.extra = candidate.extra || {};
+        candidate.extra["精神状态"] = mood;
+      }
+    }
+
+    if (/身体状态良好|身体良好|状态良好/.test(normalized)) candidate.status_effects = ["无明显异常"];
+    if (/等待用户|等用户/.test(normalized)) {
+      candidate.extra = candidate.extra || {};
+      if (!candidate.extra["当前目标"]) candidate.extra["当前目标"] = "等待用户指示";
+    }
+    if (!candidate.short_summary) candidate.short_summary = normalized.slice(0, 120).replace(/\n+/g, " ");
+
+    return hasUsefulFields(candidate) ? [candidate] : [];
+  }
+
+  function escapeRegExp(value) {
+    return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
   function matchOne(text, regex) {
     const match = text.match(regex);
     return match ? cleanTail(match[1]) : "";
@@ -603,11 +816,9 @@
       if (hasUsefulFields(candidate)) candidates.push(candidate);
     }
 
-    // v1.2：只认标准代码块，不再跑“兼容识别”。
-    // 原来的兼容识别会把预设里的字段模板、JSON 键名、说明文字误识别成角色，
-    // 例如“角色姓名 / alive_status / name”。
-    // 现在第一版测试先保证稳定：世界书、角色卡、记忆、聊天里必须使用
-    // ```status_panel 或 ```status_panel_update。
+    // 结构化块仍是最高可信来源。原记忆 / 合并记忆 / 记忆大纲允许低置信自然语言候选，
+    // 但只作为后台扫描候选展示，用户确认后才会应用，避免普通记忆摘要直接覆盖当前状态。
+    candidates.push(...extractMemoryProseCandidates(text, meta));
     return candidates.filter((candidate) => !isTemplateCandidate(candidate));
   }
 
@@ -620,67 +831,108 @@
     return score;
   }
 
+  function candidateMergeKey(item) {
+    const baseId = compact(item.id || item.name || "");
+    if (!baseId) return "";
+    // 原记忆 / 合并记忆 / 记忆大纲的自然语言候选必须按来源单独保留。
+    // 不能只按角色合并，否则同一个角色的多条记忆会被旧记忆吞掉。
+    if (item.kind === "loose_memory") {
+      const sourceKey = compact(item.source_key || "memory");
+      const sourceId = compact(item.source_id || "") || String(item.source_index ?? "0");
+      return `${sourceKey}:${sourceId}:${baseId}`;
+    }
+    return baseId;
+  }
+
+  function makeCandidateShell(item) {
+    return {
+      id: item.id || toSlug(item.name),
+      name: item.name,
+      aliases: Array.isArray(item.aliases) ? [...item.aliases] : [],
+      group: item.group || "自动提取",
+      visible: true,
+      alive_status: "",
+      hp_current: "",
+      hp_max: "",
+      mp_current: "",
+      mp_max: "",
+      location: "",
+      relationship: "",
+      status_effects: [],
+      effects_add: [],
+      effects_remove: [],
+      short_summary: "",
+      extra: {},
+      kind: item.kind,
+      source: item.source,
+      source_key: item.source_key,
+      source_id: item.source_id || "",
+      source_index: item.source_index ?? 0,
+      source_title: item.source_title || "",
+      raw_text: item.raw_text || "",
+      confidence: item.confidence,
+      sources: [],
+      matched_alias: item.matched_alias || "",
+      matched_name: item.matched_name || "",
+    };
+  }
+
+  function mergeCandidateInto(target, item) {
+    if (!target.matched_alias && item.matched_alias) target.matched_alias = item.matched_alias;
+    if (!target.matched_name && item.matched_name) target.matched_name = item.matched_name;
+    if (!target.source_title && item.source_title) target.source_title = item.source_title;
+    if (!target.source_id && item.source_id) target.source_id = item.source_id;
+    if (!target.raw_text && item.raw_text) target.raw_text = item.raw_text;
+    for (const field of ["name", "group", "alive_status", "hp_current", "hp_max", "mp_current", "mp_max", "location", "relationship", "short_summary"]) {
+      if (!target[field] && item[field]) target[field] = item[field];
+    }
+    if (Array.isArray(item.aliases) && item.aliases.length) {
+      const aliasSet = new Set(target.aliases || []);
+      item.aliases.forEach((alias) => { if (alias) aliasSet.add(alias); });
+      target.aliases = Array.from(aliasSet);
+    }
+    if (!target.status_effects.length && item.status_effects?.length) target.status_effects = item.status_effects;
+    if (!target.effects_add.length && item.effects_add?.length) target.effects_add = item.effects_add;
+    if (!target.effects_remove.length && item.effects_remove?.length) target.effects_remove = item.effects_remove;
+    if (item.extra && Object.keys(item.extra).length) target.extra = { ...(target.extra || {}), ...item.extra };
+    if (item.kind === "status_panel_update") target.kind = item.kind;
+    if (item.confidence === "高") target.confidence = "高";
+    target.sources.push({
+      source: item.source,
+      source_key: item.source_key,
+      source_id: item.source_id || "",
+      source_index: item.source_index ?? 0,
+      source_title: item.source_title || "",
+      kind: item.kind,
+      raw_text: item.raw_text,
+      score: scoreCandidate(item),
+      matched_alias: item.matched_alias || "",
+      matched_name: item.matched_name || "",
+    });
+  }
+
   function mergeCandidates(candidates) {
     const byKey = new Map();
     const sorted = [...candidates].sort((a, b) => scoreCandidate(b) - scoreCandidate(a));
 
     for (const item of sorted) {
-      const key = item.id || item.name;
+      const key = candidateMergeKey(item);
       if (!key) continue;
-      if (!byKey.has(key)) {
-        byKey.set(key, {
-          id: item.id || toSlug(item.name),
-          name: item.name,
-          group: item.group || "自动提取",
-          visible: true,
-          alive_status: "",
-          hp_current: "",
-          hp_max: "",
-          mp_current: "",
-          mp_max: "",
-          location: "",
-          relationship: "",
-          status_effects: [],
-          effects_add: [],
-          effects_remove: [],
-          short_summary: "",
-          extra: {},
-          kind: item.kind,
-          source: item.source,
-          source_key: item.source_key,
-          confidence: item.confidence,
-          sources: [],
-        });
-      }
-
-      const target = byKey.get(key);
-      for (const field of ["name", "group", "alive_status", "hp_current", "hp_max", "mp_current", "mp_max", "location", "relationship", "short_summary"]) {
-        if (!target[field] && item[field]) target[field] = item[field];
-      }
-      if (!target.status_effects.length && item.status_effects?.length) target.status_effects = item.status_effects;
-      if (!target.effects_add.length && item.effects_add?.length) target.effects_add = item.effects_add;
-      if (!target.effects_remove.length && item.effects_remove?.length) target.effects_remove = item.effects_remove;
-      if (item.extra && Object.keys(item.extra).length) target.extra = { ...(target.extra || {}), ...item.extra };
-      if (item.kind === "status_panel_update") target.kind = item.kind;
-      if (item.confidence === "高") target.confidence = "高";
-      target.sources.push({
-        source: item.source,
-        source_key: item.source_key,
-        kind: item.kind,
-        raw_text: item.raw_text,
-        score: scoreCandidate(item),
-      });
+      if (!byKey.has(key)) byKey.set(key, makeCandidateShell(item));
+      mergeCandidateInto(byKey.get(key), item);
     }
 
     return Array.from(byKey.values()).sort((a, b) => {
       const aScore = Math.max(...a.sources.map((item) => item.score || 0));
       const bScore = Math.max(...b.sources.map((item) => item.score || 0));
-      return bScore - aScore;
+      if (bScore !== aScore) return bScore - aScore;
+      return Number(b.source_index || 0) - Number(a.source_index || 0);
     });
   }
 
   async function scanStatusPanelSources(options = {}) {
     const enabledSources = new Set(options.enabledSources || SOURCE_DEFS.map((item) => item.key));
+    const existingCharacters = Array.isArray(options.characters) ? options.characters : [];
     const allCandidates = [];
     const sourceResults = [];
 
@@ -700,7 +952,10 @@
             source: item.source || source.label,
             source_key: item.source_key || source.key,
             source_index: item.source_index || 0,
+            source_id: item.source_id || "",
+            source_title: item.source_title || "",
             weight: source.weight,
+            existingCharacters,
           });
           count += candidates.length;
           allCandidates.push(...candidates);
@@ -714,6 +969,13 @@
     return {
       candidates: mergeCandidates(allCandidates),
       sourceResults,
+      debug: {
+        existingCharacters: existingCharacters.map((item) => ({
+          id: item?.id || "",
+          name: item?.name || "",
+          aliases: normalizeAliases(item?.aliases || item?.alias || []),
+        })),
+      },
     };
   }
 

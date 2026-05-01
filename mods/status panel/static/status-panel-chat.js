@@ -165,12 +165,56 @@
     mp_current: "MP当前", mp_max: "MP上限", status_effects: "身体状态", extra: "扩展字段",
   };
 
+  function aliasesOf(item) {
+    return splitList(Array.isArray(item?.aliases) ? item.aliases.join(",") : item?.aliases || "");
+  }
+
+  function normalizeMentionKey(value) {
+    return compact(value)
+      .replace(/[\s\u3000]+/g, "")
+      .replace(/[“”\"'‘’「」『』（）()\[\]【】]/g, "")
+      .replace(/[，。！？、,.!?~～—\-…:：;；]/g, "")
+      .toLowerCase();
+  }
+
+  function textContainsMention(haystack, needle) {
+    const source = compact(haystack);
+    const target = compact(needle);
+    if (!source || !target) return false;
+    const latin = /[A-Za-z0-9]/.test(target);
+    if (latin) return source.toLowerCase().includes(target.toLowerCase()) || normalizeMentionKey(source).includes(normalizeMentionKey(target));
+    return source.includes(target) || normalizeMentionKey(source).includes(normalizeMentionKey(target));
+  }
+
+  function findCharacterMentionInText(text, characters) {
+    const list = Array.isArray(characters) ? characters : [];
+    const tokens = [];
+    list.forEach((item) => {
+      const add = (value, type) => {
+        const token = compact(value);
+        if (!token) return;
+        if (token.length < 2 && !/[A-Za-z0-9]/.test(token)) return;
+        tokens.push({ token, type, character: item });
+      };
+      add(item.name, "name");
+      aliasesOf(item).forEach((alias) => add(alias, "alias"));
+      const id = compact(item.id);
+      if (id && !/^char-[a-f0-9]{6,}$/i.test(id)) add(id, "id");
+    });
+    tokens.sort((a, b) => b.token.length - a.token.length);
+    for (const entry of tokens) {
+      if (textContainsMention(text, entry.token)) return entry;
+    }
+    return null;
+  }
+
   function findCurrentCharacter(update) {
     const list = Array.isArray(lastState?.characters) ? lastState.characters : [];
     const id = compact(update?.id);
     const name = compact(update?.name);
     return list.find((item) => id && compact(item.id) === id)
-      || list.find((item) => name && compact(item.name) === name)
+      || list.find((item) => name && normalizeMentionKey(compact(item.name)) === normalizeMentionKey(name))
+      || list.find((item) => name && aliasesOf(item).some((alias) => normalizeMentionKey(alias) === normalizeMentionKey(name)))
       || null;
   }
 
@@ -613,7 +657,8 @@
 
     const maxVisible = Math.max(1, Math.min(50, Number(settings.max_visible || 8)));
     const visibleCharacters = characters.filter((item) => item.visible !== false).slice(0, maxVisible);
-    if (!visibleCharacters.length && !pendingUpdates.length && !naturalCandidates.length) return;
+    // v1.7.4-persist：即使当前没有角色，也保留聊天页状态栏入口。
+    // 这样重启后如果状态还未初始化，用户也能看到“暂无角色状态”并进入后台扫描/新增。
 
     const isOpen = getStoredOpen();
     if (isOpen && unreadCount) clearUnread();
@@ -1483,10 +1528,22 @@
     const characters = Array.isArray(lastState?.characters) ? lastState.characters.filter((item) => item.visible !== false) : [];
     if (!characters.length) return [];
     const value = compact(text);
-    const matched = characters.filter((item) => {
+    const matched = [];
+    const seen = new Set();
+    const mention = findCharacterMentionInText(value, characters);
+    if (mention?.character) {
+      matched.push(mention.character);
+      seen.add(String(mention.character.id || mention.character.name || ""));
+    }
+    characters.forEach((item) => {
       const name = compact(item.name);
-      if (!name) return false;
-      return new RegExp(escapeRegex(name), "i").test(value);
+      const aliases = aliasesOf(item);
+      const hit = (name && textContainsMention(value, name)) || aliases.some((alias) => textContainsMention(value, alias));
+      const key = String(item.id || item.name || "");
+      if (hit && !seen.has(key)) {
+        matched.push(item);
+        seen.add(key);
+      }
     });
     if (matched.length) return matched;
     return characters.length === 1 ? [characters[0]] : [];
