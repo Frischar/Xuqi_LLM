@@ -73,6 +73,26 @@ DEFAULT_WORLDBOOK_SETTINGS = {
     "default_whole_word": False,
     "default_match_mode": "any",
     "default_secondary_mode": "all",
+
+    # 新版世界书默认字段
+    "default_entry_type": "keyword",         # keyword / constant
+    "default_group_operator": "and",         # and / or
+    "default_chance": 100,                   # 0 ~ 100
+    "default_sticky_turns": 0,               # >= 0
+    "default_cooldown_turns": 0,             # >= 0
+
+    # 节点版世界书注入默认值
+    "default_insertion_position": "after_char_defs",  # before_char_defs / after_char_defs / in_chat
+    "default_injection_depth": 0,                     # 仅 in_chat 时使用
+    "default_injection_role": "system",               # system / user / assistant
+    "default_injection_order": 100,                   # 同位置内的二次排序
+
+    # RP 提示层级默认值
+    "default_prompt_layer": "follow_position",       # follow_position / stable / current_state / dynamic / output_guard
+
+    # 递归 V1
+    "recursive_scan_enabled": False,
+    "recursion_max_depth": 2,
 }
 
 DEFAULT_SYSTEM_PROMPT = """
@@ -85,33 +105,101 @@ DEFAULT_SYSTEM_PROMPT = """
 3. **格式化输出**：将提取出的数据严格按照指定的 JSON 结构进行组装。
 
 # Extraction Rules
+
+## 词条基础字段
 - **id**: 必须为唯一的字符串，格式为 `worldbook-[13位时间戳]-[5位随机小写字母和数字]`（例如：`worldbook-1776759884726-awz66`）。
-- **title**: 该设定的名称（如“魔法学院”、“艾莉丝”）。
+- **title**: 该设定的名称（如"魔法学院"、"艾莉丝"），截断 80 字符。
 - **trigger**: 触发该设定的核心关键词，通常与 title 相同。如果有多个同义词或别名，请用英文逗号分隔。
 - **secondary_trigger**: 次要触发词，若没有则留空字符串 `""`。
 - **content**: 设定的具体描述。
-- **priority**: 默认填 `100`。如果是非常核心的世界基底设定，可以设为 `101` 或更高。
+- **comment**: 简短的一句话分类（如"人物设定"、"地理位置"），方便人类阅读，截断 240 字符。
+
+## 词条类型与匹配
+- **entry_type**: 根据词条性质选择：
+  - `"keyword"`: 需要触发词才能激活（适用于大多数设定）
+  - `"constant"`: 始终注入，无需触发词（适用于全局规则、世界基底设定）
+- **group_operator**: 多触发词时的匹配逻辑：
+  - `"and"`: 所有触发词都必须命中（精确定位）
+  - `"or"`: 任一触发词命中即可（别名、同义词场景）
+- **match_mode**: 主触发词匹配模式，通常 `"any"`。
+- **secondary_mode**: 次要触发词匹配模式，通常 `"all"`。
+- **case_sensitive**: 中文场景始终 `false`。
+- **whole_word**: 中文场景始终 `false`。
+
+## 分组与概率（根据词条性质智能配置）
+- **group**: 分组名称，将相关词条归类（如"角色"、"地点"、"规则"、"剧情阶段"）。
+- **chance**: 触发概率 0-100，根据词条重要性设置：
+  - `100`: 核心设定、重要角色、关键地点（默认）
+  - `80-95`: 次要设定、支线角色、辅助信息
+  - `50-75`: 环境氛围、随机事件、装饰性设定
+  - `20-45`: 彩蛋、隐藏内容、低优先级提示
+- **sticky_turns**: 触发后持续生效的轮数：
+  - `0`: 单次触发，仅当轮生效（查询类词条）
+  - `2-5`: 短期记忆（情绪状态、临时场景变化）
+  - `6-15`: 中期记忆（剧情阶段、关系变化、获得物品）
+  - `20-50`: 长期记忆（重大事件、永久状态改变）
+- **cooldown_turns**: 触发后冷却轮数：
+  - `0`: 无冷却（默认）
+  - `3-8`: 避免频繁触发的日常对话类词条
+  - `10-20`: 重要事件，需要间隔才能再次触发
+
+## 排序与注入（根据内容智能配置）
+- **order**: 排序值 0-999999，数值越小越靠前：
+  - `50-80`: 世界基底规则、核心设定
+  - `100`: 普通设定（默认）
+  - `110-150`: 次要设定、补充信息
+- **insertion_position**: 根据词条用途选择：
+  - `"before_char_defs"`: 世界规则、全局设定、系统机制（让 AI 先理解世界规则）
+  - `"after_char_defs"`: 角色设定、地点描述、物品信息（默认）
+  - `"in_chat"`: 动态事件、实时状态、剧情推进（配合 injection_depth 使用）
+- **injection_depth**: 注入深度 0-3，仅 `"in_chat"` 时有效：
+  - `0`: 最近的消息附近
+  - `1-2`: 中等距离
+  - `3`: 较远的消息，用于背景信息
+- **injection_role**: 注入角色，通常 `"system"`。
+- **injection_order**: 同位置内二次排序，通常 `100`。
+- **prompt_layer**: 提示层级，根据词条性质选择：
+  - `"follow_position"`: 跟随注入位置（默认，大多数词条）
+  - `"stable"`: 稳定层，始终存在且位置固定（世界观基底、核心规则）
+  - `"current_state"`: 当前状态层（角色当前状态、场景描述）
+  - `"dynamic"`: 动态层，根据上下文变化（情绪、氛围、临时状态）
+  - `"output_guard"`: 输出守卫层（格式约束、语言风格规则）
+
+## 递归控制
+- **recursive_enabled**: 是否参与递归扫描，通常 `true`。
+- **prevent_further_recursion**: 是否阻止后续递归，通常 `false`。设为 `true` 可防止级联触发。
+
+## 状态
 - **enabled**: 始终为 `true`。
-- **case_sensitive** & **whole_word**: 始终为 `false`。
-- **match_mode**: 默认填 `"any"`。
-- **secondary_mode**: 默认填 `"all"`。
-- **comment**: 简短的一句话分类（如“人物设定”、“地理位置”），方便人类阅读。
+- **priority**: 与 order 保持一致。
 
 # Output Format
 你必须**且只能**输出一个合法的 JSON 对象，不要包含任何 Markdown 代码块修饰符（如 ```json），也不要包含任何多余的解释文字。JSON 的根结构必须如下：
 
 {
   "entries": [
-    // 提取的词条对象列表
+    // 提取的词条对象列表，每个词条包含上述所有字段
   ],
   "settings": {
+    "enabled": true,
     "debug_enabled": false,
+    "max_hits": 20,
     "default_case_sensitive": false,
+    "default_whole_word": false,
     "default_match_mode": "any",
     "default_secondary_mode": "all",
-    "default_whole_word": false,
-    "enabled": true,
-    "max_hits": 5
+    "default_entry_type": "keyword",
+    "default_group_operator": "and",
+    "default_chance": 100,
+    "default_sticky_turns": 0,
+    "default_cooldown_turns": 0,
+    "default_insertion_position": "after_char_defs",
+    "default_injection_depth": 0,
+    "default_injection_role": "system",
+    "default_injection_order": 100,
+    "default_prompt_layer": "follow_position",
+    "recursive_scan_enabled": false,
+    "recursion_max_depth": 2
   }
 }
 """.strip()
@@ -324,6 +412,37 @@ def sanitize_settings(raw: Any) -> dict[str, Any]:
     return data
 
 
+def _normalize_entry_type(value: Any, default: str = "keyword") -> str:
+    text = str(value or "").strip().lower()
+    return text if text in {"keyword", "constant"} else default
+
+
+def _normalize_group_operator(value: Any, default: str = "and") -> str:
+    text = str(value or "").strip().lower()
+    if text in {"and", "all"}:
+        return "and"
+    if text in {"or", "any"}:
+        return "or"
+    return default
+
+
+def _normalize_insertion_position(value: Any, default: str = "after_char_defs") -> str:
+    text = str(value or "").strip().lower()
+    return text if text in {"before_char_defs", "after_char_defs", "in_chat"} else default
+
+
+def _normalize_injection_role(value: Any, default: str = "system") -> str:
+    text = str(value or "").strip().lower()
+    if text in {"system", "user", "assistant"}:
+        return text
+    return default
+
+
+def _normalize_prompt_layer(value: Any, default: str = "follow_position") -> str:
+    text = str(value or "").strip().lower()
+    return text if text in {"follow_position", "stable", "current_state", "dynamic", "output_guard"} else default
+
+
 def sanitize_worldbook_settings(raw: Any) -> dict[str, Any]:
     settings = dict(DEFAULT_WORLDBOOK_SETTINGS)
     data = raw if isinstance(raw, dict) else {}
@@ -338,32 +457,139 @@ def sanitize_worldbook_settings(raw: Any) -> dict[str, Any]:
 
     secondary_mode = str(data.get("default_secondary_mode", settings["default_secondary_mode"])).strip().lower()
     settings["default_secondary_mode"] = secondary_mode if secondary_mode in {"any", "all"} else "all"
+
+    # 新版世界书字段
+    settings["default_entry_type"] = _normalize_entry_type(
+        data.get("default_entry_type"), settings["default_entry_type"],
+    )
+    settings["default_group_operator"] = _normalize_group_operator(
+        data.get("default_group_operator"), settings["default_group_operator"],
+    )
+    settings["default_chance"] = clamp_int(
+        data.get("default_chance"), 0, 100, settings["default_chance"],
+    )
+    settings["default_sticky_turns"] = clamp_int(
+        data.get("default_sticky_turns"), 0, 999, settings["default_sticky_turns"],
+    )
+    settings["default_cooldown_turns"] = clamp_int(
+        data.get("default_cooldown_turns"), 0, 999, settings["default_cooldown_turns"],
+    )
+
+    # 节点版注入默认值
+    settings["default_insertion_position"] = _normalize_insertion_position(
+        data.get("default_insertion_position"), settings["default_insertion_position"],
+    )
+    settings["default_injection_depth"] = clamp_int(
+        data.get("default_injection_depth"), 0, 3, settings["default_injection_depth"],
+    )
+    settings["default_injection_role"] = _normalize_injection_role(
+        data.get("default_injection_role"), settings["default_injection_role"],
+    )
+    settings["default_injection_order"] = clamp_int(
+        data.get("default_injection_order"), 0, 999999, settings["default_injection_order"],
+    )
+
+    # RP 提示层级
+    settings["default_prompt_layer"] = _normalize_prompt_layer(
+        data.get("default_prompt_layer"), settings["default_prompt_layer"],
+    )
+
+    # 递归
+    settings["recursive_scan_enabled"] = bool(data.get("recursive_scan_enabled", settings["recursive_scan_enabled"]))
+    settings["recursion_max_depth"] = clamp_int(
+        data.get("recursion_max_depth"), 0, 5, settings["recursion_max_depth"],
+    )
     return settings
 
 
 def sanitize_worldbook_entry(raw: Any, *, index: int, settings: dict[str, Any]) -> dict[str, Any] | None:
     if not isinstance(raw, dict):
         return None
-    trigger = str(raw.get("trigger", "")).strip()
     content = str(raw.get("content", "")).strip()
-    if not trigger or not content:
+    if not content:
         return None
+
+    entry_type = _normalize_entry_type(
+        raw.get("entry_type"),
+        str(settings.get("default_entry_type", "keyword")),
+    )
+
+    trigger = str(raw.get("trigger", "")).strip()
+    secondary_trigger = str(raw.get("secondary_trigger", "")).strip()
+
+    if entry_type == "keyword" and not trigger:
+        return None
+
+    title = str(raw.get("title", "")).strip() or f"词条 {index}"
+    comment = str(raw.get("comment", "")).strip()
+    entry_id = str(raw.get("id", "")).strip() or f"worldbook-{index}"
 
     match_mode = str(raw.get("match_mode", settings["default_match_mode"])).strip().lower()
     secondary_mode = str(raw.get("secondary_mode", settings["default_secondary_mode"])).strip().lower()
+
+    group_operator = _normalize_group_operator(
+        raw.get("group_operator"),
+        str(settings.get("default_group_operator", "and")),
+    )
+
+    group = str(raw.get("group", "")).strip()
+
+    chance = clamp_int(raw.get("chance"), 0, 100, int(settings.get("default_chance", 100)))
+    sticky_turns = clamp_int(raw.get("sticky_turns"), 0, 999, int(settings.get("default_sticky_turns", 0)))
+    cooldown_turns = clamp_int(raw.get("cooldown_turns"), 0, 999, int(settings.get("default_cooldown_turns", 0)))
+
+    raw_order = raw.get("order", raw.get("priority", 100))
+    order = clamp_int(raw_order, 0, 999999, 100)
+
+    insertion_position = _normalize_insertion_position(
+        raw.get("insertion_position"),
+        str(settings.get("default_insertion_position", "after_char_defs")),
+    )
+    injection_depth = clamp_int(
+        raw.get("injection_depth"), 0, 3, int(settings.get("default_injection_depth", 0)),
+    )
+    injection_role = _normalize_injection_role(
+        raw.get("injection_role"),
+        str(settings.get("default_injection_role", "system")),
+    )
+    injection_order = clamp_int(
+        raw.get("injection_order", raw_order), 0, 999999, int(settings.get("default_injection_order", 100)),
+    )
+    prompt_layer = _normalize_prompt_layer(
+        raw.get("prompt_layer"),
+        str(settings.get("default_prompt_layer", "follow_position")),
+    )
+
+    recursive_enabled = bool(raw.get("recursive_enabled", True))
+    prevent_further_recursion = bool(raw.get("prevent_further_recursion", False))
+
     return {
-        "id": str(raw.get("id", "")).strip() or f"worldbook-{index}",
-        "title": str(raw.get("title", "")).strip() or f"词条 {index}",
+        "id": entry_id,
+        "title": title[:80],
         "trigger": trigger,
-        "secondary_trigger": str(raw.get("secondary_trigger", "")).strip(),
-        "content": content,
-        "enabled": bool(raw.get("enabled", True)),
-        "priority": clamp_int(raw.get("priority"), 0, 9999, 100),
-        "case_sensitive": bool(raw.get("case_sensitive", settings["default_case_sensitive"])),
-        "whole_word": bool(raw.get("whole_word", settings["default_whole_word"])),
+        "secondary_trigger": secondary_trigger,
+        "entry_type": entry_type,
+        "group_operator": group_operator,
         "match_mode": match_mode if match_mode in {"any", "all"} else settings["default_match_mode"],
         "secondary_mode": secondary_mode if secondary_mode in {"any", "all"} else settings["default_secondary_mode"],
-        "comment": str(raw.get("comment", "")).strip(),
+        "content": content,
+        "group": group[:80],
+        "chance": chance,
+        "sticky_turns": sticky_turns,
+        "cooldown_turns": cooldown_turns,
+        "order": order,
+        "priority": order,
+        "insertion_position": insertion_position,
+        "injection_depth": injection_depth,
+        "injection_role": injection_role,
+        "injection_order": injection_order,
+        "prompt_layer": prompt_layer,
+        "recursive_enabled": recursive_enabled,
+        "prevent_further_recursion": prevent_further_recursion,
+        "enabled": bool(raw.get("enabled", True)),
+        "case_sensitive": bool(raw.get("case_sensitive", settings["default_case_sensitive"])),
+        "whole_word": bool(raw.get("whole_word", settings["default_whole_word"])),
+        "comment": comment[:240],
     }
 
 
@@ -648,7 +874,7 @@ def build_generation_messages(source_text: str, settings: dict[str, Any]) -> lis
     extra_section = f"\n额外要求：\n{extra_requirements}\n" if extra_requirements else ""
 
     instructions = f"""
-请把下面的素材整理成 Xuqi 风格世界书 JSON。
+请把下面的素材整理成世界书 JSON。
 
 当前生成模式：
 - 素材类型：{source_mode_labels[generation["source_mode"]]}
@@ -662,32 +888,79 @@ def build_generation_messages(source_text: str, settings: dict[str, Any]) -> lis
 你输出时请遵守以下规则：
 1. 只保留长期有效、可复用、可检索的信息。
 2. 不要把一次性台词、短期镜头、单次对话原封不动塞进词条。
-4. trigger ???????????????????????????????
-5. secondary_trigger ???????????????
-6. content ?????????????????????????????
-7. comment ?????????????????????????????
-8. ???????????????????
+3. trigger 填核心关键词，多个同义词或别名用英文逗号分隔。
+4. secondary_trigger 填次要触发词，若没有则留空字符串 ""。
+5. content 填高信息密度的设定描述，适合作为 AI 背景上下文。
+6. comment 填简短的一句话分类（如"人物设定"、"地理位置"）。
+7. **重要：每个词条的高级字段必须根据其语义智能配置，不要全部使用默认值！** 具体规则：
+   - entry_type: 绝大多数为 "keyword"，只有全局规则/世界基底设定用 "constant"
+   - group: 按内容归类（如"角色"、"地点"、"规则"、"组织"、"剧情"）
+   - chance: 核心设定100，次要设定80-95，氛围/装饰50-75，彩蛋/隐藏20-45
+   - sticky_turns: 查询类0，情绪/临时状态2-5，剧情阶段/关系变化6-15，重大事件20-50
+   - cooldown_turns: 通常0，日常对话类3-8，重要事件10-20
+   - order: 核心规则50-80，普通设定100，次要设定110-150
+   - insertion_position: 世界规则用"before_char_defs"，角色/地点用"after_char_defs"，动态事件用"in_chat"
+   - prompt_layer: 基底规则用"stable"，当前状态用"current_state"，情绪氛围用"dynamic"，格式约束用"output_guard"
 
-?????
-1. ??? JSON???? Markdown?
-2. ????????
+输出格式要求：
+1. 只输出合法 JSON，不要包含 Markdown 代码块标记。
+2. 每个词条必须包含以下完整字段，且高级字段要根据语义配置（以下是结构示例，实际值要根据词条内容设置）：
 {{
   "entries": [
-    // ?????????
+    {{
+      "id": "worldbook-[13位时间戳]-[5位随机字符]",
+      "title": "设定名称",
+      "trigger": "核心关键词",
+      "secondary_trigger": "次要触发词或空字符串",
+      "entry_type": "根据词条性质选择 keyword 或 constant",
+      "group_operator": "根据触发词数量选择 and 或 or",
+      "match_mode": "any",
+      "secondary_mode": "all",
+      "content": "高信息密度的设定描述",
+      "group": "按内容归类如角色/地点/规则等",
+      "chance": "根据重要性设置100/80/50等",
+      "sticky_turns": "根据词条性质设置0/3/10等",
+      "cooldown_turns": "根据词条性质设置0/5/15等",
+      "order": "根据重要性设置50/100/120等",
+      "priority": "与order保持一致",
+      "insertion_position": "根据用途选择before_char_defs/after_char_defs/in_chat",
+      "injection_depth": "仅in_chat时有效，0-3",
+      "injection_role": "system",
+      "injection_order": 100,
+      "prompt_layer": "根据性质选择follow_position/stable/current_state/dynamic/output_guard",
+      "recursive_enabled": true,
+      "prevent_further_recursion": false,
+      "enabled": true,
+      "case_sensitive": false,
+      "whole_word": false,
+      "comment": "简短分类标签"
+    }}
   ],
   "settings": {{
+    "enabled": true,
     "debug_enabled": false,
+    "max_hits": 20,
     "default_case_sensitive": false,
+    "default_whole_word": false,
     "default_match_mode": "any",
     "default_secondary_mode": "all",
-    "default_whole_word": false,
-    "enabled": true,
-    "max_hits": 5
+    "default_entry_type": "keyword",
+    "default_group_operator": "and",
+    "default_chance": 100,
+    "default_sticky_turns": 0,
+    "default_cooldown_turns": 0,
+    "default_insertion_position": "after_char_defs",
+    "default_injection_depth": 0,
+    "default_injection_role": "system",
+    "default_injection_order": 100,
+    "default_prompt_layer": "follow_position",
+    "recursive_scan_enabled": false,
+    "recursion_max_depth": 2
   }}
 }}
-3. ???????
+3. 确保所有字段都有值，不要遗漏。
 
-???????
+用户提供的素材：
 {source_text}
 """.strip()
     return [
@@ -696,7 +969,7 @@ def build_generation_messages(source_text: str, settings: dict[str, Any]) -> lis
     ]
 
 
-app = FastAPI(title="世界书生成器", version="0.5.0")
+app = FastAPI(title="世界书生成器", version="0.6.0")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 

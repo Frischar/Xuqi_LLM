@@ -160,6 +160,31 @@
                           </select>
                         </div>
                       </div>
+
+                      <div class="mini-grid">
+                        <div>
+                          <label for="entryType">词条类型</label>
+                          <select id="entryType">
+                            <option value="keyword">关键词触发</option>
+                            <option value="constant">常量注入</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label for="entryGroup">分组</label>
+                          <input id="entryGroup" type="text" placeholder="可留空" />
+                        </div>
+                      </div>
+
+                      <div class="mini-grid">
+                        <div>
+                          <label for="entryOrder">排序值</label>
+                          <input id="entryOrder" type="number" min="0" max="999999" />
+                        </div>
+                        <div>
+                          <label for="entryChance">触发概率 (0-100)</label>
+                          <input id="entryChance" type="number" min="0" max="100" />
+                        </div>
+                      </div>
                     </div>
 
                     <div class="editor-card">
@@ -177,12 +202,22 @@
 
                       <div class="mini-grid">
                         <div>
+                          <label for="entryGroupOperator">组运算符</label>
+                          <select id="entryGroupOperator">
+                            <option value="and">全部匹配 (AND)</option>
+                            <option value="or">任一匹配 (OR)</option>
+                          </select>
+                        </div>
+                        <div>
                           <label for="entryMatchMode">主触发匹配</label>
                           <select id="entryMatchMode">
                             <option value="any">任意命中</option>
                             <option value="all">全部命中</option>
                           </select>
                         </div>
+                      </div>
+
+                      <div class="mini-grid">
                         <div>
                           <label for="entrySecondaryMode">辅助触发匹配</label>
                           <select id="entrySecondaryMode">
@@ -190,9 +225,6 @@
                             <option value="any">任意命中</option>
                           </select>
                         </div>
-                      </div>
-
-                      <div class="mini-grid">
                         <div>
                           <label for="entryCaseSensitive">区分大小写</label>
                           <select id="entryCaseSensitive">
@@ -200,9 +232,93 @@
                             <option value="true">是</option>
                           </select>
                         </div>
+                      </div>
+
+                      <div class="mini-grid">
                         <div>
                           <label for="entryWholeWord">完整词匹配</label>
                           <select id="entryWholeWord">
+                            <option value="false">否</option>
+                            <option value="true">是</option>
+                          </select>
+                        </div>
+                        <div></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="entry-form-grid">
+                    <div class="editor-card">
+                      <h3>注入控制</h3>
+                      <div class="mini-grid">
+                        <div>
+                          <label for="entryInsertionPosition">注入位置</label>
+                          <select id="entryInsertionPosition">
+                            <option value="before_char_defs">角色定义前</option>
+                            <option value="after_char_defs">角色定义后</option>
+                            <option value="in_chat">聊天中注入</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label for="entryInjectionRole">注入角色</label>
+                          <select id="entryInjectionRole">
+                            <option value="system">System</option>
+                            <option value="user">User</option>
+                            <option value="assistant">Assistant</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="mini-grid">
+                        <div>
+                          <label for="entryInjectionDepth">注入深度 (0-3)</label>
+                          <input id="entryInjectionDepth" type="number" min="0" max="3" />
+                        </div>
+                        <div>
+                          <label for="entryInjectionOrder">注入排序</label>
+                          <input id="entryInjectionOrder" type="number" min="0" max="999999" />
+                        </div>
+                      </div>
+
+                      <div class="mini-grid">
+                        <div>
+                          <label for="entryPromptLayer">提示层级</label>
+                          <select id="entryPromptLayer">
+                            <option value="follow_position">跟随位置</option>
+                            <option value="stable">稳定层</option>
+                            <option value="current_state">当前状态</option>
+                            <option value="dynamic">动态层</option>
+                            <option value="output_guard">输出守卫</option>
+                          </select>
+                        </div>
+                        <div></div>
+                      </div>
+                    </div>
+
+                    <div class="editor-card">
+                      <h3>高级控制</h3>
+                      <div class="mini-grid">
+                        <div>
+                          <label for="entryStickyTurns">粘性轮数</label>
+                          <input id="entryStickyTurns" type="number" min="0" max="999" />
+                        </div>
+                        <div>
+                          <label for="entryCooldownTurns">冷却轮数</label>
+                          <input id="entryCooldownTurns" type="number" min="0" max="999" />
+                        </div>
+                      </div>
+
+                      <div class="mini-grid">
+                        <div>
+                          <label for="entryRecursiveEnabled">参与递归</label>
+                          <select id="entryRecursiveEnabled">
+                            <option value="true">是</option>
+                            <option value="false">否</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label for="entryPreventFurtherRecursion">阻止后续递归</label>
+                          <select id="entryPreventFurtherRecursion">
                             <option value="false">否</option>
                             <option value="true">是</option>
                           </select>
@@ -415,13 +531,27 @@
         id: document.getElementById("entryId"),
         trigger: document.getElementById("entryTrigger"),
         secondary_trigger: document.getElementById("entrySecondaryTrigger"),
-        priority: document.getElementById("entryPriority"),
-        enabled: document.getElementById("entryEnabled"),
+        entry_type: document.getElementById("entryType"),
+        group_operator: document.getElementById("entryGroupOperator"),
         match_mode: document.getElementById("entryMatchMode"),
         secondary_mode: document.getElementById("entrySecondaryMode"),
+        content: document.getElementById("entryContent"),
+        group: document.getElementById("entryGroup"),
+        chance: document.getElementById("entryChance"),
+        sticky_turns: document.getElementById("entryStickyTurns"),
+        cooldown_turns: document.getElementById("entryCooldownTurns"),
+        order: document.getElementById("entryOrder"),
+        priority: document.getElementById("entryPriority"),
+        insertion_position: document.getElementById("entryInsertionPosition"),
+        injection_depth: document.getElementById("entryInjectionDepth"),
+        injection_role: document.getElementById("entryInjectionRole"),
+        injection_order: document.getElementById("entryInjectionOrder"),
+        prompt_layer: document.getElementById("entryPromptLayer"),
+        recursive_enabled: document.getElementById("entryRecursiveEnabled"),
+        prevent_further_recursion: document.getElementById("entryPreventFurtherRecursion"),
+        enabled: document.getElementById("entryEnabled"),
         case_sensitive: document.getElementById("entryCaseSensitive"),
         whole_word: document.getElementById("entryWholeWord"),
-        content: document.getElementById("entryContent"),
         comment: document.getElementById("entryComment"),
       };
 
@@ -458,13 +588,27 @@
           title: "新词条",
           trigger: "",
           secondary_trigger: "",
-          content: "",
-          enabled: true,
-          priority: 100,
-          case_sensitive: false,
-          whole_word: false,
+          entry_type: "keyword",
+          group_operator: "and",
           match_mode: "any",
           secondary_mode: "all",
+          content: "",
+          group: "",
+          chance: 100,
+          sticky_turns: 0,
+          cooldown_turns: 0,
+          order: 100,
+          priority: 100,
+          insertion_position: "after_char_defs",
+          injection_depth: 0,
+          injection_role: "system",
+          injection_order: 100,
+          prompt_layer: "follow_position",
+          recursive_enabled: true,
+          prevent_further_recursion: false,
+          enabled: true,
+          case_sensitive: false,
+          whole_word: false,
           comment: "",
         };
       }
@@ -603,24 +747,50 @@
           settings: {
             enabled: Boolean(settings.enabled ?? true),
             debug_enabled: Boolean(settings.debug_enabled ?? false),
-            max_hits: Number(settings.max_hits ?? 3),
+            max_hits: Number(settings.max_hits ?? 20),
             default_case_sensitive: Boolean(settings.default_case_sensitive ?? false),
             default_whole_word: Boolean(settings.default_whole_word ?? false),
             default_match_mode: String(settings.default_match_mode || "any"),
             default_secondary_mode: String(settings.default_secondary_mode || "all"),
+            default_entry_type: String(settings.default_entry_type || "keyword"),
+            default_group_operator: String(settings.default_group_operator || "and"),
+            default_chance: Number(settings.default_chance ?? 100),
+            default_sticky_turns: Number(settings.default_sticky_turns ?? 0),
+            default_cooldown_turns: Number(settings.default_cooldown_turns ?? 0),
+            default_insertion_position: String(settings.default_insertion_position || "after_char_defs"),
+            default_injection_depth: Number(settings.default_injection_depth ?? 0),
+            default_injection_role: String(settings.default_injection_role || "system"),
+            default_injection_order: Number(settings.default_injection_order ?? 100),
+            default_prompt_layer: String(settings.default_prompt_layer || "follow_position"),
+            recursive_scan_enabled: Boolean(settings.recursive_scan_enabled ?? false),
+            recursion_max_depth: Number(settings.recursion_max_depth ?? 2),
           },
           entries: entries.map((entry) => ({
             id: String(entry?.id || ""),
             title: String(entry?.title || ""),
             trigger: String(entry?.trigger || ""),
             secondary_trigger: String(entry?.secondary_trigger || ""),
-            content: String(entry?.content || ""),
-            enabled: entry?.enabled !== false,
-            priority: Number(entry?.priority ?? 100),
-            case_sensitive: Boolean(entry?.case_sensitive ?? false),
-            whole_word: Boolean(entry?.whole_word ?? false),
+            entry_type: String(entry?.entry_type || "keyword"),
+            group_operator: String(entry?.group_operator || "and"),
             match_mode: String(entry?.match_mode || "any"),
             secondary_mode: String(entry?.secondary_mode || "all"),
+            content: String(entry?.content || ""),
+            group: String(entry?.group || ""),
+            chance: Number(entry?.chance ?? 100),
+            sticky_turns: Number(entry?.sticky_turns ?? 0),
+            cooldown_turns: Number(entry?.cooldown_turns ?? 0),
+            order: Number(entry?.order ?? entry?.priority ?? 100),
+            priority: Number(entry?.priority ?? entry?.order ?? 100),
+            insertion_position: String(entry?.insertion_position || "after_char_defs"),
+            injection_depth: Number(entry?.injection_depth ?? 0),
+            injection_role: String(entry?.injection_role || "system"),
+            injection_order: Number(entry?.injection_order ?? 100),
+            prompt_layer: String(entry?.prompt_layer || "follow_position"),
+            recursive_enabled: entry?.recursive_enabled !== false,
+            prevent_further_recursion: Boolean(entry?.prevent_further_recursion ?? false),
+            enabled: entry?.enabled !== false,
+            case_sensitive: Boolean(entry?.case_sensitive ?? false),
+            whole_word: Boolean(entry?.whole_word ?? false),
             comment: String(entry?.comment || ""),
           })),
         };
@@ -658,9 +828,11 @@
           return;
         }
         entryEditorHeading.textContent = entry.title?.trim() || "未命名词条";
+        const typeLabel = entry.entry_type === "constant" ? "常量" : "关键词";
+        const groupLabel = entry.group?.trim() ? ` · ${entry.group}` : "";
         entryEditorSubheading.textContent = entry.trigger?.trim()
-          ? `主触发词：${entry.trigger}`
-          : "还没有填写主触发词，建议先补触发词再继续细修。";
+          ? `[${typeLabel}] 主触发词：${entry.trigger}${groupLabel}`
+          : `还没有填写主触发词，建议先补触发词再继续细修。`;
         entryStatusPill.textContent = entry.enabled === false ? "当前停用" : "当前启用";
         entryStatusPill.className = `pill ${entry.enabled === false ? "is-idle" : "is-ok"}`;
         entryPriorityPill.textContent = `优先级 ${entry.priority ?? 100}`;
@@ -686,8 +858,10 @@
           button.type = "button";
           button.className = `entry-list-item ${item.id === selectedEntryId ? "is-active" : ""}`;
           const enabledLabel = item.enabled === false ? "停用" : "启用";
-          const triggerPreview = item.trigger?.trim() || "未填写主触发词";
+          const typeLabel = item.entry_type === "constant" ? "常量" : "关键词";
+          const triggerPreview = item.trigger?.trim() || (item.entry_type === "constant" ? "常量注入" : "未填写主触发词");
           const commentPreview = item.comment?.trim() || item.content?.trim() || "还没有补充说明";
+          const groupBadge = item.group?.trim() ? `<span class="entry-state-badge">${escapeHtml(item.group)}</span>` : "";
           button.innerHTML = `
             <div class="entry-list-topline">
               <strong>${escapeHtml(item.title || "未命名词条")}</strong>
@@ -696,8 +870,8 @@
             <span class="entry-trigger-line">${escapeHtml(triggerPreview)}</span>
             <small>${escapeHtml(commentPreview)}</small>
             <div class="entry-list-foot">
-              <span>优先级 ${escapeHtml(item.priority ?? 100)}</span>
-              <span>${escapeHtml(item.match_mode || "any")} / ${escapeHtml(item.secondary_mode || "all")}</span>
+              <span>${typeLabel} · 优先级 ${escapeHtml(item.priority ?? 100)}</span>
+              ${groupBadge}
             </div>
           `;
           button.addEventListener("click", () => {
@@ -740,10 +914,25 @@
         entryEditorFields.id.value = entry.id || "";
         entryEditorFields.trigger.value = entry.trigger || "";
         entryEditorFields.secondary_trigger.value = entry.secondary_trigger || "";
-        entryEditorFields.priority.value = Number(entry.priority ?? 100);
-        entryEditorFields.enabled.value = String(entry.enabled !== false);
+        entryEditorFields.entry_type.value = entry.entry_type || "keyword";
+        entryEditorFields.group_operator.value = entry.group_operator || "and";
         entryEditorFields.match_mode.value = entry.match_mode || "any";
         entryEditorFields.secondary_mode.value = entry.secondary_mode || "all";
+        entryEditorFields.content.value = entry.content || "";
+        entryEditorFields.group.value = entry.group || "";
+        entryEditorFields.chance.value = Number(entry.chance ?? 100);
+        entryEditorFields.sticky_turns.value = Number(entry.sticky_turns ?? 0);
+        entryEditorFields.cooldown_turns.value = Number(entry.cooldown_turns ?? 0);
+        entryEditorFields.order.value = Number(entry.order ?? entry.priority ?? 100);
+        entryEditorFields.priority.value = Number(entry.priority ?? entry.order ?? 100);
+        entryEditorFields.insertion_position.value = entry.insertion_position || "after_char_defs";
+        entryEditorFields.injection_depth.value = Number(entry.injection_depth ?? 0);
+        entryEditorFields.injection_role.value = entry.injection_role || "system";
+        entryEditorFields.injection_order.value = Number(entry.injection_order ?? 100);
+        entryEditorFields.prompt_layer.value = entry.prompt_layer || "follow_position";
+        entryEditorFields.recursive_enabled.value = String(entry.recursive_enabled !== false);
+        entryEditorFields.prevent_further_recursion.value = String(Boolean(entry.prevent_further_recursion));
+        entryEditorFields.enabled.value = String(entry.enabled !== false);
         entryEditorFields.case_sensitive.value = String(Boolean(entry.case_sensitive));
         entryEditorFields.whole_word.value = String(Boolean(entry.whole_word));
         entryEditorFields.content.value = entry.content || "";
@@ -759,13 +948,27 @@
         entry.id = entryEditorFields.id.value.trim() || generateEntryId();
         entry.trigger = entryEditorFields.trigger.value.trim();
         entry.secondary_trigger = entryEditorFields.secondary_trigger.value.trim();
-        entry.priority = Number(entryEditorFields.priority.value || 100);
-        entry.enabled = entryEditorFields.enabled.value === "true";
+        entry.entry_type = entryEditorFields.entry_type.value;
+        entry.group_operator = entryEditorFields.group_operator.value;
         entry.match_mode = entryEditorFields.match_mode.value;
         entry.secondary_mode = entryEditorFields.secondary_mode.value;
+        entry.content = entryEditorFields.content.value.trim();
+        entry.group = entryEditorFields.group.value.trim();
+        entry.chance = Number(entryEditorFields.chance.value || 100);
+        entry.sticky_turns = Number(entryEditorFields.sticky_turns.value || 0);
+        entry.cooldown_turns = Number(entryEditorFields.cooldown_turns.value || 0);
+        entry.order = Number(entryEditorFields.order.value || 100);
+        entry.priority = Number(entryEditorFields.priority.value || 100);
+        entry.insertion_position = entryEditorFields.insertion_position.value;
+        entry.injection_depth = Number(entryEditorFields.injection_depth.value || 0);
+        entry.injection_role = entryEditorFields.injection_role.value;
+        entry.injection_order = Number(entryEditorFields.injection_order.value || 100);
+        entry.prompt_layer = entryEditorFields.prompt_layer.value;
+        entry.recursive_enabled = entryEditorFields.recursive_enabled.value === "true";
+        entry.prevent_further_recursion = entryEditorFields.prevent_further_recursion.value === "true";
+        entry.enabled = entryEditorFields.enabled.value === "true";
         entry.case_sensitive = entryEditorFields.case_sensitive.value === "true";
         entry.whole_word = entryEditorFields.whole_word.value === "true";
-        entry.content = entryEditorFields.content.value.trim();
         entry.comment = entryEditorFields.comment.value.trim();
 
         selectedEntryId = entry.id;
