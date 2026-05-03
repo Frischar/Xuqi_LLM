@@ -507,6 +507,7 @@
       const editorForm = document.getElementById("editorForm");
       const previewHint = document.getElementById("previewHint");
       const statusText = document.getElementById("statusText");
+      const generateButton = document.getElementById("generateButton");
       const browserEntryCount = document.getElementById("browserEntryCount");
       const browserEnabledCount = document.getElementById("browserEnabledCount");
       const browserSelectedTitle = document.getElementById("browserSelectedTitle");
@@ -564,9 +565,29 @@
       let workspaceStore = structuredClone(INITIAL_WORKSPACE.store || { settings: {}, entries: [] });
       let selectedEntryId = workspaceStore.entries?.[0]?.id || null;
       let lastGeneratedAt = INITIAL_WORKSPACE.generated_at || "";
+      let isGeneratingWorldbook = false;
+      let generateButtonResetTimer = null;
 
       function setStatus(text) {
         statusText.textContent = text;
+      }
+
+      function setGenerateButtonState(state, label) {
+        if (!generateButton) return;
+        if (generateButtonResetTimer) {
+          window.clearTimeout(generateButtonResetTimer);
+          generateButtonResetTimer = null;
+        }
+        generateButton.disabled = state === "loading";
+        generateButton.setAttribute("aria-busy", state === "loading" ? "true" : "false");
+        generateButton.textContent = label || "生成世界书";
+      }
+
+      function flashGenerateButtonDone(label = "生成完成") {
+        setGenerateButtonState("done", label);
+        generateButtonResetTimer = window.setTimeout(() => {
+          setGenerateButtonState("idle", "生成世界书");
+        }, 1800);
       }
 
       function escapeHtml(value) {
@@ -1096,21 +1117,42 @@
       }
 
       async function generateWorldbook() {
-        setStatus("???????...");
-        const data = await postJson("/api/generate", {
-          ...collectSettings(),
-          ...collectWorkspacePayload(),
-          store: workspaceStore,
-        });
-        rawOutput.value = data.output_json || "";
-        lastGeneratedAt = data.workspace.generated_at || "??";
-        renderPreview(data.store, data.summary);
-        const appendedCount = Number(data.merge_summary?.appended_count ?? data.summary.entry_count ?? 0);
-        const skippedCount = Number(data.merge_summary?.skipped_duplicates ?? 0);
-        previewHint.textContent = skippedCount > 0
-          ? `???? ${appendedCount} ???? ${skippedCount} ????????? ${data.summary.entry_count} ??`
-          : `???? ${appendedCount} ??????? ${data.summary.entry_count} ??`;
-        setStatus("?????");
+        if (isGeneratingWorldbook) {
+          setStatus("正在生成中，请稍等，本次点击已忽略。");
+          return;
+        }
+        isGeneratingWorldbook = true;
+        setGenerateButtonState("loading", "正在生成...");
+        setStatus("正在生成世界书，请稍等...");
+        previewHint.textContent = "模型正在整理素材并生成词条，请不要重复点击。";
+        try {
+          const data = await postJson("/api/generate", {
+            ...collectSettings(),
+            ...collectWorkspacePayload(),
+            store: workspaceStore,
+          });
+          rawOutput.value = data.output_json || "";
+          lastGeneratedAt = data.workspace?.generated_at || new Date().toISOString();
+          renderPreview(data.store, data.summary);
+          const appendedCount = Number(data.merge_summary?.appended_count ?? data.summary.entry_count ?? 0);
+          const skippedCount = Number(data.merge_summary?.skipped_duplicates ?? 0);
+          previewHint.textContent = skippedCount > 0
+            ? `生成完成：新增 ${appendedCount} 条，跳过 ${skippedCount} 条重复词条，当前共 ${data.summary.entry_count} 条。`
+            : `生成完成：新增 ${appendedCount} 条，当前共 ${data.summary.entry_count} 条。`;
+          setStatus(skippedCount > 0
+            ? `生成完成：新增 ${appendedCount} 条，跳过 ${skippedCount} 条重复词条。`
+            : `生成完成：新增 ${appendedCount} 条词条。`);
+          flashGenerateButtonDone("生成完成");
+        } catch (error) {
+          setStatus(`生成失败：${error.message}`);
+          setGenerateButtonState("idle", "生成世界书");
+        } finally {
+          isGeneratingWorldbook = false;
+          if (generateButton?.disabled) {
+            generateButton.disabled = false;
+            generateButton.setAttribute("aria-busy", "false");
+          }
+        }
       }
 
       async function formatOutput() {
@@ -1355,13 +1397,7 @@
         setStatus("已恢复默认 Prompt。");
       });
 
-      document.getElementById("generateButton").addEventListener("click", async () => {
-        try {
-          await generateWorldbook();
-        } catch (error) {
-          setStatus(`生成失败：${error.message}`);
-        }
-      });
+      generateButton.addEventListener("click", generateWorldbook);
 
       document.getElementById("previewButton").addEventListener("click", async () => {
         try {

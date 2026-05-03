@@ -232,9 +232,48 @@ def strip_thought_blocks(text: Any) -> str:
     return content.strip()
 
 
-def build_conversation_transcript(history: list[dict[str, Any]]) -> str:
+def _same_normalized_text(left: Any, right: Any) -> bool:
+    """Compare long opening text safely without being too sensitive to whitespace."""
+    left_text = re.sub(r"\s+", "\n", str(left or "").strip())
+    right_text = re.sub(r"\s+", "\n", str(right or "").strip())
+    return bool(left_text and right_text and left_text == right_text)
+
+
+def _is_opening_only_message(item: dict[str, Any], persona: dict[str, Any] | None = None) -> bool:
+    """Opening/greeting is UI-only. It must not be sent back as chat history context."""
+    if not isinstance(item, dict):
+        return False
+
+    if item.get("source") in {"character_opening", "opening_message", "first_mes", "greeting"}:
+        return True
+
+    if item.get("is_opening") is True or item.get("opening_message") is True:
+        return True
+
+    if str(item.get("role", "")).strip() != "assistant":
+        return False
+
+    opening_text = ""
+    if isinstance(persona, dict):
+        opening_text = str(
+            persona.get("opening_message")
+            or persona.get("first_mes")
+            or persona.get("first_message")
+            or persona.get("greeting")
+            or ""
+        ).strip()
+
+    return bool(opening_text and _same_normalized_text(item.get("content", ""), opening_text))
+
+
+def filter_prompt_history(history: list[dict[str, Any]], persona: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    """Remove UI-only opening messages before building model prompts."""
+    return [item for item in history if not _is_opening_only_message(item, persona)]
+
+
+def build_conversation_transcript(history: list[dict[str, Any]], persona: dict[str, Any] | None = None) -> str:
     lines: list[str] = []
-    for item in history:
+    for item in filter_prompt_history(history, persona):
         role = item.get("role", "")
         content = strip_thought_blocks(item.get("content", ""))
         if role not in {"user", "assistant"} or not content:
@@ -307,8 +346,9 @@ def build_prompt_package(
     preset_output_guard_prompt = dependency_output_guard_prompt or marker_output_guard_prompt
 
     history_limit = max(1, int(llm_config["history_limit"]))
-    recent_history = history[-history_limit:]
-    recent_history_text = build_conversation_transcript(recent_history)
+    prompt_history = filter_prompt_history(history, persona)
+    recent_history = prompt_history[-history_limit:]
+    recent_history_text = build_conversation_transcript(recent_history, persona)
 
     actual_system_sections = [
         prompt
@@ -519,6 +559,7 @@ def build_messages(
 __all__ = [
     "configure_prompt_builder",
     "build_conversation_transcript",
+    "filter_prompt_history",
     "build_memory_recap_prompt",
     "build_messages",
     "build_prompt_package",

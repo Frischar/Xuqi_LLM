@@ -661,7 +661,7 @@
             <div>
               <p class="eyebrow">陪伴模式</p>
               <h2 id="chat-title">{{ persona.name }}</h2>
-              <p id="chat-subtitle" class="chat-greeting-scroll">{{ persona.greeting }}</p>
+              <p id="chat-subtitle" class="chat-greeting-scroll">角色卡已加载。</p>
             </div>
             <div class="header-actions">
               <div class="theme-pill" id="theme-pill">{{ "暗色模式" if settings.theme == "dark" else "浅色模式" }}</div>
@@ -695,6 +695,21 @@
           </div>
 
           <div id="messages" class="messages">
+            {% if not history and persona.greeting %}
+            <div class="message assistant opening-message" data-opening-message="true">
+              <div class="message-avatar assistant-avatar" aria-hidden="true">
+                {% if role_avatar_url %}
+                <img src="{{ role_avatar_url }}" alt="{{ persona.name or "AI" }}" onerror="this.outerHTML='<span class=&quot;avatar-text&quot;>{{ (persona.name or "AI")[:1] }}</span>';" />
+                {% else %}
+                <span class="avatar-text">{{ (persona.name or "AI")[:1] }}</span>
+                {% endif %}
+              </div>
+              <div class="bubble-wrap">
+                <div class="bubble">{{ persona.greeting }}</div>
+                <div class="message-meta">开场白</div>
+              </div>
+            </div>
+            {% endif %}
             {% for item in history %}
             <div class="message {{ item.role }}">
               {% if item.role == "user" %}
