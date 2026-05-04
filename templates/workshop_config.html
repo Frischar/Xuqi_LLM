@@ -3,371 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>创意工坊 - Xuqi LLM Chat</title>
-    <link rel="stylesheet" href="/static/styles.css?v=config-wide-v2-ui-unify-v1" />
-  
-    <style id="ui-unify-v1">
-      body.modern-setting-page {
-        --ui-card-radius: 24px;
-        --ui-sub-radius: 18px;
-        --ui-gap: 18px;
-      }
-
-      body.modern-setting-page .config-shell.compact {
-        width: min(1480px, calc(100% - 32px));
-        max-width: none;
-        gap: var(--ui-gap);
-      }
-
-      body.modern-setting-page .panel.config-panel {
-        position: relative;
-        overflow: hidden;
-        border-radius: var(--ui-card-radius);
-        border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
-        background:
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--panel-strong) 72%, transparent),
-            color-mix(in srgb, var(--panel) 92%, transparent));
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
-      }
-
-      body.modern-setting-page .panel.config-panel.full-span:first-of-type {
-        border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
-        background:
-          radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 12%, transparent), transparent 38%),
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--panel-strong) 82%, transparent),
-            color-mix(in srgb, var(--panel) 92%, transparent));
-      }
-
-      body.modern-setting-page .section-head {
-        gap: 0.35rem;
-      }
-
-      body.modern-setting-page .section-head h2,
-      body.modern-setting-page .section-head h3 {
-        margin-top: 0.08rem;
-        letter-spacing: -0.02em;
-      }
-
-      body.modern-setting-page .eyebrow {
-        display: inline-flex;
-        width: fit-content;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.26rem 0.64rem;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
-        background: color-mix(in srgb, var(--accent) 10%, transparent);
-      }
-
-      body.modern-setting-page .stats-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 12px;
-        margin-top: 14px;
-      }
-
-      body.modern-setting-page .stat-box {
-        min-height: 76px;
-        padding: 14px 16px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: var(--ui-sub-radius);
-        background:
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--input-bg) 78%, transparent),
-            color-mix(in srgb, var(--panel) 86%, transparent));
-        box-shadow: inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
-      }
-
-      body.modern-setting-page .stat-label {
-        display: block;
-        margin-bottom: 0.36rem;
-        font-size: 0.78rem;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        color: var(--muted);
-      }
-
-      body.modern-setting-page .stat-box strong {
-        font-size: 1.05rem;
-        line-height: 1.35;
-      }
-
-      body.modern-setting-page label:not(.checkbox-row):not(.check-chip) {
-        font-weight: 850;
-        color: color-mix(in srgb, var(--text) 82%, var(--muted));
-      }
-
-      body.modern-setting-page input,
-      body.modern-setting-page select,
-      body.modern-setting-page textarea {
-        border-radius: 15px;
-        border-color: color-mix(in srgb, var(--border) 84%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 92%, transparent);
-      }
-
-      body.modern-setting-page textarea {
-        line-height: 1.7;
-      }
-
-      body.modern-setting-page .button-row {
-        gap: 10px;
-      }
-
-      body.modern-setting-page button,
-      body.modern-setting-page .button-link,
-      body.modern-setting-page .ghost-link,
-      body.modern-setting-page .secondary,
-      body.modern-setting-page .compact {
-        border-radius: 999px;
-      }
-
-      body.modern-setting-page .secondary,
-      body.modern-setting-page .ghost-link,
-      body.modern-setting-page .button-link {
-        border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 70%, transparent);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-      }
-
-      body.modern-setting-page button:not(.secondary):not(.compact):not(.ghost-link):not(.button-link),
-      body.modern-setting-page #save-settings,
-      body.modern-setting-page #save-all,
-      body.modern-setting-page #save-user-profile,
-      body.modern-setting-page #save-worldbook-settings,
-      body.modern-setting-page #save-workshop,
-      body.modern-setting-page #save-card {
-        box-shadow: 0 10px 22px color-mix(in srgb, var(--accent) 18%, transparent);
-      }
-
-      body.modern-setting-page .checkbox-row {
-        display: flex;
-        align-items: center;
-        gap: 0.72rem;
-        min-height: 46px;
-        padding: 10px 12px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: 16px;
-        background: color-mix(in srgb, var(--input-bg) 64%, transparent);
-        color: var(--text);
-        font-weight: 760;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"] {
-        appearance: none;
-        -webkit-appearance: none;
-        position: relative;
-        flex: 0 0 auto;
-        width: 46px;
-        height: 26px;
-        margin: 0;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
-        background: color-mix(in srgb, var(--panel-strong) 76%, transparent);
-        cursor: pointer;
-        transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]::before {
-        content: "";
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 20px;
-        height: 20px;
-        border-radius: 999px;
-        background: color-mix(in srgb, var(--muted) 82%, white);
-        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
-        transition: transform 0.18s ease, background 0.18s ease;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]:checked {
-        border-color: color-mix(in srgb, var(--accent) 68%, var(--border));
-        background: color-mix(in srgb, var(--accent) 38%, var(--panel-strong));
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]:checked::before {
-        transform: translateX(20px);
-        background: white;
-      }
-
-      body.modern-setting-page .field-chip-row {
-        gap: 0.55rem;
-      }
-
-      body.modern-setting-page .check-chip {
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 62%, transparent);
-      }
-
-      body.modern-setting-page .helper-text,
-      body.modern-setting-page .field-note,
-      body.modern-setting-page .muted.compact {
-        color: color-mix(in srgb, var(--muted) 88%, var(--text));
-      }
-
-      body.modern-setting-page .status-line {
-        display: block;
-        min-height: 46px;
-        padding: 12px 14px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: 16px;
-        background: color-mix(in srgb, var(--input-bg) 72%, transparent);
-      }
-
-      body.modern-setting-page .inline-field,
-      body.modern-setting-page .model-combo-row {
-        align-items: stretch;
-      }
-
-      body.modern-setting-page .preview-card,
-      body.modern-setting-page .card-block,
-      body.modern-setting-page .sub-block,
-      body.modern-setting-page .workshop-runtime-panel,
-      body.modern-setting-page .workshop-search-block,
-      body.modern-setting-page .workshop-rule-shell {
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: var(--ui-sub-radius);
-        background: color-mix(in srgb, var(--input-bg) 58%, transparent);
-        box-shadow: inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
-      }
-
-      body.modern-setting-page .card-block,
-      body.modern-setting-page .sub-block,
-      body.modern-setting-page .workshop-runtime-panel,
-      body.modern-setting-page .workshop-search-block {
-        padding: 16px;
-      }
-
-      body.modern-setting-page .persona-toolbar,
-      body.modern-setting-page .memory-card-head,
-      body.modern-setting-page .workshop-rule-summary {
-        border-radius: 16px;
-      }
-
-      body.modern-setting-page .workshop-rule-shell {
-        overflow: hidden;
-        margin-bottom: 12px;
-      }
-
-      body.modern-setting-page .workshop-rule-summary {
-        padding: 12px 14px;
-        background: linear-gradient(180deg,
-          color-mix(in srgb, var(--panel-strong) 68%, transparent),
-          color-mix(in srgb, var(--input-bg) 76%, transparent));
-      }
-
-      body.modern-setting-page .workshop-rule-body {
-        padding: 16px;
-        border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-      }
-
-      body.modern-setting-page .workshop-rule-summary-meta,
-      body.modern-setting-page .workshop-rule-summary-text {
-        color: var(--muted);
-      }
-
-      body.modern-setting-page .workshop-rule-trigger-label,
-      body.modern-setting-page .workshop-rule-action-label {
-        display: inline-flex;
-        align-items: center;
-        min-height: 24px;
-        padding: 0.14rem 0.56rem;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
-        background: color-mix(in srgb, var(--accent) 9%, transparent);
-      }
-
-      body.modern-setting-page .sprite-frame {
-        border-radius: 22px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 62%, transparent);
-      }
-
-      body.modern-setting-page .topbar-stack {
-        gap: 12px;
-      }
-
-      body.modern-setting-page .slot-toolbar {
-        border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
-        background: color-mix(in srgb, var(--panel-strong) 72%, transparent);
-      }
-
-      body.modern-setting-page .slot-badge {
-        border-color: color-mix(in srgb, var(--accent) 36%, var(--border));
-        background: color-mix(in srgb, var(--accent) 12%, transparent);
-      }
-
-      @media (max-width: 768px) {
-        body.modern-setting-page .config-shell.compact {
-          width: min(100% - 16px, 100%);
-        }
-        body.modern-setting-page .stats-row {
-          grid-template-columns: 1fr;
-        }
-        body.modern-setting-page .inline-field,
-        body.modern-setting-page .model-combo-row {
-          flex-direction: column;
-        }
-      }
-    </style>
-
-  </head>
-  <body class="modern-setting-page">
+    <title>创意工坊 - Fantareal</title>
+    <link rel="stylesheet" href="/static/styles.css?v=workshop-v092-glass-buttons" />
+</head>
+  <body class="modern-setting-page app-sidebar-shell workshop-config-page">
+    <div id="workshop-toast-host" class="toast-host config-toast-host" aria-live="polite"></div>
     <div class="topbar-stack">
       <div class="topbar">
-        <a class="brand" href="/chat">Xuqi LLM Chat</a>
+        <a class="brand" href="/chat">Fantareal</a>
         {% include "_grouped_nav.html" %}
       </div>
-            <div class="slot-toolbar">
+      <div class="slot-toolbar config-hero-toolbar workshop-hero-toolbar">
         <div class="slot-toolbar-left">
           <span class="slot-badge">Workshop</span>
           <div class="slot-meta">
-            <strong>当前编辑的是角色卡工坊规则</strong>
-            <p class="slot-hint">这里只编辑当前角色卡的创意工坊规则；工坊进度现在跟随全局记忆运行。</p>
+            <strong>创意工坊</strong>
+            <p class="slot-hint">编辑当前角色卡的工坊规则；运行进度跟随全局记忆。</p>
           </div>
         </div>
       </div>
-    <div class="config-shell compact">
-      <section class="panel config-panel full-span">
-        <div class="section-head">
-          <p class="eyebrow">Workshop</p>
-          <h2>创意工坊</h2>
-          <p class="muted">当前编辑角色卡：<strong>{{ current_card.source_name or "未命名角色卡" }}</strong>。保存后会直接写回角色卡文件，当前全局运行状态会读取这张卡的最新工坊规则。</p>
+    </div>
+
+    <div class="config-shell compact config-workbench-shell workshop-workbench-shell workshop-layout-b">
+      <section class="panel config-panel workshop-main-card">
+        <div class="section-head workshop-section-head">
+          <p class="eyebrow">Rules</p>
+          <h2>工坊规则</h2>
+          <p class="muted">左侧专注编辑规则列表；右侧工坊面板负责状态、搜索、启用与保存。</p>
+        </div>
+        <div id="workshop-rule-list" class="stack-list workshop-rule-list-modern"></div>
+      </section>
+
+      <aside class="panel config-panel workshop-control-panel">
+        <div class="section-head workshop-section-head compact-head">
+          <p class="eyebrow">Workshop Panel</p>
+          <h2>工坊面板</h2>
         </div>
 
-        <div class="button-row" style="margin-bottom: 12px;">
-          <a class="secondary compact" href="/config/card">返回角色卡</a>
-          <button id="save-workshop" type="button" class="secondary compact">保存工坊</button>
+        <p id="status-text" class="task-status is-idle">已准备 · 修改规则后点击保存工坊。</p>
+
+        <div class="workshop-panel-block workshop-side-summary">
+          <div class="workshop-summary-item">
+            <span>当前角色卡</span>
+            <strong id="workshop-current-card-name">{{ current_card.source_name or "未命名角色卡" }}</strong>
+          </div>
+          <div class="workshop-summary-item">
+            <span>规则数量</span>
+            <strong id="workshop-rule-count">0</strong>
+          </div>
+          <div class="workshop-summary-item">
+            <span>工坊开关</span>
+            <strong id="workshop-enabled-state">未启用</strong>
+          </div>
+        </div>
+
+        <div class="workshop-panel-block workshop-runtime-panel-side">
+          <label class="checkbox-row"><input id="workshop-enabled" type="checkbox" /> 启用创意工坊</label>
+          <p class="muted compact" id="workshop-runtime-info">当前 temp = {{ workshop_state.temp or 0 }}，阶段 = {{ workshop_stage }}阶段。</p>
+        </div>
+
+        <div class="workshop-panel-block workshop-search-panel">
+          <label for="workshop-rule-search">搜索规则</label>
+          <input id="workshop-rule-search" type="text" placeholder="按标题、备注、Temp 或链接搜索" />
+        </div>
+
+        <div class="workshop-panel-block workshop-quick-actions">
           <button id="add-workshop-rule" type="button" class="secondary compact">+ 新增规则</button>
-          <button id="collapse-workshop-rules" type="button" class="secondary compact">全部折叠</button>
-          <button id="expand-workshop-rules" type="button" class="secondary compact">全部展开</button>
-        </div>
-
-        <div class="grid-two workshop-info-grid">
-          <div class="workshop-search-block">
-            <label for="workshop-rule-search">搜索规则</label>
-            <input id="workshop-rule-search" type="text" placeholder="按标题、备注、Temp 或链接搜索" />
+          <div class="workshop-quick-row">
+            <button id="collapse-workshop-rules" type="button" class="secondary compact">全部折叠</button>
+            <button id="expand-workshop-rules" type="button" class="secondary compact">全部展开</button>
           </div>
-          <div class="workshop-runtime-panel">
-            <label class="checkbox-row"><input id="workshop-enabled" type="checkbox" /> 启用创意工坊</label>
-            <p class="muted compact" id="workshop-runtime-info">当前 temp = {{ workshop_state.temp or 0 }}，阶段 = {{ workshop_stage }}阶段。</p>
-          </div>
+          <button id="reload-workshop-status" type="button" class="secondary compact">重新读取状态</button>
         </div>
 
-        <div id="workshop-rule-list" class="stack-list"></div>
-      </section>
-
-      <section class="panel config-panel full-span">
-        <div class="section-head">
-          <p class="eyebrow">Status</p>
-          <h2>当前状态</h2>
-          <p id="status-text" class="muted status-line">准备就绪</p>
+        <div class="workshop-panel-actions">
+          <button id="save-workshop" type="button">保存工坊</button>
+          <a class="secondary compact button-link workshop-return-link" href="/config/card">返回角色卡</a>
         </div>
-      </section>
+      </aside>
     </div>
 
     <script>
@@ -385,6 +98,9 @@
       const workshopRuleListEl = document.getElementById("workshop-rule-list");
       const workshopSearchEl = document.getElementById("workshop-rule-search");
       const workshopRuntimeInfoEl = document.getElementById("workshop-runtime-info");
+      const toastHostEl = document.getElementById("workshop-toast-host");
+      const workshopRuleCountEl = document.getElementById("workshop-rule-count");
+      const workshopEnabledStateEl = document.getElementById("workshop-enabled-state");
       let currentWorkshop = null;
 
       const MUSIC_PRESETS = [
@@ -394,8 +110,73 @@
         { id: "rain", label: "雨声音氛围", url: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_c3f39d79a8.mp3?filename=rain-110495.mp3" },
       ];
 
-      function setStatus(text) {
-        if (statusEl) statusEl.textContent = text;
+      function inferStatusKind(text) {
+        const value = String(text || "");
+        if (/失败|错误|异常|不能|不可用|请先/.test(value)) return "error";
+        if (/已|成功|完成/.test(value)) return "success";
+        if (/正在|保存中|读取中|搜索中|处理/.test(value)) return "busy";
+        return "idle";
+      }
+
+      function setStatus(text, kind = null) {
+        if (!statusEl) return;
+        const statusKind = kind || inferStatusKind(text);
+        statusEl.textContent = text || "已准备";
+        statusEl.classList.remove("is-idle", "is-busy", "is-success", "is-error");
+        statusEl.classList.add("task-status", `is-${statusKind}`);
+      }
+
+      function showToast(message, type = "info") {
+        if (!toastHostEl || !message) return;
+        const toast = document.createElement("div");
+        toast.className = `app-toast ${type}`;
+        toast.textContent = message;
+        toastHostEl.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add("show"));
+        window.setTimeout(() => {
+          toast.classList.remove("show");
+          window.setTimeout(() => toast.remove(), 220);
+        }, 2200);
+      }
+
+      function rememberButtonLabel(button) {
+        if (!button) return "";
+        if (!button.dataset.defaultLabel) {
+          button.dataset.defaultLabel = button.textContent.trim();
+        }
+        return button.dataset.defaultLabel;
+      }
+
+      function setButtonState(button, state = "idle", label = "") {
+        if (!button) return;
+        const defaultLabel = rememberButtonLabel(button);
+        button.classList.remove("is-loading", "is-success", "is-error");
+        button.disabled = state === "loading";
+        if (state === "loading") {
+          button.classList.add("is-loading");
+          button.textContent = label || "处理中…";
+          return;
+        }
+        if (state === "success") {
+          button.classList.add("is-success");
+          button.textContent = label || "已完成 ✓";
+          window.setTimeout(() => setButtonState(button, "idle"), 1200);
+          return;
+        }
+        if (state === "error") {
+          button.classList.add("is-error");
+          button.textContent = label || "操作失败";
+          window.setTimeout(() => setButtonState(button, "idle"), 1500);
+          return;
+        }
+        button.textContent = defaultLabel;
+      }
+
+      function updateWorkshopPanelStats() {
+        const total = workshopRuleListEl?.querySelectorAll(".workshop-rule-card").length || currentWorkshop?.items?.length || 0;
+        const enabled = workshopEnabledEl?.checked !== false;
+        if (workshopRuleCountEl) workshopRuleCountEl.textContent = String(total);
+        if (workshopEnabledStateEl) workshopEnabledStateEl.textContent = enabled ? "已启用" : "未启用";
       }
 
       function applyTheme(theme) {
@@ -600,11 +381,17 @@
       function setWorkshopRuleCollapsed(shell, collapsed) {
         if (!shell) return;
         const body = shell.querySelector(".workshop-rule-body");
-        if (body) body.hidden = !!collapsed;
+        if (body) body.setAttribute("aria-hidden", collapsed ? "true" : "false");
         shell.dataset.collapsed = collapsed ? "true" : "false";
         shell.classList.toggle("is-collapsed", !!collapsed);
         const button = shell.querySelector(".toggle-workshop-rule");
-        if (button) button.textContent = collapsed ? "展开" : "折叠";
+        if (button) {
+          button.textContent = collapsed ? "▸" : "▾";
+          button.setAttribute("aria-expanded", collapsed ? "false" : "true");
+          button.setAttribute("aria-label", collapsed ? "展开这条规则" : "折叠这条规则");
+        }
+        const summary = shell.querySelector(".workshop-rule-summary");
+        if (summary) summary.setAttribute("aria-expanded", collapsed ? "false" : "true");
       }
 
       function setWorkshopPanelState(panel, active) {
@@ -848,9 +635,9 @@
                   <span class="workshop-rule-summary-text">${escapeHtml(summarySnippet || "点击展开编辑这条创意工坊规则")}</span>
                 </span>
               </div>
-              <div class="button-row">
-                <button class="secondary compact toggle-workshop-rule" data-toggle-workshop-rule="${index}" type="button">折叠</button>
-                ${isCoreStage ? '<span class="preset-pill">固定阶段</span>' : `<button class="secondary compact danger-button" data-remove-workshop-rule="${index}" type="button">删除</button>`}
+              <div class="button-row workshop-rule-actions">
+                <button class="secondary compact toggle-workshop-rule fr-collapse-button" data-toggle-workshop-rule="${index}" type="button" aria-expanded="true" aria-label="折叠这条规则">▾</button>
+                ${isCoreStage ? '<span class="preset-pill fr-static-pill">固定阶段</span>' : `<button class="secondary compact danger-button fr-danger-button" data-remove-workshop-rule="${index}" type="button" aria-label="删除这条规则">×</button>`}
               </div>
             </div>
             <div class="workshop-rule-body">
@@ -904,6 +691,7 @@
           const collapsed = collapsedStateById.has(item.id) ? collapsedStateById.get(item.id) : false;
           setWorkshopRuleCollapsed(shell, collapsed);
         });
+        updateWorkshopPanelStats();
         applyWorkshopRuleSearch();
       }
 
@@ -927,6 +715,7 @@
         const block = createWorkshopRuleBlock(item, currentWorkshop.items.length - 1);
         workshopRuleListEl?.appendChild(block);
         if (workshopSearchEl) workshopSearchEl.value = "";
+        updateWorkshopPanelStats();
         applyWorkshopRuleSearch();
         const lastCard = workshopRuleListEl?.querySelector(".workshop-rule-card:last-of-type");
         if (lastCard && typeof lastCard.scrollIntoView === "function") {
@@ -1001,6 +790,7 @@
           currentWorkshop = normalizeCreativeWorkshop(data.workshop);
           renderWorkshopRules(currentWorkshop);
         }
+        updateWorkshopPanelStats();
       }
 
       async function saveWorkshop() {
@@ -1008,35 +798,62 @@
         const data = await postJson("/api/workshop/save", payload);
         currentWorkshop = normalizeCreativeWorkshop(data.workshop || payload.creativeWorkshop);
         renderWorkshopRules(currentWorkshop);
-        setStatus(`创意工坊已保存：${currentCardName || "当前角色卡"}`);
+        setStatus(`已完成：创意工坊已保存：${currentCardName || "当前角色卡"}`, "success");
         await refreshWorkshopStatus().catch(() => {});
       }
 
       workshopEnabledEl?.addEventListener("change", () => {
         if (currentWorkshop) currentWorkshop.enabled = workshopEnabledEl.checked;
+        updateWorkshopPanelStats();
+        setStatus(workshopEnabledEl.checked ? "已启用创意工坊，记得保存工坊。" : "已关闭创意工坊，记得保存工坊。", "idle");
       });
 
       workshopSearchEl?.addEventListener("input", applyWorkshopRuleSearch);
 
-      document.getElementById("add-workshop-rule")?.addEventListener("click", () => {
+      document.getElementById("add-workshop-rule")?.addEventListener("click", (event) => {
         addWorkshopRuleToCurrentCard();
+        setButtonState(event.currentTarget, "success", "已新增 ✓");
+        showToast("已新增创意工坊规则", "success");
       });
 
-      document.getElementById("collapse-workshop-rules")?.addEventListener("click", () => {
+      document.getElementById("collapse-workshop-rules")?.addEventListener("click", (event) => {
         setAllWorkshopRulesCollapsed(true);
-        setStatus("已折叠全部创意工坊规则。");
+        setButtonState(event.currentTarget, "success", "已折叠 ✓");
+        setStatus("已折叠全部创意工坊规则。", "success");
       });
 
-      document.getElementById("expand-workshop-rules")?.addEventListener("click", () => {
+      document.getElementById("expand-workshop-rules")?.addEventListener("click", (event) => {
         setAllWorkshopRulesCollapsed(false);
-        setStatus("已展开全部创意工坊规则。");
+        setButtonState(event.currentTarget, "success", "已展开 ✓");
+        setStatus("已展开全部创意工坊规则。", "success");
       });
 
-      document.getElementById("save-workshop")?.addEventListener("click", async () => {
+      document.getElementById("reload-workshop-status")?.addEventListener("click", async (event) => {
+        setButtonState(event.currentTarget, "loading", "读取中…");
+        setStatus("正在重新读取创意工坊状态…", "busy");
+        try {
+          await refreshWorkshopStatus();
+          setButtonState(event.currentTarget, "success", "已读取 ✓");
+          setStatus("已完成：创意工坊状态已重新读取。", "success");
+          showToast("创意工坊状态已重新读取", "success");
+        } catch (error) {
+          setButtonState(event.currentTarget, "error", "读取失败");
+          setStatus(`读取失败：${error.message}`, "error");
+          showToast(`读取失败：${error.message}`, "error");
+        }
+      });
+
+      document.getElementById("save-workshop")?.addEventListener("click", async (event) => {
+        setButtonState(event.currentTarget, "loading", "保存中…");
+        setStatus("正在保存创意工坊规则…", "busy");
         try {
           await saveWorkshop();
+          setButtonState(event.currentTarget, "success", "已保存 ✓");
+          showToast("创意工坊已保存", "success");
         } catch (error) {
-          setStatus(`保存失败：${error.message}`);
+          setButtonState(event.currentTarget, "error", "保存失败");
+          setStatus(`保存失败：${error.message}`, "error");
+          showToast(`保存失败：${error.message}`, "error");
         }
       });
 
@@ -1090,11 +907,12 @@
           const card = removeButton.closest(".workshop-rule-card");
           if (!card) return;
           if (String(card.querySelector(".workshop-rule-id")?.value || "").startsWith("workshop_stage_")) {
-            setStatus("固定阶段规则不能删除。");
+            setStatus("固定阶段规则不能删除。", "error");
             return;
           }
           card.remove();
-          setStatus("创意工坊规则已删除。");
+          setStatus("创意工坊规则已删除。", "success");
+          updateWorkshopPanelStats();
           applyWorkshopRuleSearch();
           return;
         }
@@ -1124,6 +942,7 @@
       applyBackground(currentBackground, currentOverlay);
       currentWorkshop = normalizeCreativeWorkshop(initialWorkshop);
       renderWorkshopRules(currentWorkshop);
+      updateWorkshopPanelStats();
       refreshWorkshopStatus().catch(() => {});
     </script>
   </body>

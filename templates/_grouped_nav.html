@@ -15,71 +15,93 @@
   {% endif %}
 {% endfor %}
 {% set settings_active = current_path == '/config' or current_path == '/config/user' or current_path == '/config/workshop' %}
-{% set persona_active = current_path == '/config/card' or current_path == '/config/preset' or current_path == '/config/memory' or current_path.startswith('/mods/status-panel') %}
-{% set worldbook_active = current_path.startswith('/config/worldbook') or current_path.startswith('/mods/worldbook-maker') %}
-{% set tts_active = current_path.startswith('/mods/tts-studio') %}
+{% set persona_active = current_path == '/config/card' or current_path == '/config/preset' or current_path == '/config/memory' %}
+{% set worldbook_active = current_path.startswith('/config/worldbook') %}
+{% set plugins_active = current_path.startswith('/mods/tts-studio') or current_path.startswith('/mods/status-panel') or current_path.startswith('/mods/worldbook-maker') or current_path.startswith('/mods/soul-weaver') %}
 
 <nav class="topnav topnav-grouped" aria-label="Primary navigation">
-  <details class="nav-group{% if current_path == '/chat' or current_path.startswith('/mods/soul-weaver') %} active-group{% endif %}">
-    <summary class="nav-group-summary">聊天</summary>
+  <details class="nav-group{% if current_path == '/chat' %} active-group{% endif %}">
+    <summary class="nav-group-summary">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 6.5h15a1.8 1.8 0 0 1 1.8 1.8v7.1a1.8 1.8 0 0 1-1.8 1.8H9.2L4.5 20V8.3a1.8 1.8 0 0 1 1.8-1.8Z"/><path d="M8.4 11.8h.1M12 11.8h.1M15.6 11.8h.1"/></svg></span>
+      <span class="nav-label">聊天</span>
+      <span class="nav-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+    </summary>
     <div class="nav-group-panel">
       <div class="nav-group-links">
-        <a class="navlink{% if current_path == '/chat' %} active{% endif %}" href="/chat">Chat</a>
-        {% if mod_state.has_soul_weaver %}
-        <a class="navlink{% if current_path.startswith('/mods/soul-weaver') %} active{% endif %}" href="/mods/soul-weaver">余声</a>
-        {% endif %}
+        <a class="navlink{% if current_path == '/chat' %} active{% endif %}" href="/chat">当前聊天</a>
       </div>
     </div>
   </details>
-
-  {% if mod_state.has_tts_studio %}
-  <details class="nav-group{% if tts_active %} active-group{% endif %}">
-    <summary class="nav-group-summary">TTS</summary>
-    <div class="nav-group-panel">
-      <div class="nav-group-links">
-        <a class="navlink{% if tts_active %} active{% endif %}" href="/mods/tts-studio">TTS Studio</a>
-      </div>
-    </div>
-  </details>
-  {% endif %}
 
   <details class="nav-group{% if settings_active %} active-group{% endif %}">
-    <summary class="nav-group-summary">设置</summary>
+    <summary class="nav-group-summary">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8.2a3.8 3.8 0 1 1 0 7.6 3.8 3.8 0 0 1 0-7.6Z"/><path d="M19.3 13.5v-3l-2.1-.5a7.6 7.6 0 0 0-.8-1.9l1.1-1.8-2.1-2.1-1.8 1.1a7.6 7.6 0 0 0-1.9-.8L11.2 2H8.8l-.5 2.1a7.6 7.6 0 0 0-1.9.8L4.6 3.8 2.5 5.9l1.1 1.8a7.6 7.6 0 0 0-.8 1.9l-2.1.5v3l2.1.5a7.6 7.6 0 0 0 .8 1.9l-1.1 1.8 2.1 2.1 1.8-1.1a7.6 7.6 0 0 0 1.9.8l.5 2.1h2.4l.5-2.1a7.6 7.6 0 0 0 1.9-.8l1.8 1.1 2.1-2.1-1.1-1.8a7.6 7.6 0 0 0 .8-1.9l2.1-.5Z"/></svg></span>
+      <span class="nav-label">设置</span>
+      <span class="nav-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+    </summary>
     <div class="nav-group-panel">
       <div class="nav-group-links">
-        <a class="navlink{% if current_path == '/config' %} active{% endif %}" href="/config">Config</a>
-        <a class="navlink{% if current_path == '/config/workshop' %} active{% endif %}" href="/config/workshop">Workshop</a>
-        <a class="navlink{% if current_path == '/config/user' %} active{% endif %}" href="/config/user">User</a>
+        <a class="navlink{% if current_path == '/config' %} active{% endif %}" href="/config">全局设置</a>
+        <a class="navlink{% if current_path == '/config/user' %} active{% endif %}" href="/config/user">用户设定</a>
+        <a class="navlink{% if current_path == '/config/workshop' %} active{% endif %}" href="/config/workshop">创意工坊</a>
       </div>
     </div>
   </details>
 
   <details class="nav-group{% if persona_active %} active-group{% endif %}">
-    <summary class="nav-group-summary">人设</summary>
+    <summary class="nav-group-summary">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 12.4a4.3 4.3 0 1 0 0-8.6 4.3 4.3 0 0 0 0 8.6Z"/><path d="M4.2 21c.8-4 3.4-6.1 7.8-6.1S19 17 19.8 21"/></svg></span>
+      <span class="nav-label">人设</span>
+      <span class="nav-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+    </summary>
     <div class="nav-group-panel">
       <div class="nav-group-links">
-        <a class="navlink{% if current_path == '/config/card' %} active{% endif %}" href="/config/card">Card</a>
-        <a class="navlink{% if current_path == '/config/preset' %} active{% endif %}" href="/config/preset">Preset</a>
-        <a class="navlink{% if current_path == '/config/memory' %} active{% endif %}" href="/config/memory">Memory</a>
-        {% if mod_state.has_status_panel %}
-        <a class="navlink{% if current_path.startswith('/mods/status-panel') %} active{% endif %}" href="/mods/status-panel/app/">Status</a>
-        {% endif %}
+        <a class="navlink{% if current_path == '/config/card' %} active{% endif %}" href="/config/card">角色卡</a>
+        <a class="navlink{% if current_path == '/config/preset' %} active{% endif %}" href="/config/preset">预设</a>
+        <a class="navlink{% if current_path == '/config/memory' %} active{% endif %}" href="/config/memory">记忆</a>
       </div>
     </div>
   </details>
 
   <details class="nav-group{% if worldbook_active %} active-group{% endif %}">
-    <summary class="nav-group-summary">世界书</summary>
+    <summary class="nav-group-summary">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.2 6.2c2.7-.9 5.2-.6 7.8 1.2v12.1c-2.5-1.7-5.1-2.2-7.8-1.2V6.2Z"/><path d="M19.8 6.2c-2.7-.9-5.2-.6-7.8 1.2v12.1c2.5-1.7 5.1-2.2 7.8-1.2V6.2Z"/><path d="M16.9 3.3l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5.5-1.2Z"/><path d="M20.2 8.7l.3.8.8.3-.8.3-.3.8-.3-.8-.8-.3.8-.3.3-.8Z"/></svg></span>
+      <span class="nav-label">世界书</span>
+      <span class="nav-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+    </summary>
     <div class="nav-group-panel">
       <div class="nav-group-links">
-        <a class="navlink{% if current_path == '/config/worldbook' %} active{% endif %}" href="/config/worldbook">WB Set</a>
-        <a class="navlink{% if current_path == '/config/worldbook/entries' %} active{% endif %}" href="/config/worldbook/entries">WB List</a>
+        <a class="navlink{% if current_path == '/config/worldbook' %} active{% endif %}" href="/config/worldbook">世界书设置</a>
+        <a class="navlink{% if current_path == '/config/worldbook/entries' %} active{% endif %}" href="/config/worldbook/entries">词条管理</a>
+      </div>
+    </div>
+  </details>
+
+  {% if mod_state.has_tts_studio or mod_state.has_status_panel or mod_state.has_worldbook_maker or mod_state.has_soul_weaver %}
+  <details class="nav-group{% if plugins_active %} active-group{% endif %}">
+    <summary class="nav-group-summary">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5l1.5 4.2L18 9.2l-4.5 1.5L12 15l-1.5-4.3L6 9.2l4.5-1.5L12 3.5Z"/><path d="M18.4 14.5l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8.8-2.1Z"/><path d="M5.1 15.8l.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5.5-1.3Z"/></svg></span>
+      <span class="nav-label">插件</span>
+      <span class="nav-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+    </summary>
+    <div class="nav-group-panel">
+      <div class="nav-group-links">
+        {% if mod_state.has_tts_studio %}
+        <a class="navlink{% if current_path.startswith('/mods/tts-studio') %} active{% endif %}" href="/mods/tts-studio">语音 TTS</a>
+        {% endif %}
+        {% if mod_state.has_status_panel %}
+        <a class="navlink{% if current_path.startswith('/mods/status-panel') %} active{% endif %}" href="/mods/status-panel/app/">游玩状态栏</a>
+        {% endif %}
         {% if mod_state.has_worldbook_maker %}
-        <a class="navlink{% if current_path.startswith('/mods/worldbook-maker') %} active{% endif %}" href="/mods/worldbook-maker">WB Maker</a>
+        <a class="navlink{% if current_path.startswith('/mods/worldbook-maker') %} active{% endif %}" href="/mods/worldbook-maker">世界书生成器</a>
+        {% endif %}
+        {% if mod_state.has_soul_weaver %}
+        <a class="navlink{% if current_path.startswith('/mods/soul-weaver') %} active{% endif %}" href="/mods/soul-weaver">余音</a>
         {% endif %}
       </div>
     </div>
   </details>
+  {% endif %}
 </nav>
 <script>
   (() => {

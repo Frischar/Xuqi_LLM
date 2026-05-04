@@ -15,6 +15,7 @@
   --panel: rgba(var(--panel-rgb), var(--panel-alpha));
   --panel-strong: rgba(var(--panel-strong-rgb), var(--panel-strong-alpha));
   --line: rgba(99, 73, 56, 0.16);
+  --border: var(--line);
   --text: #2d1f18;
   --muted: #8a7361;
   --accent: #c8673b;
@@ -23,6 +24,7 @@
   --assistant: rgba(var(--assistant-rgb), var(--assistant-alpha));
   --input-bg: rgba(var(--input-rgb), var(--input-alpha));
   --shadow: 0 20px 60px rgba(89, 58, 37, 0.12);
+  --shadow-soft: var(--shadow);
   --background-image: none;
   --background-overlay-opacity: 0.42;
 }
@@ -44,6 +46,7 @@
   --panel: rgba(var(--panel-rgb), var(--panel-alpha));
   --panel-strong: rgba(var(--panel-strong-rgb), var(--panel-strong-alpha));
   --line: rgba(152, 190, 233, 0.11);
+  --border: var(--line);
   --text: #edf5ff;
   --muted: #9db1c8;
   --accent: #5ca7ff;
@@ -52,6 +55,7 @@
   --assistant: rgba(var(--assistant-rgb), var(--assistant-alpha));
   --input-bg: rgba(var(--input-rgb), var(--input-alpha));
   --shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  --shadow-soft: var(--shadow);
 }
 
 * {
@@ -997,8 +1001,8 @@ a.compact {
 .memory-card-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 14px;
   margin-bottom: 6px;
 }
 
@@ -1366,8 +1370,8 @@ a.compact {
 .persona-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 14px;
 }
 
 .persona-toolbar h3 {
@@ -1392,8 +1396,8 @@ a.compact {
 .workshop-toolbar {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 14px;
   flex-wrap: wrap;
   margin-bottom: 12px;
 }
@@ -1432,8 +1436,8 @@ a.compact {
 .workshop-rule-summary {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 14px;
   cursor: pointer;
 }
 
@@ -1555,167 +1559,824 @@ a.compact {
   }
 }
 
-.chat-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  position: relative;
-  height: 100%;
+
+/* ================================
+   Chat Layout v4 / Visual Shell
+   ================================ */
+body.chat-page {
+  min-height: 100vh;
+  overflow: hidden;
 }
 
-.chat-layout.worldbook-rail-collapsed {
-  grid-template-columns: minmax(0, 1fr);
+body.chat-page::after {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 10, 10, calc(var(--background-overlay-opacity) * 0.52)),
+      rgba(10, 10, 10, calc(var(--background-overlay-opacity) * 0.7))
+    );
 }
 
-.worldbook-hit-rail {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 8;
-  width: min(260px, calc(100vw - 48px));
+.chat-page .topbar.topbar-chat {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 286px;
+  padding: 34px 26px 28px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  padding: 10px;
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--panel) 74%, transparent 26%);
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  border-right: 1px solid color-mix(in srgb, var(--line) 76%, transparent 24%);
+  background: color-mix(in srgb, var(--panel-strong) 94%, transparent 6%);
+  box-shadow: 14px 0 34px rgba(45, 31, 24, 0.08);
+  backdrop-filter: blur(18px);
+  z-index: 110;
+}
+
+.chat-page .topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 54px;
+}
+
+.chat-page .brand.chat-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--text);
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-decoration: none;
+}
+
+.chat-page .brand.chat-brand::before {
+  content: "";
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--text) 24%, transparent 76%);
+  border-radius: 12px;
+  background:
+    url("/static/fantareal_icon.ico") center / cover no-repeat,
+    color-mix(in srgb, var(--panel) 72%, white 28%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, white 46%, transparent 54%);
+}
+
+.chat-page .topnav,
+.chat-page .topnav-grouped {
+  position: static;
+  width: 100%;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
   backdrop-filter: none;
-  transition: width 0.18s ease, background 0.18s ease, border-color 0.18s ease, padding 0.18s ease;
+  white-space: normal;
 }
 
-.worldbook-hit-rail:not(.expanded) {
-  align-items: center;
-  justify-content: center;
+.chat-page .nav-group {
+  width: 100%;
+}
+
+.chat-page .nav-group-summary {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 8px;
+  justify-content: flex-start;
+  gap: 14px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+}
+
+
+
+.chat-page .nav-icon {
   width: 30px;
   height: 30px;
-  min-height: 30px;
-  bottom: auto;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  backdrop-filter: none;
-  overflow: visible;
-}
-
-.worldbook-rail-toggle {
-  width: 30px !important;
-  height: 30px;
-  min-width: 30px !important;
-  max-width: 30px;
-  margin: 0;
-  padding: 0;
-  border-radius: 999px;
-  display: inline-grid;
-  place-items: center;
-  position: relative;
-  background: color-mix(in srgb, var(--accent) 88%, transparent 12%);
-  color: white;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
-}
-
-.worldbook-hit-rail:not(.expanded) .worldbook-rail-toggle {
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
-}
-
-.worldbook-rail-toggle:hover {
-  transform: translateX(1px);
-}
-
-.worldbook-hit-rail.expanded .worldbook-rail-toggle {
-  align-self: flex-end;
-}
-
-.worldbook-rail-arrow {
-  font-size: 22px;
-  line-height: 1;
-  transform: translateY(-1px);
-}
-
-.worldbook-rail-count {
-  position: absolute;
-  right: -5px;
-  top: -5px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: 999px;
+  flex: 0 0 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent-dark);
+  color: var(--text);
+}
+
+.chat-page .nav-icon svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.95;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chat-page .nav-label {
+  flex: 1 1 auto;
+}
+
+.chat-page .nav-group-summary::after {
+  content: "⌄";
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 15px;
+  letter-spacing: 0;
+  transition: transform 0.16s ease;
+}
+
+.chat-page .nav-group[open] .nav-group-summary::after {
+  transform: rotate(180deg);
+}
+
+.chat-page .nav-group-summary:hover {
+  transform: none;
+  border-color: transparent;
+  background: color-mix(in srgb, var(--accent) 7%, transparent 93%);
+}
+
+.chat-page .nav-group[open] .nav-group-summary,
+.chat-page .nav-group.active-group .nav-group-summary {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, transparent 88%);
+  border-color: transparent;
+}
+
+.chat-page .nav-group-panel {
+  position: static;
+  min-width: 0;
+  max-width: none;
+  padding: 4px 0 0 42px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.chat-page .nav-group[open] .nav-group-panel {
+  opacity: 1;
+  transform: none;
+}
+
+.chat-page .nav-group-links {
+  display: grid;
+  gap: 6px;
+}
+
+.chat-page .nav-group-links .navlink,
+.chat-page .navlink,
+.chat-page .ghost-link {
+  width: 100%;
+  min-height: 34px;
+  padding: 8px 10px;
+  justify-content: flex-start;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+}
+
+.chat-page .navlink:hover,
+.chat-page .ghost-link:hover {
+  transform: none;
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 8%, transparent 92%);
+}
+
+.chat-page .navlink.active {
+  color: white;
+  background: var(--accent);
+}
+
+.chat-page .chat-shell {
+  height: 100vh;
+  overflow: hidden;
+  margin: 0;
+  padding: 32px 32px 32px 318px;
+}
+
+.chat-page .chat-layout {
+  --runtime-panel-width: clamp(320px, 27vw, 390px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 0;
+  gap: 0;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent 20%);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--panel) 70%, transparent 30%);
+  box-shadow: 0 18px 42px rgba(42, 30, 23, 0.09);
+  backdrop-filter: blur(18px);
+  transition: grid-template-columns 0.22s ease, gap 0.22s ease;
+}
+
+.chat-page .chat-layout.runtime-panel-open {
+  grid-template-columns: minmax(0, 1fr) var(--runtime-panel-width);
+  gap: 18px;
+}
+
+.chat-page .chat-layout.runtime-panel-collapsed {
+  grid-template-columns: minmax(0, 1fr) 0;
+  gap: 0;
+}
+
+.chat-page .chat-area.standalone {
+  height: 100%;
+  max-height: none;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent 28%) !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--panel-strong) 62%, transparent 38%) !important;
+  box-shadow: 0 10px 26px rgba(42, 30, 23, 0.06) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+.chat-page .chat-header { grid-row: 1; }
+.chat-page .retrieval-bar { grid-row: 2; }
+.chat-page .messages { grid-row: 3; }
+.chat-page .composer { grid-row: 4; }
+
+.chat-page .chat-area.standalone .chat-header {
+  min-height: 86px;
+  padding: 24px 28px 12px;
+  border-bottom: 0;
+  background: color-mix(in srgb, var(--panel-strong) 38%, transparent 62%);
+}
+
+.chat-page .chat-header h2 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  line-height: 1.08;
+  letter-spacing: 0.12em;
+}
+
+.chat-page .chat-header .eyebrow {
+  margin-bottom: 8px;
+  letter-spacing: 0.12em;
+}
+
+.chat-page .header-actions {
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-page .theme-pill,
+.chat-page .header-actions .secondary.compact {
+  min-height: 36px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+
+.chat-page .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.chat-page .runtime-panel-handle {
+  position: absolute;
+  top: 50%;
+  right: -27px;
+  z-index: 55;
+  width: 54px;
+  height: 142px;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent 30%);
+  border-radius: 28px 0 0 28px;
+  background: color-mix(in srgb, var(--panel-strong) 96%, white 4%);
+  color: color-mix(in srgb, var(--muted) 78%, var(--text) 22%);
+  box-shadow: -8px 10px 22px rgba(42, 30, 23, 0.08);
+  transform: translateY(-50%);
+  transition: right 0.22s ease, color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.chat-page .runtime-panel-handle:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line) 72%);
+  background: var(--panel-strong);
+}
+
+.chat-page .runtime-panel-handle-icon {
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.16em;
+  transform: translateX(-2px);
+}
+
+.chat-page .chat-layout.runtime-panel-open .runtime-panel-handle {
+  right: calc(var(--runtime-panel-width) - 27px);
+}
+
+.chat-page .config-gear-button {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.chat-page .config-gear-button.active {
+  color: white;
+  background: var(--accent);
+}
+
+.chat-page .preset-toolbar {
+  margin: 0 0 14px;
+  padding: 14px 18px;
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--panel-strong) 42%, transparent 58%);
+}
+
+.chat-page .retrieval-bar {
+  margin: 0 18px 12px;
+}
+
+.chat-page .messages {
+  min-height: 0;
+  margin: 0 18px 10px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--line) 46%, transparent 54%);
+  border-radius: 18px;
+  background: color-mix(in srgb, #eef9fb 42%, transparent 58%);
+}
+
+:root[data-theme="dark"] .chat-page .messages {
+  background: color-mix(in srgb, var(--panel) 62%, transparent 38%);
+}
+
+.chat-page .message .bubble-wrap {
+  max-width: min(74%, 760px);
+}
+
+.chat-page .message.assistant .bubble-wrap {
+  width: auto;
+  max-width: min(72%, 760px);
+}
+
+.chat-page .message-avatar {
+  box-shadow: none;
+}
+
+.chat-page .bubble {
+  box-shadow: 0 10px 22px rgba(60, 43, 32, 0.06);
+}
+
+.chat-page .composer {
+  margin: 0 18px 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.chat-page #message-input {
+  height: 66px;
+  max-height: 120px;
+  min-height: 66px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--input-bg) 94%, transparent 6%);
+}
+
+.chat-page .composer-actions {
+  margin-top: 10px;
+}
+
+.chat-page .action-group button {
+  flex: 0 0 auto;
+}
+
+.chat-page .runtime-panel {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent 18%);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--panel-strong) 88%, transparent 12%);
+  box-shadow: none;
+  opacity: 0;
+  transform: translateX(10px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+
+.chat-page .chat-layout.runtime-panel-open .runtime-panel {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.chat-page .runtime-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.chat-page .runtime-panel-head h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.chat-page .runtime-panel-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 62%, transparent 38%);
+}
+
+.chat-page .runtime-tab {
+  position: relative;
+  width: auto;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel-strong) 72%, transparent 28%);
+}
+
+.chat-page .runtime-tab:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--line) 68%);
+  background: color-mix(in srgb, var(--panel-strong) 92%, transparent 8%);
+}
+
+.chat-page .runtime-tab.active {
+  color: white;
+  border-color: transparent;
+  background: var(--accent);
+}
+
+.chat-page .runtime-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-dark) 88%, black 12%);
   color: white;
   font-size: 10px;
   font-weight: 800;
   line-height: 1;
-  border: 1px solid color-mix(in srgb, var(--panel-strong) 82%, transparent 18%);
 }
 
-.worldbook-rail-count[hidden] {
+.chat-page .runtime-tab-count[hidden] {
   display: none !important;
 }
 
-.worldbook-rail-content {
-  min-width: 0;
+.chat-page .runtime-panel-body {
   min-height: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
+  padding: 14px 4px 0 0;
+}
+
+.chat-page .runtime-tab-panel {
+  display: grid;
   gap: 12px;
 }
 
-.worldbook-hit-rail:not(.expanded) .worldbook-rail-content {
+.chat-page .runtime-tab-panel[hidden] {
   display: none !important;
 }
 
-.worldbook-hit-rail .section-head {
-  gap: 4px;
+.chat-page .runtime-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--panel-strong) 72%, transparent 28%);
 }
 
-.worldbook-hit-rail h2 {
-  font-size: 20px;
-}
-
-.worldbook-rail-list {
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.worldbook-rail-list[hidden],
-.worldbook-rail-empty[hidden] {
-  display: none !important;
-}
-
-.worldbook-rail-items {
+.chat-page .runtime-card-head {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.chat-page .runtime-card-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line) 72%);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent 90%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.chat-page .runtime-kv-list {
+  display: grid;
   gap: 8px;
 }
 
-.worldbook-rail-items .retrieval-chip {
-  width: 100%;
-  min-width: 0;
+.chat-page .runtime-kv-list div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
   padding: 8px 10px;
   border-radius: 12px;
-  font-size: 12px;
-  line-height: 1.35;
+  background: color-mix(in srgb, var(--input-bg) 78%, transparent 22%);
+}
+
+.chat-page .runtime-kv-list span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.chat-page .runtime-kv-list strong {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 13px;
 }
 
-.worldbook-rail-empty {
-  padding: 12px;
-  border: 1px dashed var(--line);
-  border-radius: 14px;
-  color: var(--muted);
+.chat-page .runtime-main-text {
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+
+.chat-page .runtime-inline-link {
+  color: var(--accent);
+  text-decoration: none;
   font-size: 13px;
-  text-align: center;
-  background: color-mix(in srgb, var(--panel-strong) 78%, transparent 22%);
+  font-weight: 700;
+}
+
+.chat-page .runtime-preset-card {
+  position: relative;
+}
+
+.chat-page .runtime-preset-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  margin-bottom: 12px;
+}
+
+.chat-page .runtime-preset-summary .preset-current-meta {
+  min-width: 0;
+}
+
+.chat-page .runtime-preset-summary #chat-preset-name {
+  display: block;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.chat-page .runtime-preset-combo {
+  width: 100%;
+}
+
+.chat-page .runtime-preset-combo .preset-pill-button {
+  width: 100%;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 8px 12px;
+  box-shadow: none;
+}
+
+.chat-page .runtime-preset-combo .preset-menu {
+  left: 0;
+  right: auto;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chat-page .runtime-empty-card {
+  line-height: 1.7;
+}
+
+.chat-page .runtime-card-action {
+  margin-top: 10px;
+}
+
+.chat-page .runtime-plugin-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chat-page .runtime-plugin-links .secondary {
+  margin-top: 0;
+}
+
+.chat-page .runtime-panel .drawer-debug-panel {
+  box-shadow: none;
+}
+
+.chat-page .runtime-panel .debug-code-block {
+  max-height: 280px;
+  overflow: auto;
+}
+
+@media (max-width: 1180px) {
+  .chat-page .topbar.topbar-chat {
+    width: 238px;
+    padding: 26px 20px;
+  }
+
+  .chat-page .brand.chat-brand {
+    font-size: 24px;
+  }
+
+  .chat-page .brand.chat-brand::before {
+    width: 42px;
+    height: 42px;
+  }
+
+  .chat-page .chat-shell {
+    padding-left: 258px;
+  }
+
+  .chat-page .chat-layout,
+  .chat-page .chat-layout.runtime-panel-open,
+  .chat-page .chat-layout.runtime-panel-collapsed {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .chat-page .runtime-panel-handle {
+    right: 12px;
+    top: auto;
+    bottom: 22px;
+    width: 52px;
+    height: 52px;
+    border-radius: 999px;
+    transform: none;
+  }
+
+  .chat-page .chat-layout.runtime-panel-open .runtime-panel-handle {
+    right: 12px;
+  }
+
+  .chat-page .runtime-panel-handle-icon {
+    font-size: 28px;
+  }
+
+  .chat-page .runtime-panel {
+    min-height: 320px;
+    max-height: 52vh;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .chat-page .chat-layout.runtime-panel-collapsed .runtime-panel {
+    display: none;
+  }
+}
+
+@media (max-width: 820px) {
+  body.chat-page {
+    overflow: auto;
+  }
+
+  .chat-page .topbar.topbar-chat {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    min-height: auto;
+    padding: 14px 16px;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .chat-page .topbar-left {
+    margin: 0;
+  }
+
+  .chat-page .brand.chat-brand {
+    font-size: 20px;
+  }
+
+  .chat-page .brand.chat-brand::before {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+  }
+
+  .chat-page .topnav,
+  .chat-page .topnav-grouped {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+  }
+
+  .chat-page .nav-group {
+    width: auto;
+  }
+
+  .chat-page .nav-group-summary {
+    width: auto;
+    min-height: 38px;
+    padding: 9px 12px;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+  }
+
+  .chat-page .nav-group-summary::before {
+    display: none;
+  }
+
+  .chat-page .nav-group-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    min-width: 180px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel-strong);
+    box-shadow: var(--shadow);
+    transform: translateX(-50%);
+  }
+
+  .chat-page .chat-shell {
+    height: auto;
+    min-height: calc(100vh - 74px);
+    padding: 14px;
+  }
+
+  .chat-page .chat-layout {
+    min-height: calc(100vh - 102px);
+    padding: 12px;
+  }
+
+  .chat-page .chat-area.standalone .chat-header {
+    padding: 16px;
+    flex-direction: column;
+  }
+
+  .chat-page .messages {
+    margin: 0 10px 12px;
+    padding: 12px;
+  }
+
+  .chat-page .composer {
+    margin: 0 10px 12px;
+  }
 }
 
 .sprite-stage {
@@ -1794,8 +2455,8 @@ a.compact {
 .drawer-head {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 14px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
 }
@@ -1926,15 +2587,5173 @@ a.compact {
   }
 
   .chat-layout,
-  .chat-layout.worldbook-rail-collapsed {
+  .chat-layout.runtime-panel-open,
+  .chat-layout.runtime-panel-collapsed {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .worldbook-hit-rail:not(.expanded) {
-    width: 36px;
+  .runtime-panel {
+    min-height: 320px;
+    max-height: 52vh;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .chat-layout.runtime-panel-collapsed .runtime-panel {
+    display: none;
   }
 
   .sprite-stage {
     min-height: 280px;
   }
+}
+
+/* Runtime panel handle v4 */
+.chat-page .runtime-panel-open-button {
+  display: none !important;
+}
+
+/* ================================
+   Chat Interaction polish v5
+   ================================ */
+.chat-page .nav-group-summary::after {
+  display: none !important;
+  content: none !important;
+}
+
+.chat-page .nav-group-summary {
+  position: relative;
+  padding: 10px 10px 10px 12px;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.chat-page .nav-group-summary::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0;
+  transform: scaleY(0.45);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.chat-page .nav-group.active-group .nav-group-summary::before,
+.chat-page .nav-group[open] .nav-group-summary::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.chat-page .nav-chevron {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--line) 62%, transparent 38%);
+  border-radius: 13px;
+  color: color-mix(in srgb, var(--muted) 78%, var(--text) 22%);
+  background: color-mix(in srgb, var(--panel-strong) 22%, transparent 78%);
+  transition: transform 0.18s ease, color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.chat-page .nav-chevron svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chat-page .nav-group-summary:hover .nav-chevron,
+.chat-page .nav-group[open] .nav-chevron,
+.chat-page .nav-group.active-group .nav-chevron {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--line) 76%);
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel-strong) 90%);
+}
+
+.chat-page .nav-group[open] .nav-chevron {
+  transform: rotate(180deg);
+}
+
+.chat-page .nav-group-panel {
+  overflow: hidden;
+}
+
+.chat-page .nav-group-links {
+  padding-top: 4px;
+  transform-origin: top;
+  animation: navPanelIn 0.18s ease both;
+}
+
+@keyframes navPanelIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-page .nav-group-links .navlink,
+.chat-page .navlink,
+.chat-page .ghost-link {
+  position: relative;
+  padding-left: 14px;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.chat-page .nav-group-links .navlink.active::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: translateY(-50%);
+}
+
+.chat-page .runtime-panel-handle {
+  right: -24px;
+  width: 48px;
+  height: 118px;
+  border-radius: 24px 0 0 24px;
+  background: color-mix(in srgb, var(--panel-strong) 88%, transparent 12%);
+  box-shadow: -7px 10px 22px rgba(0, 0, 0, 0.10);
+  transition: right 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.chat-page .runtime-panel-handle-icon {
+  font-size: 30px;
+  letter-spacing: -0.22em;
+  transform: translateX(-1px);
+}
+
+.chat-page .chat-layout.runtime-panel-open .runtime-panel-handle {
+  right: calc(var(--runtime-panel-width) - 24px);
+  border-radius: 24px 0 0 24px;
+  background: color-mix(in srgb, var(--panel-strong) 94%, transparent 6%);
+  box-shadow: -5px 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.chat-page .runtime-panel {
+  transition: opacity 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s ease;
+}
+
+.chat-page .chat-layout {
+  transition: grid-template-columns 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), gap 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.chat-page .runtime-panel-tabs {
+  position: relative;
+  gap: 6px;
+  padding: 10px 0 12px;
+}
+
+.chat-page .runtime-tab {
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.chat-page .runtime-tab::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, white 30%));
+  opacity: 0;
+  transform: scale(0.82);
+  z-index: -1;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.chat-page .runtime-tab.active {
+  background: transparent;
+  color: white;
+  border-color: transparent;
+  transform: translateY(-1px);
+}
+
+.chat-page .runtime-tab.active::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.chat-page .runtime-tab-dot {
+  display: inline-flex;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 16%, transparent 84%);
+}
+
+.chat-page .runtime-tab-dot[hidden] {
+  display: none !important;
+}
+
+.chat-page .runtime-tab-panel.active {
+  animation: runtimePanelIn 0.18s ease both;
+}
+
+@keyframes runtimePanelIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-page .composer {
+  transition: box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.chat-page #message-input {
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease, height 0.12s ease;
+}
+
+.chat-page .composer-focused #message-input,
+.chat-page #message-input:focus {
+  border-color: color-mix(in srgb, var(--accent) 46%, var(--line) 54%);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 13%, transparent 87%);
+}
+
+.chat-page .composer.has-input button[type="submit"] {
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 22%, transparent 78%);
+}
+
+.chat-page .composer button[type="submit"].is-busy {
+  opacity: 0.82;
+  cursor: wait;
+}
+
+
+.chat-page .message.streaming .message-meta {
+  color: var(--accent);
+}
+
+.chat-page .message.streaming .message-meta::after {
+  content: "";
+  display: inline-block;
+  width: 1.1em;
+  margin-left: 3px;
+  text-align: left;
+  animation: typingDots 1.1s steps(4, end) infinite;
+}
+
+@keyframes typingDots {
+  0% { content: ""; }
+  25% { content: "."; }
+  50% { content: ".."; }
+  75%, 100% { content: "..."; }
+}
+
+.chat-page .message.streaming .bubble::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin-left: 3px;
+  vertical-align: -0.15em;
+  border-radius: 999px;
+  background: currentColor;
+  animation: caretBlink 0.9s ease-in-out infinite;
+}
+
+@keyframes caretBlink {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.9; }
+}
+
+.chat-page .scroll-bottom-button {
+  position: absolute;
+  right: 42px;
+  bottom: 104px;
+  z-index: 20;
+  width: auto;
+  margin: 0;
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel-strong) 92%, transparent 8%);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(14px);
+  font-size: 13px;
+}
+
+.chat-page .scroll-bottom-button.has-new {
+  color: white;
+  border-color: transparent;
+  background: var(--accent);
+}
+
+.toast-host {
+  position: fixed;
+  right: 24px;
+  top: 24px;
+  z-index: 240;
+  display: grid;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.app-toast {
+  max-width: min(360px, calc(100vw - 48px));
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel-strong) 94%, transparent 6%);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(16px);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  font-size: 13px;
+}
+
+.app-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.app-toast.success { border-color: color-mix(in srgb, #62b47b 38%, var(--line) 62%); }
+.app-toast.warn { border-color: color-mix(in srgb, #d8a548 46%, var(--line) 54%); }
+.app-toast.error { border-color: color-mix(in srgb, #d45a4f 50%, var(--line) 50%); }
+
+@media (max-width: 1180px) {
+  .chat-page .chat-layout.runtime-panel-open .runtime-panel-handle,
+  .chat-page .runtime-panel-handle {
+    right: 12px;
+    border-radius: 999px;
+  }
+
+  .chat-page .scroll-bottom-button {
+    right: 24px;
+    bottom: 92px;
+  }
+}
+
+@media (max-width: 820px) {
+  .chat-page .nav-chevron {
+    width: 26px;
+    height: 26px;
+    flex-basis: 26px;
+    border-radius: 10px;
+  }
+  .toast-host {
+    top: 14px;
+    right: 14px;
+  }
+}
+
+/* ================================
+   Chat polish v6: readable bubbles, task status, slim runtime handle
+   ================================ */
+.chat-page .runtime-panel-handle {
+  right: -11px !important;
+  width: 22px !important;
+  height: 104px !important;
+  border-radius: 14px 0 0 14px !important;
+  border-right: 0 !important;
+  background: color-mix(in srgb, var(--panel-strong) 76%, transparent 24%) !important;
+  color: color-mix(in srgb, var(--accent) 74%, var(--muted) 26%) !important;
+  box-shadow: -4px 8px 18px rgba(42, 30, 23, 0.06) !important;
+  opacity: 0.62;
+  backdrop-filter: blur(10px);
+  transition:
+    right 0.24s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease !important;
+}
+
+.chat-page .runtime-panel-handle:hover,
+.chat-page .runtime-panel-handle:focus-visible {
+  opacity: 1;
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--panel-strong) 92%, transparent 8%) !important;
+  box-shadow: -6px 10px 22px rgba(42, 30, 23, 0.10) !important;
+}
+
+.chat-page .runtime-panel-handle-icon {
+  font-size: 20px !important;
+  letter-spacing: -0.28em !important;
+  transform: translateX(-1px) !important;
+}
+
+.chat-page .chat-layout.runtime-panel-open .runtime-panel-handle {
+  right: calc(var(--runtime-panel-width) - 11px) !important;
+  opacity: 0.58;
+  border-color: color-mix(in srgb, var(--line) 68%, transparent 32%) !important;
+}
+
+.chat-page .chat-layout.runtime-panel-open .runtime-panel-handle:hover,
+.chat-page .chat-layout.runtime-panel-open .runtime-panel-handle:focus-visible {
+  opacity: 1;
+}
+
+:root[data-theme="dark"] .chat-page .runtime-panel-handle {
+  background: color-mix(in srgb, var(--panel-strong) 84%, transparent 16%) !important;
+  color: color-mix(in srgb, var(--accent) 64%, var(--muted) 36%) !important;
+  box-shadow: -6px 10px 22px rgba(0, 0, 0, 0.18) !important;
+}
+
+.chat-page .messages {
+  border-color: color-mix(in srgb, var(--line) 62%, transparent 38%) !important;
+  background: color-mix(in srgb, #f5fbf8 56%, var(--panel) 44%) !important;
+}
+
+:root[data-theme="dark"] .chat-page .messages {
+  border-color: color-mix(in srgb, var(--line) 86%, transparent 14%) !important;
+  background: color-mix(in srgb, var(--panel) 80%, #0b1219 20%) !important;
+}
+
+.chat-page .message-avatar {
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  border: 2px solid color-mix(in srgb, var(--panel-strong) 82%, var(--accent) 18%) !important;
+  background: color-mix(in srgb, var(--panel-strong) 94%, white 6%) !important;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--panel-strong) 55%, transparent 45%),
+    0 12px 28px rgba(74, 50, 34, 0.12) !important;
+}
+
+.chat-page .message-avatar .avatar-text {
+  color: var(--text);
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+}
+
+.chat-page .message.user .message-avatar {
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--panel-strong) 72%) !important;
+}
+
+.chat-page .message.assistant .message-avatar {
+  border-color: color-mix(in srgb, var(--line) 62%, var(--accent) 38%) !important;
+}
+
+.chat-page .bubble {
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent 22%) !important;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, white 46%, transparent 54%) inset,
+    0 14px 32px rgba(60, 43, 32, 0.10) !important;
+}
+
+.chat-page .message.assistant .bubble {
+  background: color-mix(in srgb, var(--assistant) 88%, #fffdf9 12%) !important;
+  border-left: 3px solid color-mix(in srgb, var(--accent) 24%, var(--line) 76%) !important;
+}
+
+.chat-page .message.user .bubble {
+  background: color-mix(in srgb, var(--user) 86%, var(--accent) 14%) !important;
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--line) 78%) !important;
+}
+
+:root[data-theme="dark"] .chat-page .message-avatar {
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--line) 74%) !important;
+  background: color-mix(in srgb, var(--panel-strong) 94%, #233447 6%) !important;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--panel-strong) 52%, transparent 48%),
+    0 14px 30px rgba(0, 0, 0, 0.28) !important;
+}
+
+:root[data-theme="dark"] .chat-page .bubble {
+  border-color: color-mix(in srgb, var(--line) 82%, transparent 18%) !important;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22) !important;
+}
+
+:root[data-theme="dark"] .chat-page .message.assistant .bubble {
+  background: color-mix(in srgb, var(--assistant) 90%, #1b2a39 10%) !important;
+  border-left-color: color-mix(in srgb, var(--accent) 40%, var(--line) 60%) !important;
+}
+
+:root[data-theme="dark"] .chat-page .message.user .bubble {
+  background: color-mix(in srgb, var(--user) 88%, var(--accent) 12%) !important;
+}
+
+.chat-page .task-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  max-width: min(54vw, 680px);
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 58%, transparent 42%);
+  background: color-mix(in srgb, var(--panel-strong) 46%, transparent 54%);
+  color: color-mix(in srgb, var(--text) 74%, var(--muted) 26%);
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-page .task-status.is-idle {
+  color: color-mix(in srgb, var(--muted) 86%, var(--text) 14%);
+  background: transparent;
+  border-color: transparent;
+  padding-left: 0;
+}
+
+.chat-page .task-status.is-busy {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line) 72%);
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel-strong) 90%);
+}
+
+.chat-page .task-status.is-success {
+  color: color-mix(in srgb, #3f8d58 78%, var(--text) 22%);
+  border-color: color-mix(in srgb, #62b47b 32%, var(--line) 68%);
+  background: color-mix(in srgb, #62b47b 11%, var(--panel-strong) 89%);
+}
+
+.chat-page .task-status.is-error {
+  color: color-mix(in srgb, #c24a3f 82%, var(--text) 18%);
+  border-color: color-mix(in srgb, #d45a4f 34%, var(--line) 66%);
+  background: color-mix(in srgb, #d45a4f 10%, var(--panel-strong) 90%);
+}
+
+.chat-page .task-status.is-busy::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: taskStatusSpin 0.8s linear infinite;
+}
+
+.chat-page .task-status.is-success::before {
+  content: "✓";
+  font-weight: 800;
+}
+
+.chat-page .task-status.is-error::before {
+  content: "!";
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: white;
+  background: currentColor;
+  font-weight: 800;
+  font-size: 11px;
+}
+
+@keyframes taskStatusSpin {
+  to { transform: rotate(360deg); }
+}
+
+.chat-page #end-conversation.is-busy,
+.chat-page .action-group button.is-busy {
+  cursor: wait;
+  opacity: 0.82;
+}
+
+@media (max-width: 1180px) {
+  .chat-page .chat-layout.runtime-panel-open .runtime-panel-handle,
+  .chat-page .runtime-panel-handle {
+    right: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 999px !important;
+    opacity: 0.9;
+  }
+}
+
+/* ================================
+   Chat Message Units v8
+   Ivory assistant bubbles, no external tail, lighter floating depth
+   ================================ */
+:root {
+  --chat-assistant-bubble-light: #fff7e8;
+  --chat-user-bubble-light: #f4d7c4;
+  --chat-bubble-border-light: rgba(194, 143, 92, 0.12);
+  --chat-assistant-shadow-light:
+    0 12px 26px rgba(128, 87, 48, 0.075),
+    0 3px 8px rgba(128, 87, 48, 0.045);
+  --chat-user-shadow-light:
+    0 10px 22px rgba(160, 96, 58, 0.085),
+    0 2px 7px rgba(112, 67, 43, 0.045);
+}
+
+.chat-page .messages {
+  gap: 0 !important;
+  padding: 18px 18px 12px !important;
+  border-color: color-mix(in srgb, var(--line) 24%, transparent 76%) !important;
+  background: color-mix(in srgb, #fffdf8 10%, transparent 90%) !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="dark"] .chat-page .messages {
+  border-color: color-mix(in srgb, var(--line) 86%, transparent 14%) !important;
+  background: color-mix(in srgb, var(--panel) 80%, #0b1219 20%) !important;
+}
+
+.chat-page .message {
+  position: relative;
+  align-items: flex-start !important;
+  margin: 0 0 24px !important;
+}
+
+.chat-page .message.assistant + .message.assistant,
+.chat-page .message.system + .message.system,
+.chat-page .message.user + .message.user {
+  margin-top: -12px !important;
+}
+
+.chat-page .message.assistant + .message.user,
+.chat-page .message.system + .message.user,
+.chat-page .message.user + .message.assistant,
+.chat-page .message.user + .message.system {
+  margin-top: 6px !important;
+}
+
+.chat-page .message .bubble-wrap {
+  max-width: min(72%, 780px) !important;
+}
+
+.chat-page .message.assistant .bubble-wrap,
+.chat-page .message.system .bubble-wrap {
+  width: auto !important;
+  max-width: min(72%, 780px) !important;
+  align-items: flex-start !important;
+}
+
+.chat-page .message.user .bubble-wrap {
+  max-width: min(68%, 720px) !important;
+  align-items: flex-end !important;
+}
+
+.chat-page .message-avatar {
+  width: 54px !important;
+  height: 54px !important;
+  min-width: 54px !important;
+  border: 1px solid color-mix(in srgb, #fffdf8 78%, var(--line) 22%) !important;
+  background: color-mix(in srgb, var(--panel-strong) 96%, white 4%) !important;
+  box-shadow:
+    0 10px 24px rgba(76, 52, 34, 0.105),
+    0 2px 8px rgba(76, 52, 34, 0.055),
+    0 0 0 4px color-mix(in srgb, var(--panel-strong) 38%, transparent 62%) !important;
+}
+
+.chat-page .message.assistant .message-avatar,
+.chat-page .message.system .message-avatar {
+  margin-right: 10px !important;
+}
+
+.chat-page .message.user .message-avatar {
+  margin-left: 10px !important;
+}
+
+.chat-page .message.assistant + .message.assistant .message-avatar,
+.chat-page .message.system + .message.system .message-avatar,
+.chat-page .message.user + .message.user .message-avatar {
+  opacity: 0 !important;
+  box-shadow: none !important;
+}
+
+.chat-page .message-avatar .avatar-text {
+  color: var(--text) !important;
+  font-size: 1.02rem !important;
+  font-weight: 800 !important;
+}
+
+.chat-page .bubble {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--line) 14%, transparent 86%) !important;
+  box-shadow: var(--chat-assistant-shadow-light) !important;
+  backdrop-filter: none !important;
+}
+
+.chat-page .message.assistant .bubble,
+.chat-page .message.system .bubble {
+  background: var(--chat-assistant-bubble-light) !important;
+  border-color: var(--chat-bubble-border-light) !important;
+  border-left-color: var(--chat-bubble-border-light) !important;
+  border-bottom-left-radius: 18px !important;
+}
+
+.chat-page .message.user .bubble {
+  background: var(--chat-user-bubble-light) !important;
+  border-color: color-mix(in srgb, var(--accent) 18%, transparent 82%) !important;
+  border-bottom-right-radius: 18px !important;
+  box-shadow: var(--chat-user-shadow-light) !important;
+}
+
+/* V8: remove the old external bubble tail; message direction is handled by spacing/alignment. */
+.chat-page .bubble::before {
+  display: none !important;
+  content: none !important;
+}
+
+.chat-page .message-meta {
+  margin-top: 7px !important;
+  padding: 0 3px;
+  font-size: 12px !important;
+  color: color-mix(in srgb, var(--muted) 86%, var(--text) 14%) !important;
+  line-height: 1.4;
+}
+
+.chat-page .message.user .message-meta {
+  text-align: right !important;
+}
+
+.chat-page .message.assistant + .message.assistant .message-meta,
+.chat-page .message.system + .message.system .message-meta,
+.chat-page .message.user + .message.user .message-meta {
+  opacity: 0.72;
+}
+
+:root[data-theme="dark"] .chat-page .message-avatar {
+  border-color: color-mix(in srgb, var(--line) 48%, transparent 52%) !important;
+  background: color-mix(in srgb, var(--panel-strong) 88%, #27394c 12%) !important;
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.32),
+    0 4px 12px rgba(0, 0, 0, 0.20),
+    0 0 0 5px color-mix(in srgb, var(--panel-strong) 44%, transparent 56%) !important;
+}
+
+:root[data-theme="dark"] .chat-page .bubble {
+  border-color: color-mix(in srgb, var(--line) 28%, transparent 72%) !important;
+  box-shadow:
+    0 20px 44px rgba(0, 0, 0, 0.28),
+    0 6px 18px rgba(0, 0, 0, 0.18),
+    0 1px 0 color-mix(in srgb, white 8%, transparent 92%) inset !important;
+}
+
+:root[data-theme="dark"] .chat-page .message.assistant .bubble,
+:root[data-theme="dark"] .chat-page .message.system .bubble {
+  background: color-mix(in srgb, var(--assistant) 86%, #203145 14%) !important;
+  border-color: color-mix(in srgb, var(--line) 30%, transparent 70%) !important;
+}
+
+:root[data-theme="dark"] .chat-page .message.user .bubble {
+  background: color-mix(in srgb, var(--user) 82%, var(--accent) 18%) !important;
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent 72%) !important;
+}
+
+@media (max-width: 768px) {
+  .chat-page .message-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+  }
+  .chat-page .message .bubble-wrap,
+  .chat-page .message.assistant .bubble-wrap,
+  .chat-page .message.user .bubble-wrap {
+    max-width: min(82%, 640px) !important;
+  }
+  .chat-page .message.assistant .message-avatar,
+  .chat-page .message.system .message-avatar {
+    margin-right: 8px !important;
+  }
+  .chat-page .message.user .message-avatar {
+    margin-left: 8px !important;
+  }
+}
+
+/* =========================================================
+   V0.8 patch: remove the broad chat-area outer mask.
+   Keep hierarchy on bubbles/composer/header; do not rely on a large translucent veil.
+   ========================================================= */
+.chat-page .chat-layout {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.chat-page .chat-area.standalone {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.chat-page .chat-area.standalone .chat-header {
+  background: transparent !important;
+}
+
+.chat-page .messages,
+:root[data-theme="dark"] .chat-page .messages {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.chat-page .messages::before,
+.chat-page .messages::after,
+.chat-page .chat-area.standalone::before,
+.chat-page .chat-area.standalone::after,
+.chat-page .chat-layout::before,
+.chat-page .chat-layout::after {
+  display: none !important;
+  content: none !important;
+}
+
+
+/* =========================================================
+   V0.8.1 strict no-mask fix
+   Remove all large translucent reading veils from the chat shell.
+   Keep bubbles, avatars, composer, task status and runtime panel untouched.
+   ========================================================= */
+body.chat-page .chat-layout,
+body.chat-page .chat-area.standalone {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+body.chat-page .chat-layout {
+  border-color: transparent !important;
+}
+
+body.chat-page .chat-area.standalone {
+  border-color: transparent !important;
+}
+
+body.chat-page .chat-area.standalone .chat-header,
+body.chat-page .messages,
+:root[data-theme="dark"] body.chat-page .messages {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+body.chat-page .messages,
+:root[data-theme="dark"] body.chat-page .messages {
+  border-color: transparent !important;
+  outline: 0 !important;
+}
+
+body.chat-page .messages::before,
+body.chat-page .messages::after,
+body.chat-page .chat-area.standalone::before,
+body.chat-page .chat-area.standalone::after,
+body.chat-page .chat-layout::before,
+body.chat-page .chat-layout::after {
+  display: none !important;
+  content: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+
+/* =========================================================
+   V0.8.2 single controllable reading mask
+   Keep only one soft chat reading veil. It follows UI opacity via --panel.
+   ========================================================= */
+body.chat-page .chat-layout {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  border-color: transparent !important;
+}
+
+body.chat-page .chat-area.standalone {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line) 34%, transparent 66%) !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--panel) 42%, transparent 58%) !important;
+  box-shadow: 0 18px 46px rgba(92, 68, 44, 0.075) !important;
+  backdrop-filter: blur(8px) saturate(108%) !important;
+}
+
+:root[data-theme="dark"] body.chat-page .chat-area.standalone {
+  border-color: color-mix(in srgb, var(--line) 48%, transparent 52%) !important;
+  background: color-mix(in srgb, var(--panel) 58%, transparent 42%) !important;
+  box-shadow: 0 20px 54px rgba(0, 0, 0, 0.22) !important;
+  backdrop-filter: blur(10px) saturate(112%) !important;
+}
+
+body.chat-page .chat-area.standalone::before,
+body.chat-page .chat-area.standalone::after,
+body.chat-page .messages::before,
+body.chat-page .messages::after,
+body.chat-page .chat-layout::before,
+body.chat-page .chat-layout::after {
+  display: none !important;
+  content: none !important;
+}
+
+body.chat-page .chat-area.standalone .chat-header,
+body.chat-page .messages,
+:root[data-theme="dark"] body.chat-page .messages {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+body.chat-page .messages,
+:root[data-theme="dark"] body.chat-page .messages {
+  border-color: transparent !important;
+  outline: 0 !important;
+}
+
+/* =========================================================
+   V0.8.3 readable single mask layer
+   One controllable reading veil lives on chat-area::before.
+   The veil has its own minimum alpha, so it remains visible even when UI opacity changes.
+   ========================================================= */
+:root {
+  --chat-reading-mask-alpha: 0.53;
+  --chat-reading-mask-blur: 7px;
+  --chat-reading-mask-bg: 255, 250, 244;
+}
+
+:root[data-theme="dark"] {
+  --chat-reading-mask-alpha: 0.34;
+  --chat-reading-mask-blur: 8px;
+  --chat-reading-mask-bg: 13, 21, 30;
+}
+
+body.chat-page .chat-layout {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  border-color: transparent !important;
+}
+
+body.chat-page .chat-area.standalone {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line) 32%, transparent 68%) !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+  box-shadow: 0 18px 44px rgba(88, 64, 42, 0.07) !important;
+  backdrop-filter: none !important;
+}
+
+:root[data-theme="dark"] body.chat-page .chat-area.standalone {
+  border-color: color-mix(in srgb, var(--line) 46%, transparent 54%) !important;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.22) !important;
+}
+
+body.chat-page .chat-area.standalone::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: rgba(var(--chat-reading-mask-bg), var(--chat-reading-mask-alpha)) !important;
+  backdrop-filter: blur(var(--chat-reading-mask-blur)) saturate(108%);
+  -webkit-backdrop-filter: blur(var(--chat-reading-mask-blur)) saturate(108%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+:root[data-theme="dark"] body.chat-page .chat-area.standalone::before {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.chat-page .chat-area.standalone::after,
+body.chat-page .messages::before,
+body.chat-page .messages::after,
+body.chat-page .chat-layout::before,
+body.chat-page .chat-layout::after {
+  display: none !important;
+  content: none !important;
+}
+
+body.chat-page .chat-area.standalone .chat-header,
+body.chat-page .retrieval-bar,
+body.chat-page .messages,
+body.chat-page .composer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Keep the scroll-to-bottom affordance floating above the composer.
+   It must remain absolute; otherwise it falls back into the message flow. */
+body.chat-page .scroll-bottom-button {
+  position: absolute;
+  z-index: 20;
+}
+
+body.chat-page .chat-area.standalone .chat-header,
+body.chat-page .messages,
+:root[data-theme="dark"] body.chat-page .messages {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+body.chat-page .messages,
+:root[data-theme="dark"] body.chat-page .messages {
+  border-color: transparent !important;
+  outline: 0 !important;
+}
+
+
+
+/* =========================================================
+   V0.8.4 brand plate + runtime handle contrast polish
+   Based on v8 reading mask layer. Keeps previous task status,
+   reading mask, bubble, avatar and runtime-panel behaviours.
+   ========================================================= */
+body.chat-page .topbar-left {
+  width: 100%;
+  margin-bottom: 48px !important;
+}
+
+body.chat-page .brand.chat-brand {
+  width: 100%;
+  min-height: 64px;
+  padding: 9px 11px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  color: color-mix(in srgb, var(--text) 94%, white 6%) !important;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  font-size: 31px !important;
+  font-weight: 600 !important;
+  line-height: 1;
+  letter-spacing: 0.075em !important;
+  text-decoration: none;
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--panel-strong) 82%, transparent 18%),
+      color-mix(in srgb, var(--panel) 62%, transparent 38%)
+    );
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent 22%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 28%, transparent 72%),
+    0 12px 28px rgba(58, 40, 28, 0.07);
+  backdrop-filter: blur(12px) saturate(110%);
+  -webkit-backdrop-filter: blur(12px) saturate(110%);
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+body.chat-page .brand.chat-brand:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--line) 78%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 34%, transparent 66%),
+    0 16px 34px rgba(58, 40, 28, 0.10);
+}
+
+body.chat-page .brand.chat-brand::before {
+  width: 46px !important;
+  height: 46px !important;
+  flex-basis: 46px !important;
+  border-radius: 13px !important;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, white 20%) !important;
+  background:
+    url("/static/fantareal_icon.ico") center / cover no-repeat,
+    color-mix(in srgb, var(--panel-strong) 80%, white 20%) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, white 48%, transparent 52%),
+    0 6px 14px rgba(36, 24, 18, 0.12) !important;
+}
+
+:root[data-theme="dark"] body.chat-page .brand.chat-brand {
+  color: #f1f6ff !important;
+  background:
+    linear-gradient(135deg,
+      rgba(31, 46, 62, 0.94),
+      rgba(18, 29, 42, 0.78)
+    );
+  border-color: rgba(139, 174, 211, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 14px 32px rgba(0, 0, 0, 0.22);
+}
+
+:root[data-theme="dark"] body.chat-page .brand.chat-brand:hover {
+  border-color: rgba(139, 174, 211, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 16px 36px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme="dark"] body.chat-page .brand.chat-brand::before {
+  border-color: rgba(190, 212, 238, 0.28) !important;
+  background:
+    url("/static/fantareal_icon.ico") center / cover no-repeat,
+    rgba(238, 245, 255, 0.92) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.34),
+    0 8px 18px rgba(0, 0, 0, 0.30) !important;
+}
+
+/* Keep the slim pull-tab, but make it legible on both bright backgrounds and dark panels. */
+body.chat-page .runtime-panel-handle {
+  right: -6px !important;
+  width: 24px !important;
+  height: 108px !important;
+  border-radius: 15px 0 0 15px !important;
+  border: 1px solid rgba(190, 125, 78, 0.34) !important;
+  border-right: 0 !important;
+  background:
+    linear-gradient(180deg,
+      rgba(255, 251, 242, 0.92),
+      rgba(244, 229, 211, 0.82)
+    ) !important;
+  color: #a85b31 !important;
+  opacity: 0.92 !important;
+  box-shadow:
+    -1px 0 0 rgba(255, 255, 255, 0.42) inset,
+    -5px 8px 18px rgba(94, 59, 34, 0.13) !important;
+  backdrop-filter: blur(12px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(112%) !important;
+}
+
+body.chat-page .runtime-panel-handle:hover,
+body.chat-page .runtime-panel-handle:focus-visible {
+  right: -4px !important;
+  opacity: 1 !important;
+  background:
+    linear-gradient(180deg,
+      rgba(255, 253, 248, 0.98),
+      rgba(249, 235, 218, 0.92)
+    ) !important;
+  color: #c8673b !important;
+  border-color: rgba(200, 103, 59, 0.48) !important;
+  box-shadow:
+    -1px 0 0 rgba(255, 255, 255, 0.54) inset,
+    -7px 10px 24px rgba(94, 59, 34, 0.18) !important;
+}
+
+body.chat-page .runtime-panel-handle-icon {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.34em !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+body.chat-page .chat-layout.runtime-panel-open .runtime-panel-handle {
+  right: calc(var(--runtime-panel-width) - 6px) !important;
+}
+
+body.chat-page .chat-layout.runtime-panel-open .runtime-panel-handle:hover,
+body.chat-page .chat-layout.runtime-panel-open .runtime-panel-handle:focus-visible {
+  right: calc(var(--runtime-panel-width) - 4px) !important;
+}
+
+:root[data-theme="dark"] body.chat-page .runtime-panel-handle {
+  border-color: rgba(125, 164, 205, 0.36) !important;
+  background:
+    linear-gradient(180deg,
+      rgba(36, 53, 70, 0.98),
+      rgba(24, 38, 53, 0.90)
+    ) !important;
+  color: #c8ddf1 !important;
+  box-shadow:
+    -1px 0 0 rgba(255, 255, 255, 0.075) inset,
+    -6px 10px 22px rgba(0, 0, 0, 0.30) !important;
+}
+
+:root[data-theme="dark"] body.chat-page .runtime-panel-handle:hover,
+:root[data-theme="dark"] body.chat-page .runtime-panel-handle:focus-visible {
+  border-color: rgba(145, 190, 236, 0.52) !important;
+  background:
+    linear-gradient(180deg,
+      rgba(48, 69, 90, 1),
+      rgba(30, 47, 64, 0.98)
+    ) !important;
+  color: #eef6ff !important;
+  box-shadow:
+    -1px 0 0 rgba(255, 255, 255, 0.10) inset,
+    -8px 12px 26px rgba(0, 0, 0, 0.36) !important;
+}
+
+:root[data-theme="dark"] body.chat-page .runtime-panel-handle-icon {
+  text-shadow: 0 1px 8px rgba(92, 167, 255, 0.18);
+}
+
+@media (max-width: 820px) {
+  body.chat-page .brand.chat-brand {
+    min-height: 54px;
+    padding: 8px 9px;
+    font-size: 25px !important;
+    border-radius: 15px;
+    letter-spacing: 0.06em !important;
+  }
+
+  body.chat-page .brand.chat-brand::before {
+    width: 40px !important;
+    height: 40px !important;
+    flex-basis: 40px !important;
+  }
+
+  body.chat-page .runtime-panel-handle,
+  body.chat-page .chat-layout.runtime-panel-open .runtime-panel-handle {
+    right: 10px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 999px !important;
+    border-right: 1px solid rgba(190, 125, 78, 0.34) !important;
+  }
+}
+
+
+/* =========================================================
+   V0.8.5 brand card correction
+   Make the Fantareal logo area a true brand card instead of a narrow pill.
+   This is appended as a final override to preserve v8 reading mask, task status,
+   bubble/avatar polish, and runtime panel behavior.
+   ========================================================= */
+body.chat-page .topbar-left {
+  width: 100% !important;
+  margin-bottom: 52px !important;
+  padding: 0 !important;
+}
+
+body.chat-page .brand.chat-brand {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-height: 70px !important;
+  padding: 12px 14px !important;
+  border-radius: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  overflow: hidden !important;
+  color: color-mix(in srgb, var(--text) 96%, #3a2419 4%) !important;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+  font-size: clamp(25px, 1.75vw, 28px) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.045em !important;
+  text-decoration: none !important;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.52), transparent 42%),
+    linear-gradient(135deg,
+      rgba(255, 250, 244, 0.86),
+      rgba(247, 234, 217, 0.68)
+    ) !important;
+  border: 1px solid rgba(190, 152, 121, 0.25) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(120, 86, 64, 0.04),
+    0 14px 30px rgba(84, 57, 38, 0.075) !important;
+  backdrop-filter: blur(14px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(112%) !important;
+}
+
+body.chat-page .brand.chat-brand:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(200, 103, 59, 0.26) !important;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.62), transparent 42%),
+    linear-gradient(135deg,
+      rgba(255, 250, 244, 0.92),
+      rgba(248, 236, 221, 0.76)
+    ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    inset 0 -1px 0 rgba(120, 86, 64, 0.045),
+    0 18px 34px rgba(84, 57, 38, 0.10) !important;
+}
+
+body.chat-page .brand.chat-brand::before {
+  content: "" !important;
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  flex: 0 0 46px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(190, 152, 121, 0.30) !important;
+  background:
+    url("/static/fantareal_icon.ico") center / cover no-repeat,
+    rgba(255, 252, 248, 0.94) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 7px 16px rgba(61, 40, 27, 0.13) !important;
+}
+
+:root[data-theme="dark"] body.chat-page .brand.chat-brand {
+  color: #f2f7ff !important;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(121, 159, 202, 0.12), transparent 42%),
+    linear-gradient(135deg,
+      rgba(36, 52, 70, 0.90),
+      rgba(17, 28, 41, 0.84)
+    ) !important;
+  border-color: rgba(153, 187, 224, 0.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 16px 34px rgba(0, 0, 0, 0.25) !important;
+}
+
+:root[data-theme="dark"] body.chat-page .brand.chat-brand:hover {
+  border-color: rgba(153, 187, 224, 0.30) !important;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(121, 159, 202, 0.16), transparent 42%),
+    linear-gradient(135deg,
+      rgba(41, 59, 78, 0.96),
+      rgba(18, 30, 44, 0.90)
+    ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.17),
+    0 18px 38px rgba(0, 0, 0, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.chat-page .brand.chat-brand::before {
+  border-color: rgba(195, 217, 244, 0.30) !important;
+  background:
+    url("/static/fantareal_icon.ico") center / cover no-repeat,
+    rgba(240, 246, 255, 0.96) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.34),
+    0 8px 18px rgba(0, 0, 0, 0.34) !important;
+}
+
+@media (max-width: 1180px) {
+  body.chat-page .brand.chat-brand {
+    min-height: 62px !important;
+    padding: 10px 11px !important;
+    border-radius: 17px !important;
+    font-size: 24px !important;
+    letter-spacing: 0.035em !important;
+  }
+
+  body.chat-page .brand.chat-brand::before {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    flex-basis: 42px !important;
+    border-radius: 12px !important;
+  }
+}
+
+@media (max-width: 820px) {
+  body.chat-page .brand.chat-brand {
+    min-height: 56px !important;
+    padding: 8px 10px !important;
+    border-radius: 15px !important;
+    font-size: 22px !important;
+    letter-spacing: 0.025em !important;
+  }
+
+  body.chat-page .brand.chat-brand::before {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    flex-basis: 38px !important;
+    border-radius: 11px !important;
+  }
+}
+
+/* ================================
+   Global Sidebar Shell v0.8.1
+   Non-chat pages reuse the Chat left navigation without changing their inner layouts.
+   ================================ */
+:root {
+  --app-sidebar-width: 260px;
+  --app-sidebar-gap: 18px;
+}
+
+body.app-sidebar-shell:not(.chat-page) {
+  min-height: 100vh;
+  padding-left: var(--app-sidebar-width);
+}
+
+body.app-sidebar-shell:not(.chat-page) .topbar-stack {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 180;
+  width: var(--app-sidebar-width);
+  padding: 26px 18px 22px;
+  border-right: 1px solid color-mix(in srgb, var(--line) 78%, transparent 22%);
+  background: color-mix(in srgb, var(--panel-strong) 86%, transparent 14%);
+  backdrop-filter: blur(22px);
+  box-shadow: 16px 0 42px rgba(42, 31, 24, 0.08);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+:root[data-theme="dark"] body.app-sidebar-shell:not(.chat-page) .topbar-stack {
+  background: color-mix(in srgb, #121d29 88%, transparent 12%);
+  border-right-color: rgba(152, 190, 233, 0.10);
+  box-shadow: 16px 0 42px rgba(0, 0, 0, 0.28);
+}
+
+body.app-sidebar-shell:not(.chat-page) .topbar-stack::-webkit-scrollbar {
+  display: none;
+}
+
+body.app-sidebar-shell:not(.chat-page) .topbar-stack .topbar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 24px;
+  padding: 0;
+}
+
+body.app-sidebar-shell:not(.chat-page) .topbar-stack .brand {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  width: 100%;
+  padding: 10px 14px 10px 12px;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255,255,255,0.18) 16%);
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--panel-strong) 86%, rgba(255,255,255,0.26) 14%),
+      color-mix(in srgb, var(--panel) 74%, transparent 26%)
+    );
+  color: var(--text);
+  text-decoration: none;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.045em;
+  box-shadow:
+    0 16px 34px rgba(72, 50, 35, 0.075),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+:root[data-theme="dark"] body.app-sidebar-shell:not(.chat-page) .topbar-stack .brand {
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, #1a2a3b 88%, rgba(255,255,255,0.08) 12%),
+      color-mix(in srgb, #111b26 82%, transparent 18%)
+    );
+  border-color: rgba(152, 190, 233, 0.14);
+  color: #eef5ff;
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body.app-sidebar-shell:not(.chat-page) .topbar-stack .brand::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.42)),
+    url("/static/fantareal_icon.ico") center / cover no-repeat;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, rgba(255,255,255,0.26) 30%);
+  box-shadow:
+    0 8px 18px rgba(87, 58, 40, 0.12),
+    inset 0 1px 0 rgba(255,255,255,0.45);
+}
+
+:root[data-theme="dark"] body.app-sidebar-shell:not(.chat-page) .topbar-stack .brand::before {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04)),
+    url("/static/fantareal_icon.ico") center / cover no-repeat;
+  border-color: rgba(152, 190, 233, 0.22);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
+body.app-sidebar-shell:not(.chat-page) .topnav,
+body.app-sidebar-shell:not(.chat-page) .topnav-grouped {
+  position: static;
+  inset: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  overflow: visible;
+  white-space: normal;
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group {
+  width: 100%;
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group-summary {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 30px;
+  align-items: center;
+  justify-content: stretch;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 9px 11px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group-summary:hover {
+  transform: none;
+  background: color-mix(in srgb, var(--panel-strong) 72%, transparent 28%);
+  border-color: color-mix(in srgb, var(--line) 72%, transparent 28%);
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group[open] .nav-group-summary,
+body.app-sidebar-shell:not(.chat-page) .nav-group.active-group .nav-group-summary {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 13%, var(--panel-strong) 87%);
+  border-color: color-mix(in srgb, var(--accent) 16%, var(--line) 84%);
+}
+
+:root[data-theme="dark"] body.app-sidebar-shell:not(.chat-page) .nav-group[open] .nav-group-summary,
+:root[data-theme="dark"] body.app-sidebar-shell:not(.chat-page) .nav-group.active-group .nav-group-summary {
+  color: #edf5ff;
+  background: color-mix(in srgb, var(--accent) 18%, #162538 82%);
+  border-color: color-mix(in srgb, var(--accent) 22%, rgba(152, 190, 233, 0.12) 78%);
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-icon svg,
+body.app-sidebar-shell:not(.chat-page) .nav-chevron svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-label {
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-chevron {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel-strong) 52%, transparent 48%);
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group[open] .nav-chevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel-strong) 88%);
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group-panel {
+  position: static;
+  display: grid;
+  min-width: 0;
+  max-width: none;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  padding: 0 0 0 52px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: max-height 0.22s ease, padding 0.22s ease;
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group[open] .nav-group-panel {
+  max-height: 280px;
+  padding-top: 7px;
+  padding-bottom: 2px;
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group-links {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group-links .navlink {
+  position: relative;
+  justify-content: flex-start;
+  min-height: 34px;
+  width: 100%;
+  padding: 8px 10px 8px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group-links .navlink:hover {
+  transform: none;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel-strong) 68%, transparent 32%);
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group-links .navlink.active {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel-strong) 88%);
+}
+
+body.app-sidebar-shell:not(.chat-page) .nav-group-links .navlink.active::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  transform: translateY(-50%);
+}
+
+body.app-sidebar-shell:not(.chat-page) .config-shell,
+body.app-sidebar-shell:not(.chat-page) .welcome-shell {
+  width: min(1760px, calc(100vw - var(--app-sidebar-width) - 32px));
+  max-width: min(1760px, calc(100vw - var(--app-sidebar-width) - 32px));
+  margin-left: 0;
+  margin-right: auto;
+}
+
+body.app-sidebar-shell:not(.chat-page) .config-shell.wide {
+  width: min(1760px, calc(100vw - var(--app-sidebar-width) - 32px));
+  max-width: min(1760px, calc(100vw - var(--app-sidebar-width) - 32px));
+}
+
+@media (max-width: 980px) {
+  body.app-sidebar-shell:not(.chat-page) {
+    padding-left: 0;
+  }
+
+  body.app-sidebar-shell:not(.chat-page) .topbar-stack {
+    position: sticky;
+    top: 0;
+    bottom: auto;
+    width: 100%;
+    min-height: 0;
+    padding: 12px 14px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    overflow: visible;
+  }
+
+  body.app-sidebar-shell:not(.chat-page) .topbar-stack .topbar {
+    gap: 12px;
+  }
+
+  body.app-sidebar-shell:not(.chat-page) .topbar-stack .brand {
+    width: fit-content;
+    min-height: 52px;
+    font-size: 24px;
+  }
+
+  body.app-sidebar-shell:not(.chat-page) .topnav,
+  body.app-sidebar-shell:not(.chat-page) .topnav-grouped {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-bottom: 4px;
+  }
+
+  body.app-sidebar-shell:not(.chat-page) .nav-group-summary {
+    min-width: 140px;
+  }
+
+  body.app-sidebar-shell:not(.chat-page) .nav-group-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 190px;
+    max-height: none;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel-strong);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+  }
+
+  body.app-sidebar-shell:not(.chat-page) .nav-group[open] .nav-group-panel {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    padding: 10px;
+  }
+
+  body.app-sidebar-shell:not(.chat-page) .config-shell,
+  body.app-sidebar-shell:not(.chat-page) .config-shell.wide,
+  body.app-sidebar-shell:not(.chat-page) .welcome-shell {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Global Sidebar Shell correction: keep page toolbars/content in the main area; only the nav bar is fixed. */
+body.app-sidebar-shell:not(.chat-page) .topbar-stack {
+  position: static;
+  inset: auto;
+  width: auto;
+  padding: 0;
+  border-right: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  overflow: visible;
+}
+
+body.app-sidebar-shell:not(.chat-page) .topbar-stack > .topbar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 180;
+  width: var(--app-sidebar-width);
+  padding: 26px 18px 22px;
+  border-right: 1px solid color-mix(in srgb, var(--line) 78%, transparent 22%);
+  background: color-mix(in srgb, var(--panel-strong) 86%, transparent 14%);
+  backdrop-filter: blur(22px);
+  box-shadow: 16px 0 42px rgba(42, 31, 24, 0.08);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+:root[data-theme="dark"] body.app-sidebar-shell:not(.chat-page) .topbar-stack > .topbar {
+  background: color-mix(in srgb, #121d29 88%, transparent 12%);
+  border-right-color: rgba(152, 190, 233, 0.10);
+  box-shadow: 16px 0 42px rgba(0, 0, 0, 0.28);
+}
+
+body.app-sidebar-shell:not(.chat-page) .topbar-stack > .topbar::-webkit-scrollbar {
+  display: none;
+}
+
+body.app-sidebar-shell:not(.chat-page) .slot-toolbar {
+  margin: 18px 24px 0;
+}
+
+@media (max-width: 980px) {
+  body.app-sidebar-shell:not(.chat-page) .topbar-stack > .topbar {
+    position: sticky;
+    inset: auto;
+    top: 0;
+    width: 100%;
+    min-height: 0;
+    padding: 12px 14px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    overflow: visible;
+  }
+
+  body.app-sidebar-shell:not(.chat-page) .slot-toolbar {
+    margin: 12px 14px 0;
+  }
+}
+
+/* =========================================================
+   Config Workbench UI v0.8.2
+   UI-only polish for /config. Keeps existing ids and API logic.
+   ========================================================= */
+body.modern-setting-page.app-sidebar-shell:not(.chat-page) {
+  --config-card-alpha: 0.92;
+  --config-card-alpha-strong: 0.96;
+  --config-sticky-top: 18px;
+}
+
+body.modern-setting-page.app-sidebar-shell:not(.chat-page) .topbar-stack .brand,
+body.modern-setting-page.app-sidebar-shell:not(.chat-page) .topbar-stack > .topbar .brand {
+  min-height: 58px;
+  padding: 9px 12px;
+  border-radius: 17px;
+  font-size: 25px;
+  letter-spacing: 0.035em;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255,255,255,0.50), transparent 42%),
+    linear-gradient(135deg,
+      rgba(255, 250, 244, 0.78),
+      rgba(247, 234, 217, 0.58)
+    );
+  border-color: rgba(190, 152, 121, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.42),
+    0 10px 24px rgba(84, 57, 38, 0.055);
+}
+
+body.modern-setting-page.app-sidebar-shell:not(.chat-page) .topbar-stack .brand::before,
+body.modern-setting-page.app-sidebar-shell:not(.chat-page) .topbar-stack > .topbar .brand::before {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background:
+    url("/static/fantareal_icon.ico") center / cover no-repeat,
+    rgba(255, 252, 248, 0.94);
+  opacity: 1;
+}
+
+:root[data-theme="dark"] body.modern-setting-page.app-sidebar-shell:not(.chat-page) .topbar-stack .brand,
+:root[data-theme="dark"] body.modern-setting-page.app-sidebar-shell:not(.chat-page) .topbar-stack > .topbar .brand {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(121, 159, 202, 0.12), transparent 42%),
+    linear-gradient(135deg, rgba(36, 52, 70, 0.90), rgba(17, 28, 41, 0.84));
+  border-color: rgba(153, 187, 224, 0.18);
+}
+
+body.modern-setting-page .config-workbench-shell {
+  align-items: start;
+  gap: 18px;
+}
+
+body.modern-setting-page .config-hero-toolbar {
+  margin-bottom: 12px;
+}
+
+body.modern-setting-page .config-sticky-actions {
+  position: sticky;
+  top: 16px;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 14px 24px 14px;
+  padding: 14px 16px 14px 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line) 82%);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--panel-strong) 88%, transparent 12%),
+      color-mix(in srgb, var(--panel) 78%, transparent 22%)
+    );
+  backdrop-filter: blur(22px) saturate(116%);
+  -webkit-backdrop-filter: blur(22px) saturate(116%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.24),
+    0 16px 34px rgba(72, 50, 35, 0.08);
+}
+
+body.modern-setting-page .config-sticky-copy {
+  min-width: 0;
+}
+
+body.modern-setting-page .config-sticky-kicker {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  margin-bottom: 4px;
+  padding: 0.24rem 0.58rem;
+  border-radius: 999px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+body.modern-setting-page .config-sticky-copy strong {
+  display: block;
+  font-size: 1.02rem;
+  line-height: 1.25;
+}
+
+body.modern-setting-page .config-sticky-copy .status-line {
+  margin: 5px 0 0;
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+body.modern-setting-page .config-sticky-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+body.modern-setting-page .config-sticky-buttons button {
+  width: auto;
+  min-width: 128px;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+body.modern-setting-page .panel.config-panel {
+  background:
+    linear-gradient(180deg,
+      rgba(var(--panel-strong-rgb), var(--config-card-alpha-strong)),
+      rgba(var(--panel-rgb), var(--config-card-alpha))
+    );
+  backdrop-filter: blur(18px) saturate(108%);
+  -webkit-backdrop-filter: blur(18px) saturate(108%);
+}
+
+body.modern-setting-page .config-primary-panel {
+  border-color: color-mix(in srgb, var(--accent) 18%, var(--line) 82%);
+}
+
+body.modern-setting-page .config-overview-grid {
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+}
+
+body.modern-setting-page .config-overview-actions {
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+
+body.modern-setting-page .config-advanced-group {
+  grid-column: 1 / -1;
+  display: block;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent 18%);
+  background:
+    linear-gradient(180deg,
+      rgba(var(--panel-strong-rgb), 0.80),
+      rgba(var(--panel-rgb), 0.70)
+    );
+  box-shadow: 0 14px 34px rgba(72, 50, 35, 0.07);
+  overflow: hidden;
+}
+
+body.modern-setting-page .config-advanced-summary {
+  list-style: none;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 16px 18px;
+  cursor: pointer;
+  user-select: none;
+}
+
+body.modern-setting-page .config-advanced-summary::-webkit-details-marker {
+  display: none;
+}
+
+body.modern-setting-page .config-advanced-summary::after {
+  content: "展开";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent 22%);
+  background: color-mix(in srgb, var(--input-bg) 72%, transparent 28%);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+body.modern-setting-page .config-advanced-group[open] .config-advanced-summary::after {
+  content: "收起";
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--line) 78%);
+}
+
+body.modern-setting-page .config-advanced-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.28rem 0.66rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line) 78%);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.10em;
+}
+
+body.modern-setting-page .config-advanced-summary strong {
+  font-size: 1.05rem;
+}
+
+body.modern-setting-page .config-advanced-summary .muted {
+  min-width: 0;
+  font-size: 0.88rem;
+}
+
+body.modern-setting-page .config-retrieval-panel {
+  margin: 0 16px 16px;
+  box-shadow: none;
+}
+
+
+
+
+body.modern-setting-page #save-settings,
+body.modern-setting-page #save-retrieval,
+body.modern-setting-page #test-connection,
+body.modern-setting-page #test-embedding {
+  min-height: 44px;
+}
+
+@media (max-width: 1280px) {
+  body.modern-setting-page .config-overview-grid {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  body.modern-setting-page .config-sticky-actions {
+    position: static;
+    margin: 12px 14px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  body.modern-setting-page .config-sticky-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  body.modern-setting-page .config-sticky-buttons button {
+    width: 100%;
+  }
+  body.modern-setting-page .config-advanced-summary {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+  body.modern-setting-page .config-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Config workbench v2: align with Chat feedback language */
+body.modern-setting-page .config-sticky-actions {
+  position: sticky;
+  top: 12px;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 72px;
+  padding: 12px 16px;
+  margin: 12px 0 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line) 76%);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 10%, transparent), transparent 42%),
+    color-mix(in srgb, var(--panel-strong) 82%, transparent 18%);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 16px 40px rgba(80, 53, 35, 0.12);
+}
+
+:root[data-theme="dark"] body.modern-setting-page .config-sticky-actions {
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+}
+
+body.modern-setting-page .config-sticky-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+body.modern-setting-page .config-sticky-kicker {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  padding: 0.24rem 0.62rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line) 70%);
+  background: color-mix(in srgb, var(--accent) 11%, transparent 89%);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+body.modern-setting-page .config-sticky-copy strong {
+  font-size: 1.05rem;
+}
+
+body.modern-setting-page .config-sticky-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+body.modern-setting-page .config-workbench-shell {
+  grid-template-columns: minmax(420px, 1fr) minmax(420px, 1fr);
+  align-items: start;
+}
+
+body.modern-setting-page .config-primary-panel,
+body.modern-setting-page .config-appearance-panel {
+  min-height: 100%;
+}
+
+body.modern-setting-page .config-overview-grid {
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+}
+
+body.modern-setting-page .config-overview-actions {
+  margin-top: 12px;
+  justify-content: flex-start;
+}
+
+body.modern-setting-page .danger-action {
+  border-color: color-mix(in srgb, #d65a43 42%, var(--line) 58%) !important;
+  background: color-mix(in srgb, #d65a43 16%, var(--input-bg) 84%) !important;
+  color: color-mix(in srgb, #8f2f21 72%, var(--text) 28%) !important;
+}
+
+body.modern-setting-page .danger-action:hover {
+  background: color-mix(in srgb, #d65a43 24%, var(--input-bg) 76%) !important;
+  border-color: color-mix(in srgb, #d65a43 58%, var(--line) 42%) !important;
+}
+
+:root[data-theme="dark"] body.modern-setting-page .danger-action {
+  color: #ffb3a7 !important;
+  background: color-mix(in srgb, #c84f3f 18%, var(--input-bg) 82%) !important;
+}
+
+body.modern-setting-page .danger-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.2rem;
+}
+
+body.modern-setting-page .task-status {
+  display: inline-flex;
+  width: fit-content;
+  max-width: min(720px, 100%);
+  min-height: 34px;
+  align-items: center;
+  gap: 0.52rem;
+  padding: 0.45rem 0.78rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent 18%);
+  background: color-mix(in srgb, var(--input-bg) 70%, transparent 30%);
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.35;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+}
+
+body.modern-setting-page .task-status::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 70%, transparent 30%);
+  flex: 0 0 auto;
+}
+
+body.modern-setting-page .task-status.is-busy {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--line) 66%);
+  color: color-mix(in srgb, var(--accent) 76%, var(--text) 24%);
+  background: color-mix(in srgb, var(--accent) 10%, var(--input-bg) 90%);
+}
+
+body.modern-setting-page .task-status.is-busy::before {
+  width: 0.68rem;
+  height: 0.68rem;
+  border: 2px solid color-mix(in srgb, var(--accent) 24%, transparent 76%);
+  border-top-color: var(--accent);
+  background: transparent;
+  animation: config-spin 0.78s linear infinite;
+}
+
+body.modern-setting-page .task-status.is-success {
+  border-color: color-mix(in srgb, #68ad7b 38%, var(--line) 62%);
+  color: color-mix(in srgb, #3a8750 72%, var(--text) 28%);
+  background: color-mix(in srgb, #68ad7b 12%, var(--input-bg) 88%);
+}
+
+body.modern-setting-page .task-status.is-success::before {
+  content: "✓";
+  width: 1rem;
+  height: 1rem;
+  display: inline-grid;
+  place-items: center;
+  color: #3a8750;
+  background: color-mix(in srgb, #68ad7b 18%, transparent 82%);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+body.modern-setting-page .task-status.is-error {
+  border-color: color-mix(in srgb, #d65a43 42%, var(--line) 58%);
+  color: color-mix(in srgb, #b43f30 78%, var(--text) 22%);
+  background: color-mix(in srgb, #d65a43 11%, var(--input-bg) 89%);
+}
+
+body.modern-setting-page .task-status.is-error::before {
+  content: "!";
+  width: 1rem;
+  height: 1rem;
+  display: inline-grid;
+  place-items: center;
+  color: #b43f30;
+  background: color-mix(in srgb, #d65a43 18%, transparent 82%);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+@keyframes config-spin {
+  to { transform: rotate(360deg); }
+}
+
+body.modern-setting-page button.is-loading,
+body.modern-setting-page a.secondary.is-loading {
+  opacity: 0.82;
+  cursor: wait;
+  transform: none !important;
+}
+
+body.modern-setting-page button.is-loading::before {
+  content: "";
+  display: inline-block;
+  width: 0.82em;
+  height: 0.82em;
+  margin-right: 0.5em;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, currentColor 25%, transparent 75%);
+  border-top-color: currentColor;
+  vertical-align: -0.1em;
+  animation: config-spin 0.78s linear infinite;
+}
+
+body.modern-setting-page button.is-success {
+  background: color-mix(in srgb, #68ad7b 58%, var(--accent) 42%) !important;
+  color: #fff !important;
+}
+
+body.modern-setting-page button.is-error {
+  background: color-mix(in srgb, #d65a43 74%, var(--accent) 26%) !important;
+  color: #fff !important;
+  animation: config-shake 0.28s ease;
+}
+
+@keyframes config-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+body.modern-setting-page .config-toast-host.toast-host {
+  position: fixed;
+  right: 22px;
+  bottom: 24px;
+  z-index: 260;
+}
+
+body.modern-setting-page .app-toast {
+  min-width: min(320px, calc(100vw - 44px));
+}
+
+body.modern-setting-page .config-advanced-group {
+  margin-top: 0;
+}
+
+body.modern-setting-page .config-advanced-summary {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 8%, transparent), transparent 42%),
+    color-mix(in srgb, var(--panel-strong) 78%, transparent 22%);
+}
+
+@media (max-width: 1180px) {
+  body.modern-setting-page .config-workbench-shell {
+    grid-template-columns: 1fr;
+  }
+  body.modern-setting-page .config-overview-grid {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  body.modern-setting-page .config-sticky-actions {
+    position: relative;
+    top: auto;
+    align-items: stretch;
+    flex-direction: column;
+  }
+  body.modern-setting-page .config-sticky-buttons {
+    justify-content: stretch;
+  }
+  body.modern-setting-page .config-sticky-buttons button {
+    flex: 1 1 100%;
+  }
+  body.modern-setting-page .config-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   Config Workbench v0.8.4 cleanup
+   - compact aligned workbench
+   - real small toast, not a stretched panel
+   - keep /config functionality unchanged
+   ========================================================= */
+body.modern-setting-page.app-sidebar-shell:not(.chat-page) {
+  --config-main-width: min(1480px, calc(100vw - var(--app-sidebar-width) - 48px));
+}
+
+body.modern-setting-page .topbar-stack > .slot-toolbar.config-hero-toolbar,
+body.modern-setting-page .config-sticky-actions,
+body.modern-setting-page .config-shell.compact.config-workbench-shell {
+  width: var(--config-main-width) !important;
+  max-width: var(--config-main-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+body.modern-setting-page .topbar-stack > .slot-toolbar.config-hero-toolbar {
+  margin-top: 18px !important;
+  margin-bottom: 10px !important;
+}
+
+body.modern-setting-page .config-sticky-actions {
+  min-height: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 14px !important;
+  padding: 10px 14px 10px 16px !important;
+  border-radius: 20px !important;
+  align-items: center !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    0 12px 26px rgba(72, 50, 35, 0.075) !important;
+}
+
+body.modern-setting-page .config-sticky-copy {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, auto) minmax(240px, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+}
+
+body.modern-setting-page .config-sticky-kicker {
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+
+body.modern-setting-page .config-sticky-copy strong {
+  font-size: 0.96rem !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+
+body.modern-setting-page .config-sticky-copy .task-status,
+body.modern-setting-page #status-text.task-status {
+  min-height: 30px !important;
+  padding: 0.34rem 0.68rem !important;
+  font-size: 0.82rem !important;
+  max-width: 100% !important;
+}
+
+body.modern-setting-page .config-sticky-buttons {
+  flex: 0 0 auto !important;
+  gap: 8px !important;
+}
+
+body.modern-setting-page .config-sticky-buttons button {
+  min-height: 36px !important;
+  padding: 8px 13px !important;
+  border-radius: 999px !important;
+}
+
+/* Fix: the global toast host has top:24px; if bottom is added without clearing top,
+   CSS grid stretches the toast into a tall blank panel. */
+body.modern-setting-page .config-toast-host.toast-host {
+  top: auto !important;
+  left: auto !important;
+  right: 22px !important;
+  bottom: 22px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: min(360px, calc(100vw - 44px)) !important;
+  pointer-events: none !important;
+}
+
+body.modern-setting-page .config-toast-host .app-toast,
+body.modern-setting-page .app-toast {
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: min(340px, calc(100vw - 44px)) !important;
+  min-height: 0 !important;
+  padding: 10px 13px !important;
+  border-radius: 14px !important;
+  line-height: 1.45 !important;
+  white-space: normal !important;
+  align-self: flex-end !important;
+}
+
+@media (max-width: 1180px) {
+  body.modern-setting-page.app-sidebar-shell:not(.chat-page) {
+    --config-main-width: min(100%, calc(100vw - var(--app-sidebar-width) - 32px));
+  }
+  body.modern-setting-page .config-sticky-copy {
+    grid-template-columns: 1fr !important;
+    align-items: start !important;
+  }
+  body.modern-setting-page .config-sticky-actions {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+  body.modern-setting-page .config-sticky-buttons {
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 980px) {
+  body.modern-setting-page.app-sidebar-shell:not(.chat-page) {
+    --config-main-width: calc(100vw - 28px);
+  }
+  body.modern-setting-page .topbar-stack > .slot-toolbar.config-hero-toolbar,
+  body.modern-setting-page .config-sticky-actions,
+  body.modern-setting-page .config-shell.compact.config-workbench-shell {
+    width: var(--config-main-width) !important;
+    max-width: var(--config-main-width) !important;
+  }
+  body.modern-setting-page .config-toast-host.toast-host {
+    right: 14px !important;
+    bottom: 14px !important;
+    max-width: calc(100vw - 28px) !important;
+  }
+}
+
+
+/* =========================================================
+   User Profile Workbench v0.8.5
+   UI-only polish for /config/user. Keeps existing API ids.
+   ========================================================= */
+body.modern-setting-page .user-workbench-shell {
+  align-items: start;
+}
+
+body.modern-setting-page .user-workbench-shell .config-panel {
+  min-width: 0;
+}
+
+body.modern-setting-page .user-avatar-card {
+  align-self: start;
+}
+
+body.modern-setting-page .user-avatar-layout {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+body.modern-setting-page .user-avatar-frame {
+  max-width: none !important;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 8%, transparent), transparent 42%),
+    color-mix(in srgb, var(--input-bg) 72%, transparent 28%);
+}
+
+body.modern-setting-page .user-avatar-image {
+  width: 100%;
+  height: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+body.modern-setting-page .user-avatar-controls {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+body.modern-setting-page .user-avatar-controls .helper-text {
+  margin: 0;
+}
+
+@media (max-width: 820px) {
+  body.modern-setting-page .user-avatar-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   User Profile Layout Trials v0.8.6
+   A: title + workbench + main/sidebar
+   B: title + left form + sticky right user panel
+   ========================================================= */
+body.modern-setting-page .user-hero-toolbar .slot-badge {
+  text-transform: uppercase;
+}
+
+body.modern-setting-page .user-workbench-shell.user-layout-a,
+body.modern-setting-page .user-workbench-shell.user-layout-b {
+  grid-template-columns: minmax(540px, 1.42fr) minmax(320px, 0.58fr) !important;
+  gap: 18px !important;
+}
+
+body.modern-setting-page .user-section-head {
+  min-height: 0 !important;
+  margin-bottom: 14px !important;
+}
+
+body.modern-setting-page .user-section-head h2 {
+  margin-bottom: 3px;
+}
+
+body.modern-setting-page .user-section-head .muted {
+  margin-top: 0;
+  line-height: 1.55;
+}
+
+body.modern-setting-page .user-profile-main-card {
+  min-height: 0;
+}
+
+body.modern-setting-page .user-profile-main-card textarea#profile-text {
+  min-height: 190px;
+}
+
+body.modern-setting-page .user-profile-main-card textarea#profile-notes {
+  min-height: 108px;
+}
+
+body.modern-setting-page .user-form-actions {
+  justify-content: flex-start;
+  padding-top: 14px !important;
+  margin-top: 4px !important;
+}
+
+body.modern-setting-page .user-form-actions button {
+  min-width: 220px;
+}
+
+body.modern-setting-page .user-avatar-stack,
+body.modern-setting-page .user-control-panel {
+  display: grid;
+  gap: 14px;
+}
+
+body.modern-setting-page .user-layout-a .user-avatar-frame,
+body.modern-setting-page .user-layout-b .user-avatar-frame {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 0 !important;
+  max-height: none;
+  overflow: hidden;
+}
+
+body.modern-setting-page .user-layout-a .user-avatar-image,
+body.modern-setting-page .user-layout-b .user-avatar-image {
+  width: 100%;
+  height: 100%;
+  max-height: none !important;
+  object-fit: cover;
+}
+
+body.modern-setting-page .user-side-summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+body.modern-setting-page .user-summary-item {
+  display: grid;
+  gap: 4px;
+  padding: 12px 13px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--input-bg) 72%, transparent),
+      color-mix(in srgb, var(--panel) 82%, transparent));
+}
+
+body.modern-setting-page .user-summary-item span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 820;
+  letter-spacing: 0.03em;
+}
+
+body.modern-setting-page .user-summary-item strong {
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+body.modern-setting-page .user-avatar-controls {
+  display: grid;
+  gap: 10px;
+}
+
+body.modern-setting-page .user-avatar-controls button,
+body.modern-setting-page .user-panel-actions button {
+  width: 100%;
+}
+
+body.modern-setting-page .user-layout-a .user-layout-a-side {
+  align-self: start;
+}
+
+body.modern-setting-page .user-layout-a-toolbar .config-sticky-copy {
+  grid-template-columns: auto minmax(0, auto) minmax(260px, 1fr) !important;
+}
+
+body.modern-setting-page .user-layout-b {
+  margin-top: 0 !important;
+}
+
+body.modern-setting-page .user-control-panel {
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  padding: 16px !important;
+}
+
+body.modern-setting-page .user-control-panel .compact-head {
+  margin-bottom: 0 !important;
+}
+
+body.modern-setting-page .user-control-panel #status-text.task-status {
+  width: 100%;
+  max-width: none !important;
+  min-height: 38px !important;
+  justify-content: flex-start;
+}
+
+body.modern-setting-page .user-panel-block {
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+body.modern-setting-page .user-panel-avatar-block {
+  border-top: 0;
+  padding-top: 0;
+}
+
+body.modern-setting-page .user-panel-actions {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+}
+
+body.modern-setting-page .user-panel-actions button {
+  min-height: 42px !important;
+}
+
+@media (max-width: 1180px) {
+  body.modern-setting-page .user-workbench-shell.user-layout-a,
+  body.modern-setting-page .user-workbench-shell.user-layout-b {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.modern-setting-page .user-layout-b .user-control-panel {
+    position: relative;
+    top: auto;
+  }
+
+  body.modern-setting-page .user-layout-a-toolbar .config-sticky-copy {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.modern-setting-page .user-form-actions button {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+
+
+/* =========================================================
+   Workshop Layout v0.8.8
+   - B-style: left rule editor + sticky right workshop panel
+   - follows User Panel structure
+   ========================================================= */
+body.modern-setting-page .workshop-hero-toolbar .slot-badge {
+  text-transform: uppercase;
+}
+
+body.modern-setting-page .workshop-workbench-shell.workshop-layout-b {
+  width: min(100% - 48px, 1320px) !important;
+  margin-top: 22px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 360px !important;
+  align-items: start !important;
+  gap: 20px !important;
+}
+
+body.modern-setting-page .workshop-layout-b .workshop-main-card {
+  min-width: 0;
+  padding: 26px 28px 30px !important;
+  min-height: 640px;
+}
+
+body.modern-setting-page .workshop-layout-b .workshop-section-head {
+  min-height: 0 !important;
+  margin-bottom: 16px !important;
+}
+
+body.modern-setting-page .workshop-layout-b .workshop-section-head h2 {
+  margin-bottom: 3px;
+}
+
+body.modern-setting-page .workshop-layout-b .workshop-section-head .muted {
+  margin-top: 0;
+  line-height: 1.55;
+}
+
+body.modern-setting-page .workshop-layout-b .workshop-control-panel {
+  position: sticky !important;
+  top: 20px !important;
+  align-self: start;
+  display: grid !important;
+  gap: 14px !important;
+  padding: 18px !important;
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--border)) !important;
+  box-shadow: 0 18px 48px color-mix(in srgb, #000 14%, transparent) !important;
+}
+
+body.modern-setting-page .workshop-layout-b .workshop-control-panel .section-head h2::after {
+  content: "侧栏保存区";
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  vertical-align: middle;
+}
+
+body.modern-setting-page .workshop-layout-b .workshop-control-panel .compact-head {
+  margin-bottom: 0 !important;
+}
+
+body.modern-setting-page .workshop-layout-b .workshop-control-panel #status-text.task-status {
+  width: 100%;
+  max-width: none !important;
+  min-height: 38px !important;
+  justify-content: flex-start;
+}
+
+body.modern-setting-page .workshop-panel-block {
+  display: grid;
+  gap: 10px;
+  padding-top: 13px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+body.modern-setting-page .workshop-panel-block:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+body.modern-setting-page .workshop-side-summary {
+  grid-template-columns: 1fr;
+}
+
+body.modern-setting-page .workshop-summary-item {
+  display: grid;
+  gap: 4px;
+  padding: 12px 13px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--input-bg) 72%, transparent),
+      color-mix(in srgb, var(--panel) 82%, transparent));
+}
+
+body.modern-setting-page .workshop-summary-item span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 820;
+  letter-spacing: 0.03em;
+}
+
+body.modern-setting-page .workshop-summary-item strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+body.modern-setting-page .workshop-runtime-panel-side .checkbox-row {
+  width: 100%;
+}
+
+body.modern-setting-page .workshop-runtime-panel-side #workshop-runtime-info {
+  margin: 0;
+  line-height: 1.55;
+}
+
+body.modern-setting-page .workshop-search-panel input {
+  width: 100%;
+}
+
+body.modern-setting-page .workshop-quick-actions button,
+body.modern-setting-page .workshop-panel-actions button,
+body.modern-setting-page .workshop-panel-actions .button-link {
+  width: 100%;
+  min-height: 42px !important;
+  justify-content: center;
+}
+
+body.modern-setting-page .workshop-quick-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+body.modern-setting-page .workshop-panel-actions {
+  display: grid;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+}
+
+body.modern-setting-page .workshop-panel-actions button:first-child {
+  min-height: 46px !important;
+  font-size: 0.98rem !important;
+}
+
+body.modern-setting-page .workshop-return-link {
+  text-align: center;
+  text-decoration: none;
+}
+
+body.modern-setting-page .workshop-rule-list-modern {
+  gap: 14px;
+}
+
+body.modern-setting-page .workshop-rule-list-modern .workshop-rule-shell {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+body.modern-setting-page .workshop-rule-list-modern .workshop-rule-summary {
+  align-items: center;
+  min-height: 58px;
+}
+
+body.modern-setting-page .workshop-rule-list-modern .workshop-rule-summary-copy {
+  flex: 1 1 auto;
+}
+
+body.modern-setting-page .workshop-rule-list-modern .workshop-rule-body {
+  margin-top: 0;
+  padding: 16px;
+}
+
+body.modern-setting-page .workshop-rule-list-modern .toggle-workshop-rule,
+body.modern-setting-page .workshop-rule-list-modern [data-remove-workshop-rule] {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1180px) {
+  body.modern-setting-page .workshop-workbench-shell.workshop-layout-b {
+    width: min(100% - 24px, 100%) !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  body.modern-setting-page .workshop-layout-b .workshop-control-panel {
+    position: relative !important;
+    top: auto !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.modern-setting-page .workshop-quick-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   Config UI shared layout + WB-aligned components v0.9.0
+   Scope: /config, /config/user, /config/workshop
+   - No hover/press movement on buttons.
+   - Switches use the small WBmanager 36x20 track.
+   - Workshop collapse/delete actions use WBmanager-like round icons.
+   ========================================================= */
+body.modern-setting-page {
+  --ui-card-radius: 24px;
+  --ui-sub-radius: 18px;
+  --ui-gap: 18px;
+  --fr-toggle-w: 36px;
+  --fr-toggle-h: 20px;
+  --fr-toggle-dot: 14px;
+}
+
+body.modern-setting-page .config-shell.compact {
+  width: min(1480px, calc(100% - 32px));
+  max-width: none;
+  gap: var(--ui-gap);
+}
+
+body.modern-setting-page .panel.config-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ui-card-radius);
+  border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--panel-strong) 72%, transparent),
+      color-mix(in srgb, var(--panel) 92%, transparent));
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
+}
+
+body.modern-setting-page .panel.config-panel.full-span:first-of-type {
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 12%, transparent), transparent 38%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--panel-strong) 82%, transparent),
+      color-mix(in srgb, var(--panel) 92%, transparent));
+}
+
+body.modern-setting-page .section-head {
+  gap: 0.35rem;
+}
+
+body.modern-setting-page .section-head h2,
+body.modern-setting-page .section-head h3 {
+  margin-top: 0.08rem;
+  letter-spacing: -0.02em;
+}
+
+body.modern-setting-page .eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.26rem 0.64rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+body.modern-setting-page .stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+body.modern-setting-page .stat-box {
+  min-height: 76px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: var(--ui-sub-radius);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--input-bg) 78%, transparent),
+      color-mix(in srgb, var(--panel) 86%, transparent));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+}
+
+body.modern-setting-page .stat-label {
+  display: block;
+  margin-bottom: 0.36rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+body.modern-setting-page .stat-box strong {
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+body.modern-setting-page label:not(.checkbox-row):not(.check-chip) {
+  font-weight: 850;
+  color: color-mix(in srgb, var(--text) 82%, var(--muted));
+}
+
+body.modern-setting-page input,
+body.modern-setting-page select,
+body.modern-setting-page textarea {
+  border-radius: 15px;
+  border-color: color-mix(in srgb, var(--border) 84%, transparent);
+  background: color-mix(in srgb, var(--input-bg) 92%, transparent);
+}
+
+body.modern-setting-page textarea {
+  line-height: 1.7;
+}
+
+body.modern-setting-page .button-row {
+  gap: 10px;
+}
+
+/* Buttons: keep feedback by color/shadow only; no hover lift, no press shrink. */
+body.modern-setting-page button,
+body.modern-setting-page .button-link,
+body.modern-setting-page .ghost-link,
+body.modern-setting-page .secondary,
+body.modern-setting-page .compact,
+body.modern-setting-page .navlink,
+body.modern-setting-page .nav-group-summary {
+  border-radius: 999px;
+  transform: none !important;
+  transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease !important;
+}
+
+body.modern-setting-page button:not(:disabled):hover,
+body.modern-setting-page button:not(:disabled):active,
+body.modern-setting-page .button-link:not(:disabled):hover,
+body.modern-setting-page .button-link:not(:disabled):active,
+body.modern-setting-page .ghost-link:not(:disabled):hover,
+body.modern-setting-page .ghost-link:not(:disabled):active,
+body.modern-setting-page .secondary:not(:disabled):hover,
+body.modern-setting-page .secondary:not(:disabled):active,
+body.modern-setting-page .compact:not(:disabled):hover,
+body.modern-setting-page .compact:not(:disabled):active,
+body.modern-setting-page .navlink:hover,
+body.modern-setting-page .nav-group-summary:hover {
+  transform: none !important;
+}
+
+body.modern-setting-page .secondary,
+body.modern-setting-page .ghost-link,
+body.modern-setting-page .button-link {
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: color-mix(in srgb, var(--input-bg) 70%, transparent);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+body.modern-setting-page button:not(.secondary):not(.compact):not(.ghost-link):not(.button-link),
+body.modern-setting-page #save-settings,
+body.modern-setting-page #save-all,
+body.modern-setting-page #save-user-profile,
+body.modern-setting-page #save-worldbook-settings,
+body.modern-setting-page #save-workshop,
+body.modern-setting-page #save-card {
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+body.modern-setting-page .helper-text,
+body.modern-setting-page .field-note,
+body.modern-setting-page .muted.compact {
+  color: color-mix(in srgb, var(--muted) 88%, var(--text));
+}
+
+body.modern-setting-page .status-line {
+  display: block;
+  min-height: 40px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--input-bg) 72%, transparent);
+}
+
+body.modern-setting-page .inline-field,
+body.modern-setting-page .model-combo-row {
+  align-items: stretch;
+}
+
+body.modern-setting-page .preview-card,
+body.modern-setting-page .card-block,
+body.modern-setting-page .sub-block,
+body.modern-setting-page .workshop-runtime-panel,
+body.modern-setting-page .workshop-search-block,
+body.modern-setting-page .workshop-rule-shell {
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: var(--ui-sub-radius);
+  background: color-mix(in srgb, var(--input-bg) 58%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
+}
+
+body.modern-setting-page .card-block,
+body.modern-setting-page .sub-block,
+body.modern-setting-page .workshop-runtime-panel,
+body.modern-setting-page .workshop-search-block {
+  padding: 16px;
+}
+
+body.modern-setting-page .persona-toolbar,
+body.modern-setting-page .memory-card-head,
+body.modern-setting-page .workshop-rule-summary {
+  border-radius: 16px;
+}
+
+/* Small WBmanager-style horizontal switches. */
+body.modern-setting-page .checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--input-bg) 64%, transparent);
+  color: var(--text);
+  font-weight: 760;
+}
+
+body.modern-setting-page .checkbox-row input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  position: relative !important;
+  flex: 0 0 auto !important;
+  width: var(--fr-toggle-w) !important;
+  height: var(--fr-toggle-h) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent) !important;
+  background: rgba(148, 163, 184, 0.42) !important;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+body.modern-setting-page .checkbox-row input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: var(--fr-toggle-dot);
+  height: var(--fr-toggle-dot);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.24);
+  transition: transform 0.16s ease;
+}
+
+body.modern-setting-page .checkbox-row input[type="checkbox"]:checked {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent) !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 16%, transparent) !important;
+}
+
+body.modern-setting-page .checkbox-row input[type="checkbox"]:checked::before {
+  transform: translateX(16px);
+}
+
+body.modern-setting-page .checkbox-row input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent) !important;
+}
+
+/* Field chips: keep as clean pills, but remove movement. */
+body.modern-setting-page .field-chip-row {
+  gap: 8px;
+}
+
+body.modern-setting-page .check-chip {
+  position: relative;
+  min-height: 38px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body.modern-setting-page .check-chip input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+body.modern-setting-page .check-chip span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  background: color-mix(in srgb, var(--input-bg) 68%, transparent);
+  color: color-mix(in srgb, var(--text) 86%, var(--muted));
+  font-weight: 780;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
+  transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+
+body.modern-setting-page .check-chip span::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 5px;
+  border: 1.5px solid color-mix(in srgb, var(--border) 92%, var(--muted));
+  background: color-mix(in srgb, var(--panel-strong) 78%, transparent);
+}
+
+body.modern-setting-page .check-chip:hover span {
+  transform: none !important;
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+
+body.modern-setting-page .check-chip input[type="checkbox"]:checked + span {
+  color: color-mix(in srgb, var(--text) 92%, var(--accent));
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+  background: color-mix(in srgb, var(--accent) 10%, var(--input-bg));
+}
+
+body.modern-setting-page .check-chip input[type="checkbox"]:checked + span::before {
+  content: "✓";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  border-color: transparent;
+  background: var(--accent);
+}
+
+body.modern-setting-page .check-chip input[type="checkbox"]:focus-visible + span {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+
+
+/* Global settings: small WBmanager-like toggles, without turning the whole row into a giant pill. */
+body.modern-setting-page .fr-setting-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+  user-select: none;
+}
+
+body.modern-setting-page .fr-setting-switch-row.offset-top {
+  margin-top: 31px;
+}
+
+body.modern-setting-page .fr-setting-switch-row:hover {
+  background: transparent;
+}
+
+body.modern-setting-page .fr-setting-switch-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.modern-setting-page .fr-setting-switch-row input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  position: relative !important;
+  flex: 0 0 34px !important;
+  width: 34px !important;
+  height: 18px !important;
+  min-width: 34px !important;
+  min-height: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent) !important;
+  background: rgba(148, 163, 184, 0.42) !important;
+  cursor: pointer;
+  box-shadow: none !important;
+  vertical-align: middle !important;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+body.modern-setting-page .fr-setting-switch-row input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  box-sizing: border-box;
+  top: 50%;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.24);
+  transform: translateY(-50%);
+  transition: transform 0.16s ease;
+}
+
+body.modern-setting-page .fr-setting-switch-row input[type="checkbox"]:checked {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent) !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 16%, transparent) !important;
+}
+
+body.modern-setting-page .fr-setting-switch-row input[type="checkbox"]:checked::before {
+  transform: translate(16px, -50%);
+}
+
+body.modern-setting-page .fr-setting-switch-row input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent) !important;
+}
+
+/* Workshop cards: WBmanager-like summary row and round action icons. */
+body.modern-setting-page .workshop-rule-shell {
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+body.modern-setting-page .workshop-rule-summary {
+  align-items: center;
+  padding: 12px 14px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--input-bg) 58%, transparent),
+      color-mix(in srgb, var(--panel) 86%, transparent));
+}
+
+body.modern-setting-page .workshop-rule-summary-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+body.modern-setting-page .workshop-rule-actions {
+  flex: 0 0 auto !important;
+  justify-content: flex-end;
+  gap: 7px !important;
+}
+
+body.modern-setting-page .workshop-rule-body {
+  padding: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+body.modern-setting-page .workshop-rule-summary-meta,
+body.modern-setting-page .workshop-rule-summary-text {
+  color: var(--muted);
+}
+
+body.modern-setting-page .workshop-rule-trigger-label,
+body.modern-setting-page .workshop-rule-action-label,
+body.modern-setting-page .workshop-trigger-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-right: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+  color: color-mix(in srgb, var(--accent) 80%, var(--text));
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  font-weight: 800;
+}
+
+body.modern-setting-page .toggle-workshop-rule.fr-collapse-button,
+body.modern-setting-page .toggle-workshop-rule,
+body.modern-setting-page .workshop-rule-actions [data-remove-workshop-rule].fr-danger-button {
+  min-width: 30px !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 0 !important;
+  line-height: 1;
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent) !important;
+  background: color-mix(in srgb, var(--input-bg) 72%, transparent) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+body.modern-setting-page .toggle-workshop-rule::before {
+  content: "▾";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.94rem;
+  font-weight: 900;
+  line-height: 1;
+  transform: none !important;
+  transition: none !important;
+}
+
+body.modern-setting-page .workshop-rule-shell.is-collapsed .toggle-workshop-rule::before,
+body.modern-setting-page .workshop-rule-shell[data-collapsed="true"] .toggle-workshop-rule::before {
+  content: "▸";
+  transform: none !important;
+}
+
+body.modern-setting-page .workshop-rule-actions [data-remove-workshop-rule].fr-danger-button::before {
+  content: "×";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+body.modern-setting-page .toggle-workshop-rule:hover {
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border)) !important;
+  background: color-mix(in srgb, var(--accent) 9%, var(--input-bg)) !important;
+}
+
+body.modern-setting-page .workshop-rule-actions [data-remove-workshop-rule].fr-danger-button {
+  color: color-mix(in srgb, #9d3d2f 78%, var(--text));
+  border-color: rgba(220, 84, 84, 0.45) !important;
+}
+
+body.modern-setting-page .workshop-rule-actions [data-remove-workshop-rule].fr-danger-button:hover {
+  border-color: rgba(220, 84, 84, 0.8) !important;
+  background: rgba(220, 84, 84, 0.12) !important;
+}
+
+body.modern-setting-page .danger-button:not([data-remove-workshop-rule]),
+body.modern-setting-page .fr-danger-button:not([data-remove-workshop-rule]) {
+  color: color-mix(in srgb, #9d3d2f 78%, var(--text));
+  border-color: color-mix(in srgb, #cf6b5d 30%, var(--border)) !important;
+  background: color-mix(in srgb, #fff2ef 52%, var(--input-bg)) !important;
+}
+
+body.modern-setting-page .preset-pill,
+body.modern-setting-page .fr-static-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border));
+  background: color-mix(in srgb, var(--accent) 8%, var(--input-bg));
+  color: color-mix(in srgb, var(--accent) 78%, var(--text));
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: .03em;
+}
+
+body.modern-setting-page .workshop-rule-shell .workshop-rule-body {
+  display: grid !important;
+}
+
+body.modern-setting-page .workshop-rule-shell[data-collapsed="true"] .workshop-rule-body,
+body.modern-setting-page .workshop-rule-shell.is-collapsed .workshop-rule-body {
+  display: none !important;
+}
+
+body.modern-setting-page .workshop-rule-card {
+  transition: border-color 0.12s ease, box-shadow 0.12s ease !important;
+}
+
+body.modern-setting-page .workshop-rule-card:hover {
+  transform: none !important;
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--border));
+}
+
+body.modern-setting-page .workshop-asset-row {
+  align-items: center;
+  padding: 8px 0 2px;
+}
+
+body.modern-setting-page .workshop-asset-pick::before {
+  content: "+";
+  margin-right: 5px;
+  font-weight: 900;
+}
+
+body.modern-setting-page .sprite-frame {
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  background: color-mix(in srgb, var(--input-bg) 62%, transparent);
+}
+
+body.modern-setting-page .topbar-stack {
+  gap: 12px;
+}
+
+body.modern-setting-page .slot-toolbar {
+  border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
+  background: color-mix(in srgb, var(--panel-strong) 72%, transparent);
+}
+
+body.modern-setting-page .slot-badge {
+  border-color: color-mix(in srgb, var(--accent) 36%, var(--border));
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* Native file button polish for user avatar and workshop local assets. */
+body.modern-setting-page input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: color-mix(in srgb, var(--input-bg) 70%, transparent);
+}
+
+body.modern-setting-page input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: 7px 11px;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-strong) 88%, transparent);
+  color: var(--text);
+  font-weight: 760;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease;
+}
+
+body.modern-setting-page input[type="file"]::file-selector-button:hover {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+  color: color-mix(in srgb, var(--accent) 84%, var(--text));
+  background: color-mix(in srgb, var(--accent) 8%, var(--panel-strong));
+}
+
+body.modern-setting-page input[type="range"] {
+  accent-color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  body.modern-setting-page .config-shell.compact {
+    width: min(100% - 16px, 100%);
+  }
+  body.modern-setting-page .stats-row {
+    grid-template-columns: 1fr;
+  }
+  body.modern-setting-page .inline-field,
+  body.modern-setting-page .model-combo-row {
+    flex-direction: column;
+  }
+}
+
+/* =========================================================
+   Config local helpers moved out of templates
+   ========================================================= */
+[hidden] {
+  display: none !important;
+}
+
+.model-combo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+.model-combo > input {
+  flex: 1 1 auto;
+}
+.model-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  box-shadow: var(--shadow-soft);
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+.model-menu-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 0.7rem;
+  background: transparent;
+  color: var(--text);
+  padding: 0.7rem 0.8rem;
+  cursor: pointer;
+}
+.model-menu-item:hover {
+  background: var(--input-bg);
+}
+.model-menu-empty {
+  color: var(--muted);
+  padding: 0.7rem 0.8rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.modern-setting-page *,
+  body.modern-setting-page *::before,
+  body.modern-setting-page *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* =========================================================
+   Workshop-only controls correction v0.9.2
+   Keep the original glassmorphism panels/inputs from v0.9.0.
+   Only preserve the accepted control changes:
+   - smaller centered horizontal toggles
+   - WBmanager-like round collapse/delete buttons
+   - no hover/press movement
+   ========================================================= */
+body.modern-setting-page.workshop-config-page {
+  --fr-toggle-w: 34px;
+  --fr-toggle-h: 18px;
+  --fr-toggle-dot: 14px;
+  --fr-toggle-offset: 2px;
+  --fr-toggle-shift: 16px;
+}
+
+/* Keep workshop toggles compact without replacing the page's glass style. */
+body.modern-setting-page.workshop-config-page .checkbox-row {
+  min-height: 30px !important;
+  padding: 5px 8px !important;
+  gap: 7px !important;
+  border-radius: 999px !important;
+  font-size: 0.88rem !important;
+  font-weight: 760 !important;
+  line-height: 1.1 !important;
+  transform: none !important;
+}
+
+body.modern-setting-page.workshop-config-page .workshop-runtime-panel-side .checkbox-row,
+body.modern-setting-page.workshop-config-page .workshop-action-panel .grid-two .checkbox-row,
+body.modern-setting-page.workshop-config-page .workshop-rule-body > .checkbox-row {
+  width: 100% !important;
+  justify-content: space-between !important;
+  flex-direction: row-reverse !important;
+}
+
+body.modern-setting-page.workshop-config-page .checkbox-row input[type="checkbox"] {
+  box-sizing: border-box !important;
+  display: block !important;
+  width: var(--fr-toggle-w) !important;
+  height: var(--fr-toggle-h) !important;
+  min-width: var(--fr-toggle-w) !important;
+  min-height: var(--fr-toggle-h) !important;
+  flex: 0 0 var(--fr-toggle-w) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  vertical-align: middle !important;
+}
+
+body.modern-setting-page.workshop-config-page .checkbox-row input[type="checkbox"]::before {
+  box-sizing: border-box !important;
+  top: 50% !important;
+  left: var(--fr-toggle-offset) !important;
+  width: var(--fr-toggle-dot) !important;
+  height: var(--fr-toggle-dot) !important;
+  transform: translateY(-50%) !important;
+}
+
+body.modern-setting-page.workshop-config-page .checkbox-row input[type="checkbox"]:checked::before {
+  transform: translate(var(--fr-toggle-shift), -50%) !important;
+}
+
+/* Keep workshop action icons compact and WBmanager-like. */
+body.modern-setting-page.workshop-config-page .toggle-workshop-rule.fr-collapse-button,
+body.modern-setting-page.workshop-config-page .toggle-workshop-rule,
+body.modern-setting-page.workshop-config-page .workshop-rule-actions [data-remove-workshop-rule].fr-danger-button {
+  min-width: 30px !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  transform: none !important;
+}
+
+body.modern-setting-page.workshop-config-page .toggle-workshop-rule:hover,
+body.modern-setting-page.workshop-config-page .workshop-rule-actions [data-remove-workshop-rule].fr-danger-button:hover {
+  transform: none !important;
+}
+
+
+/* Card editor v0.9.5: warm ivory fields only, keep outer glass panels unchanged. */
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page input:not([type="checkbox"]):not([type="radio"]),
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page select,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page textarea {
+  background: rgba(255, 250, 242, 0.88) !important;
+  border-color: rgba(172, 128, 92, 0.24) !important;
+  color: #3f3025;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    0 1px 2px rgba(90, 60, 36, 0.04);
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page input:not([type="checkbox"]):not([type="radio"]):hover,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page select:hover,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page textarea:hover {
+  background: rgba(255, 252, 246, 0.93) !important;
+  border-color: rgba(172, 128, 92, 0.34) !important;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page input:not([type="checkbox"]):not([type="radio"]):focus,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page select:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page textarea:focus {
+  background: rgba(255, 253, 248, 0.97) !important;
+  border-color: rgba(202, 139, 83, 0.52) !important;
+  box-shadow:
+    0 0 0 3px rgba(202, 139, 83, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58) !important;
+  outline: none;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page textarea {
+  padding: 14px 16px;
+  line-height: 1.76;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page input::placeholder,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page textarea::placeholder {
+  color: rgba(91, 67, 50, 0.58);
+}
+
+/* Card editor v0.9.6: workbench + compact item actions. Keep glass panels, no hover lift. */
+body.modern-setting-page.card-config-page .card-workbench {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--panel-strong) 72%, transparent),
+      color-mix(in srgb, var(--input-bg) 58%, transparent));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+}
+
+body.modern-setting-page.card-config-page .card-workbench-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+body.modern-setting-page.card-config-page .card-workbench-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+body.modern-setting-page.card-config-page .card-workbench-title strong {
+  color: var(--text);
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+body.modern-setting-page.card-config-page .eyebrow.mini {
+  padding: 0.18rem 0.56rem;
+  font-size: 0.74rem;
+}
+
+body.modern-setting-page.card-config-page .card-workbench-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: min(430px, 100%);
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--input-bg) 58%, transparent);
+}
+
+body.modern-setting-page.card-config-page .card-status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 72%, var(--muted));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+body.modern-setting-page.card-config-page .card-workbench-status .status-line {
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.modern-setting-page.card-config-page .card-workbench-status .status-line[data-state="dirty"] {
+  color: var(--text);
+  font-weight: 800;
+}
+
+body.modern-setting-page.card-config-page .card-workbench-grid {
+  margin-bottom: 0;
+}
+
+body.modern-setting-page.card-config-page .card-workbench-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+body.modern-setting-page.card-config-page .card-main-actions {
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+body.modern-setting-page.card-config-page .card-add-button {
+  min-height: 32px;
+  padding-inline: 14px;
+  font-weight: 800;
+}
+
+body.modern-setting-page.card-config-page .card-field-tip {
+  margin: -4px 0 2px;
+  padding: 6px 9px;
+  border: 1px dashed color-mix(in srgb, var(--border) 76%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--input-bg) 50%, transparent);
+  line-height: 1.5;
+}
+
+body.modern-setting-page.card-config-page .card-item-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px 10px;
+  margin-bottom: 10px;
+  padding: 10px 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--panel-strong) 66%, transparent),
+    color-mix(in srgb, var(--input-bg) 60%, transparent));
+}
+
+body.modern-setting-page.card-config-page .card-item-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+body.modern-setting-page.card-config-page .card-item-title strong {
+  min-width: 0;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.modern-setting-page.card-config-page .card-title-sub {
+  max-width: 220px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.86rem;
+}
+
+body.modern-setting-page.card-config-page .card-head-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+body.modern-setting-page.card-config-page .card-summary-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--input-bg) 58%, transparent);
+  color: color-mix(in srgb, var(--muted) 86%, var(--text));
+  font-size: 0.78rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+body.modern-setting-page.card-config-page .card-icon-button {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: color-mix(in srgb, var(--input-bg) 70%, transparent);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transform: none !important;
+}
+
+body.modern-setting-page.card-config-page .card-icon-button:hover,
+body.modern-setting-page.card-config-page .card-icon-button:active {
+  transform: none !important;
+}
+
+body.modern-setting-page.card-config-page .card-danger-icon {
+  border-color: color-mix(in srgb, #dc5454 42%, var(--border));
+  color: color-mix(in srgb, #dc5454 78%, var(--text));
+}
+
+body.modern-setting-page.card-config-page .card-danger-icon:hover {
+  border-color: color-mix(in srgb, #dc5454 72%, var(--border));
+  background: color-mix(in srgb, #dc5454 12%, var(--input-bg));
+}
+
+body.modern-setting-page.card-config-page .persona-toolbar {
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 980px) {
+  body.modern-setting-page.card-config-page .card-workbench-head,
+  body.modern-setting-page.card-config-page .card-workbench-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.modern-setting-page.card-config-page .card-workbench-status,
+  body.modern-setting-page.card-config-page .card-main-actions {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  body.modern-setting-page.card-config-page .card-main-actions,
+  body.modern-setting-page.card-config-page .card-source-actions {
+    justify-content: flex-start;
+  }
+
+  body.modern-setting-page.card-config-page .card-item-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  body.modern-setting-page.card-config-page .card-head-summary {
+    grid-column: 1 / 3;
+    justify-content: flex-start;
+  }
+}
+
+/* Card editor v0.9.7: confirmed role layout cleanup.
+   Keep glass panels, remove field-summary bubbles, keep all textareas expanded. */
+body.modern-setting-page.card-config-page .card-workbench-actions {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 10px;
+}
+
+body.modern-setting-page.card-config-page .card-action-separator {
+  width: 1px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 72%, transparent);
+  margin: 0 2px;
+}
+
+body.modern-setting-page.card-config-page .card-action-spacer {
+  display: none !important;
+}
+
+body.modern-setting-page.card-config-page .card-main-actions,
+body.modern-setting-page.card-config-page .card-source-actions {
+  margin-left: 0 !important;
+  justify-content: flex-start !important;
+}
+
+body.modern-setting-page.card-config-page .card-workbench-actions #save-card {
+  margin-left: 0;
+}
+
+body.modern-setting-page.card-config-page .card-head-summary {
+  display: none !important;
+}
+
+body.modern-setting-page.card-config-page .card-item-head {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  min-height: 46px;
+}
+
+body.modern-setting-page.card-config-page .card-item-title {
+  gap: 8px;
+}
+
+body.modern-setting-page.card-config-page .card-item-title .persona-display-title {
+  max-width: 100%;
+}
+
+body.modern-setting-page.card-config-page .card-summary-chip {
+  min-height: 22px;
+  padding: 2px 8px;
+  font-size: 0.76rem;
+}
+
+body.modern-setting-page.card-config-page .card-persona-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-items: start;
+}
+
+body.modern-setting-page.card-config-page .persona-card {
+  min-width: 0;
+}
+
+body.modern-setting-page.card-config-page .card-field-tip {
+  margin: -6px 0 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  line-height: 1.55;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page input:not([type="checkbox"]):not([type="radio"]),
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page select,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page textarea {
+  background: rgba(255, 248, 236, 0.96) !important;
+  border-color: rgba(150, 101, 65, 0.40) !important;
+  color: #3d2c20;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.64),
+    inset 0 -10px 24px rgba(146, 101, 67, 0.025),
+    0 1px 3px rgba(86, 55, 32, 0.075) !important;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page input:not([type="checkbox"]):not([type="radio"]):hover,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page select:hover,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page textarea:hover {
+  background: rgba(255, 250, 241, 0.98) !important;
+  border-color: rgba(142, 91, 56, 0.54) !important;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page input:not([type="checkbox"]):not([type="radio"]):focus,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page select:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page textarea:focus {
+  background: rgba(255, 252, 246, 0.99) !important;
+  border-color: rgba(199, 122, 67, 0.72) !important;
+  box-shadow:
+    0 0 0 3px rgba(199, 122, 67, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    0 2px 8px rgba(86, 55, 32, 0.08) !important;
+  outline: none;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.card-config-page textarea {
+  line-height: 1.78;
+  padding: 14px 16px;
+}
+
+@media (max-width: 1180px) {
+  body.modern-setting-page.card-config-page .card-persona-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body.modern-setting-page.card-config-page .card-persona-grid {
+    grid-template-columns: 1fr !important;
+  }
+  body.modern-setting-page.card-config-page .card-action-separator {
+    display: none;
+  }
+}
+
+/* Card editor v0.9.8: final role-page cleanup.
+   Short workbench buttons, centered card canvas, multi-role grid fill, and no-motion color feedback. */
+body.modern-setting-page.card-config-page .config-shell.compact {
+  width: min(1480px, calc(100vw - var(--app-sidebar-width, 0px) - 48px)) !important;
+  max-width: 1480px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+body.modern-setting-page.card-config-page .slot-toolbar {
+  max-width: 1480px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+body.modern-setting-page.card-config-page .card-workbench-actions {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 10px;
+}
+
+body.modern-setting-page.card-config-page .card-workbench-actions button {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 72px;
+  margin-top: 0;
+  padding-inline: 18px;
+  transform: none !important;
+}
+
+body.modern-setting-page.card-config-page .card-workbench-actions #save-card {
+  min-width: 126px;
+  margin-left: 0 !important;
+  font-weight: 850;
+}
+
+body.modern-setting-page.card-config-page .card-action-separator,
+body.modern-setting-page.card-config-page .card-action-spacer {
+  display: none !important;
+}
+
+body.modern-setting-page.card-config-page .card-persona-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-items: start;
+}
+
+body.modern-setting-page.card-config-page .card-persona-grid:has(.persona-card:nth-child(1):last-child) {
+  grid-template-columns: 1fr !important;
+}
+
+body.modern-setting-page.card-config-page .card-persona-grid:has(.persona-card:nth-child(1):nth-last-child(2)) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body.modern-setting-page.card-config-page .card-summary-chip {
+  color: color-mix(in srgb, var(--muted) 86%, var(--text));
+}
+
+body.modern-setting-page.card-config-page .card-add-button {
+  width: auto !important;
+  min-width: 104px;
+  margin-top: 0;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, opacity 0.16s ease !important;
+  transform: none !important;
+}
+
+body.modern-setting-page.card-config-page .card-add-button:hover,
+body.modern-setting-page.card-config-page .card-add-button:active {
+  transform: none !important;
+}
+
+body.modern-setting-page.card-config-page .card-add-button.is-feedback {
+  border-color: color-mix(in srgb, var(--accent) 62%, var(--border)) !important;
+  background: color-mix(in srgb, var(--accent) 24%, var(--input-bg)) !important;
+  color: var(--text) !important;
+}
+
+@media (max-width: 1180px) {
+  body.modern-setting-page.card-config-page .config-shell.compact {
+    width: min(100% - 28px, 1480px) !important;
+  }
+  body.modern-setting-page.card-config-page .card-persona-grid,
+  body.modern-setting-page.card-config-page .card-persona-grid:has(.persona-card:nth-child(1):nth-last-child(2)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body.modern-setting-page.card-config-page .config-shell.compact {
+    width: min(100% - 16px, 100%) !important;
+  }
+  body.modern-setting-page.card-config-page .card-workbench-actions button {
+    flex: 1 1 110px !important;
+    min-width: 0;
+  }
+  body.modern-setting-page.card-config-page .card-persona-grid,
+  body.modern-setting-page.card-config-page .card-persona-grid:has(.persona-card:nth-child(1):last-child),
+  body.modern-setting-page.card-config-page .card-persona-grid:has(.persona-card:nth-child(1):nth-last-child(2)) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* =========================================================
+   Config fields v0.9.9: sync role-card ivory input fields
+   Scope: global settings, user settings, workshop only.
+   Keep glass panels; only make editable fields clearer and warmer.
+   ========================================================= */
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page select,
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page textarea,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page select,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page textarea,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page select,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page textarea {
+  background: rgba(255, 248, 236, 0.96) !important;
+  border-color: rgba(150, 101, 65, 0.40) !important;
+  color: #3d2c20;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.64),
+    inset 0 -10px 24px rgba(146, 101, 67, 0.025),
+    0 1px 3px rgba(86, 55, 32, 0.075) !important;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):hover,
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page select:hover,
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page textarea:hover,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):hover,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page select:hover,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page textarea:hover,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):hover,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page select:hover,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page textarea:hover {
+  background: rgba(255, 250, 241, 0.98) !important;
+  border-color: rgba(142, 91, 56, 0.54) !important;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page select:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page textarea:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page select:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page textarea:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page select:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page textarea:focus {
+  background: rgba(255, 252, 246, 0.99) !important;
+  border-color: rgba(199, 122, 67, 0.72) !important;
+  box-shadow:
+    0 0 0 3px rgba(199, 122, 67, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    0 2px 8px rgba(86, 55, 32, 0.08) !important;
+  outline: none;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page textarea,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page textarea,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page textarea {
+  line-height: 1.76;
+  padding: 14px 16px;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page input::placeholder,
+html:not([data-theme="dark"]) body.modern-setting-page.global-config-page textarea::placeholder,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page input::placeholder,
+html:not([data-theme="dark"]) body.modern-setting-page.user-config-page textarea::placeholder,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page input::placeholder,
+html:not([data-theme="dark"]) body.modern-setting-page.workshop-config-page textarea::placeholder {
+  color: rgba(94, 68, 49, 0.56);
+}
+
+
+/* =========================================================
+   Preset + Memory v1.0 workbench sync.
+   Keep existing body layout, module toggles and glass panels.
+   Only add centered canvas, workbench actions and ivory editable fields.
+   ========================================================= */
+body.modern-setting-page.preset-config-page .config-shell.compact,
+body.modern-setting-page.memory-config-page .config-shell.compact.memory-wide {
+  width: min(1480px, calc(100vw - var(--app-sidebar-width, 0px) - 48px)) !important;
+  max-width: 1480px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+body.modern-setting-page.preset-config-page .slot-toolbar,
+body.modern-setting-page.memory-config-page .slot-toolbar {
+  max-width: 1480px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+body.modern-setting-page.preset-config-page .preset-workbench-panel,
+body.modern-setting-page.memory-config-page .memory-workbench-panel {
+  overflow: hidden;
+}
+
+body.modern-setting-page.preset-config-page .preset-workbench-head,
+body.modern-setting-page.memory-config-page .memory-workbench-head {
+  margin-bottom: 14px;
+}
+
+body.modern-setting-page.preset-config-page .config-workbench-actions,
+body.modern-setting-page.memory-config-page .config-workbench-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent 28%);
+}
+
+body.modern-setting-page.preset-config-page .config-workbench-actions button,
+body.modern-setting-page.memory-config-page .config-workbench-actions button,
+body.modern-setting-page.memory-config-page .config-workbench-actions select {
+  width: auto !important;
+  flex: 0 0 auto !important;
+  min-width: 72px;
+  margin-top: 0;
+  padding-inline: 18px;
+  white-space: nowrap;
+  transform: none !important;
+}
+
+body.modern-setting-page.memory-config-page .config-workbench-actions select {
+  min-width: 118px;
+}
+
+body.modern-setting-page.preset-config-page .config-workbench-actions button:hover,
+body.modern-setting-page.preset-config-page .config-workbench-actions button:active,
+body.modern-setting-page.memory-config-page .config-workbench-actions button:hover,
+body.modern-setting-page.memory-config-page .config-workbench-actions button:active {
+  transform: none !important;
+}
+
+body.modern-setting-page.preset-config-page .config-workbench-actions button.is-feedback,
+body.modern-setting-page.memory-config-page .config-workbench-actions button.is-feedback {
+  border-color: color-mix(in srgb, var(--accent) 62%, var(--border)) !important;
+  background: color-mix(in srgb, var(--accent) 24%, var(--input-bg)) !important;
+  color: var(--text) !important;
+}
+
+body.modern-setting-page.preset-config-page .preset-library-head {
+  align-items: flex-start;
+}
+
+/* No-motion button guard for these two polished pages. */
+body.modern-setting-page.preset-config-page button:hover,
+body.modern-setting-page.preset-config-page button:active,
+body.modern-setting-page.memory-config-page button:hover,
+body.modern-setting-page.memory-config-page button:active {
+  transform: none !important;
+}
+
+/* Sync the approved role-card ivory fields to Preset and Memory pages only.
+   This intentionally does not target checkbox/radio/file inputs or preset module toggles. */
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page select,
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page textarea,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page select,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page textarea {
+  background: rgba(255, 248, 236, 0.96) !important;
+  border-color: rgba(150, 101, 65, 0.40) !important;
+  color: #3d2c20;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.64),
+    inset 0 -10px 24px rgba(146, 101, 67, 0.025),
+    0 1px 3px rgba(86, 55, 32, 0.075) !important;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):hover,
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page select:hover,
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page textarea:hover,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):hover,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page select:hover,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page textarea:hover {
+  background: rgba(255, 250, 241, 0.98) !important;
+  border-color: rgba(142, 91, 56, 0.54) !important;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page select:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page textarea:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page select:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page textarea:focus {
+  background: rgba(255, 252, 246, 0.99) !important;
+  border-color: rgba(199, 122, 67, 0.72) !important;
+  box-shadow:
+    0 0 0 3px rgba(199, 122, 67, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    0 2px 8px rgba(86, 55, 32, 0.08) !important;
+  outline: none;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page textarea,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page textarea {
+  line-height: 1.76;
+  padding: 14px 16px;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page input::placeholder,
+html:not([data-theme="dark"]) body.modern-setting-page.preset-config-page textarea::placeholder,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page input::placeholder,
+html:not([data-theme="dark"]) body.modern-setting-page.memory-config-page textarea::placeholder {
+  color: rgba(94, 68, 49, 0.56);
+}
+
+@media (max-width: 1180px) {
+  body.modern-setting-page.preset-config-page .config-shell.compact,
+  body.modern-setting-page.memory-config-page .config-shell.compact.memory-wide {
+    width: min(100% - 28px, 1480px) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body.modern-setting-page.preset-config-page .config-shell.compact,
+  body.modern-setting-page.memory-config-page .config-shell.compact.memory-wide {
+    width: min(100% - 16px, 100%) !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body.modern-setting-page.preset-config-page .config-workbench-actions button,
+  body.modern-setting-page.memory-config-page .config-workbench-actions button,
+  body.modern-setting-page.memory-config-page .config-workbench-actions select {
+    flex: 1 1 110px !important;
+    min-width: 0;
+  }
+}
+
+
+/* =========================================================
+   Preset + Memory v1.0.1 status pill polish.
+   Replace heavy white status boxes with lightweight inline state pills.
+   ========================================================= */
+body.modern-setting-page.preset-config-page .preset-status-strip.config-status-strip,
+body.modern-setting-page.memory-config-page .memory-overview-status.config-status-strip {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+  padding: 9px 12px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border)) !important;
+  border-left: 4px solid color-mix(in srgb, var(--accent) 74%, transparent 26%) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 10%, transparent), color-mix(in srgb, var(--panel-strong) 76%, transparent 24%)) !important;
+  box-shadow: none !important;
+}
+
+body.modern-setting-page.memory-config-page .memory-overview-status.config-status-strip {
+  justify-content: flex-end !important;
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  width: auto !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+body.modern-setting-page.preset-config-page .preset-status-strip.config-status-strip .helper-text {
+  margin: 0 !important;
+  min-width: 240px;
+  text-align: right;
+}
+
+body.modern-setting-page .config-status-pill {
+  position: relative;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  max-width: min(520px, 100%) !important;
+  min-height: 34px !important;
+  padding: 7px 14px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--border)) !important;
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, var(--input-bg)), color-mix(in srgb, var(--accent) 5%, var(--input-bg))) !important;
+  color: var(--accent) !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.40),
+    0 3px 10px rgba(100, 62, 36, 0.06) !important;
+}
+
+body.modern-setting-page .config-status-pill::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  opacity: 0.92;
+}
+
+body.modern-setting-page .config-status-pill.is-idle::before {
+  border-top-color: currentColor;
+  background: currentColor;
+  box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--input-bg) 86%, transparent 14%);
+}
+
+body.modern-setting-page .config-status-pill.is-saving::before {
+  animation: config-status-spin 0.9s linear infinite;
+}
+
+body.modern-setting-page .config-status-pill.is-success {
+  color: color-mix(in srgb, var(--accent) 82%, #2e8b70 18%) !important;
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--border)) !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 12%, var(--input-bg)), color-mix(in srgb, var(--accent) 6%, var(--input-bg))) !important;
+}
+
+body.modern-setting-page .config-status-pill.is-success::before {
+  content: "✓";
+  width: 16px;
+  height: 16px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  line-height: 1;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+body.modern-setting-page .config-status-pill.is-dirty {
+  color: #b56531 !important;
+  border-color: rgba(199, 122, 67, 0.48) !important;
+  background: linear-gradient(180deg, rgba(238, 169, 79, 0.18), color-mix(in srgb, var(--input-bg) 88%, transparent 12%)) !important;
+}
+
+body.modern-setting-page .config-status-pill.is-dirty::before {
+  border-top-color: currentColor;
+}
+
+body.modern-setting-page .config-status-pill.is-error {
+  color: #c44b3e !important;
+  border-color: rgba(196, 75, 62, 0.45) !important;
+  background: linear-gradient(180deg, rgba(196, 75, 62, 0.12), color-mix(in srgb, var(--input-bg) 88%, transparent 12%)) !important;
+}
+
+body.modern-setting-page .config-status-pill.is-error::before {
+  content: "!";
+  width: 16px;
+  height: 16px;
+  border: 1px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.74rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+@keyframes config-status-spin {
+  to { transform: rotate(360deg); }
+}
+
+html[data-theme="dark"] body.modern-setting-page .config-status-pill {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 3px 10px rgba(0,0,0,0.18) !important;
+}
+
+@media (max-width: 860px) {
+  body.modern-setting-page.preset-config-page .preset-status-strip.config-status-strip {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  body.modern-setting-page.preset-config-page .preset-status-strip.config-status-strip .helper-text {
+    min-width: 0;
+    text-align: left;
+  }
+}
+
+
+/* v1.0.2 preset restore guard: preset library cards are rectangular cards, not pill buttons. */
+body.modern-setting-page.preset-config-page .preset-card-grid .preset-item {
+  border-radius: 18px !important;
+  transform: none !important;
+}
+body.modern-setting-page.preset-config-page .preset-card-grid .preset-item:hover,
+body.modern-setting-page.preset-config-page .preset-card-grid .preset-item:active {
+  transform: none !important;
+}
+
+
+/* =========================================================
+   Worldbook Settings v1.0.4: sticky workbench + WBmanager-aligned controls.
+   Scope only to /config/worldbook settings page.
+   ========================================================= */
+body.modern-setting-page.worldbook-config-page .config-shell.compact.worldbook-config-shell {
+  width: min(1280px, calc(100% - 32px));
+  max-width: min(1280px, calc(100% - 32px));
+  margin-left: auto;
+  margin-right: auto;
+  gap: 16px;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-settings-hero,
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-panel,
+body.modern-setting-page.worldbook-config-page .worldbook-settings-panel {
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border) 82%);
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 8%, transparent), transparent 42%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--panel-strong) 84%, transparent 16%),
+      color-mix(in srgb, var(--panel) 90%, transparent 10%)
+    );
+  backdrop-filter: blur(18px) saturate(108%);
+  -webkit-backdrop-filter: blur(18px) saturate(108%);
+  box-shadow: 0 16px 38px rgba(80, 53, 35, 0.10);
+}
+
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-settings-hero,
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-workbench-panel,
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-settings-panel {
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-panel {
+  position: sticky;
+  top: 12px;
+  z-index: 92;
+  padding: 14px 16px;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-title {
+  min-width: 0;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-title .eyebrow {
+  margin-bottom: 8px;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-title h2 {
+  margin: 0 0 4px;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-title .muted {
+  margin: 0;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-state {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: min(420px, 100%);
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-mini-stat {
+  min-height: 68px;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--border) 74%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--input-bg) 58%, transparent 42%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16);
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-mini-stat span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-mini-stat strong {
+  color: var(--text);
+  font-size: 1.02rem;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent 40%);
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions button,
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions .button-link,
+body.modern-setting-page.worldbook-config-page .worldbook-actions-row button,
+body.modern-setting-page.worldbook-config-page .worldbook-actions-row .button-link {
+  width: auto;
+  min-width: 0;
+  min-height: 38px;
+  margin: 0;
+  padding: 8px 17px;
+  border-radius: 999px;
+  transform: none !important;
+  white-space: nowrap;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions .secondary,
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions .button-link,
+body.modern-setting-page.worldbook-config-page .worldbook-actions-row .secondary,
+body.modern-setting-page.worldbook-config-page .worldbook-actions-row .button-link {
+  background: rgba(232, 222, 210, 0.82);
+  border: 1px solid rgba(160, 126, 96, 0.34);
+  color: #5a4232;
+  box-shadow: 0 4px 12px rgba(83, 57, 36, 0.06);
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions .secondary:hover,
+body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions .button-link:hover,
+body.modern-setting-page.worldbook-config-page .worldbook-actions-row .secondary:hover,
+body.modern-setting-page.worldbook-config-page .worldbook-actions-row .button-link:hover {
+  background: rgba(222, 210, 196, 0.92);
+  border-color: rgba(160, 112, 76, 0.48);
+  color: #3f2d22;
+}
+
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions .secondary,
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions .button-link,
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-actions-row .secondary,
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-actions-row .button-link {
+  background: rgba(25, 37, 50, 0.92);
+  border-color: rgba(126, 149, 169, 0.36);
+  color: rgba(229, 237, 245, 0.92);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions .secondary:hover,
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions .button-link:hover,
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-actions-row .secondary:hover,
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-actions-row .button-link:hover {
+  background: rgba(34, 49, 64, 0.98);
+  border-color: rgba(94, 194, 168, 0.44);
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-settings-panel {
+  padding: 18px;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card {
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 74%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--input-bg) 54%, transparent 46%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card.wide {
+  grid-column: 1 / -1;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card h3 {
+  margin: 0 0 12px;
+  font-size: 1.02rem;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .grid-two {
+  gap: 12px 14px;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-actions-row {
+  justify-content: flex-end;
+  padding-top: 14px;
+  margin-top: 14px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent 40%);
+}
+
+/* Approved ivory field boundary for light settings pages; keep outer panels glassy. */
+html:not([data-theme="dark"]) body.modern-setting-page.worldbook-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html:not([data-theme="dark"]) body.modern-setting-page.worldbook-config-page select,
+html:not([data-theme="dark"]) body.modern-setting-page.worldbook-config-page textarea {
+  background: rgba(255, 248, 236, 0.96) !important;
+  border-color: rgba(150, 101, 65, 0.40) !important;
+  color: #3d2c20;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.64),
+    inset 0 -10px 24px rgba(146, 101, 67, 0.025),
+    0 1px 3px rgba(86, 55, 32, 0.075) !important;
+}
+
+html:not([data-theme="dark"]) body.modern-setting-page.worldbook-config-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+html:not([data-theme="dark"]) body.modern-setting-page.worldbook-config-page select:focus,
+html:not([data-theme="dark"]) body.modern-setting-page.worldbook-config-page textarea:focus {
+  background: rgba(255, 252, 246, 0.99) !important;
+  border-color: rgba(199, 122, 67, 0.72) !important;
+  box-shadow:
+    0 0 0 3px rgba(199, 122, 67, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    0 2px 8px rgba(86, 55, 32, 0.08) !important;
+}
+
+/* Worldbook settings keeps existing toggle/checkbox styling; no page-specific toggle overrides. */
+
+body.modern-setting-page.worldbook-config-page button:hover,
+body.modern-setting-page.worldbook-config-page button:active,
+body.modern-setting-page.worldbook-config-page .button-link:hover,
+body.modern-setting-page.worldbook-config-page .button-link:active {
+  transform: none !important;
+}
+
+body.modern-setting-page.worldbook-config-page button.is-feedback,
+body.modern-setting-page.worldbook-config-page .button-link.is-feedback {
+  background: color-mix(in srgb, var(--accent) 24%, var(--input-bg)) !important;
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--border)) !important;
+  color: var(--accent) !important;
+}
+
+@media (max-width: 900px) {
+  body.modern-setting-page.worldbook-config-page .config-shell.compact.worldbook-config-shell {
+    width: min(100% - 18px, 100%);
+  }
+
+  body.modern-setting-page.worldbook-config-page .worldbook-workbench-panel {
+    position: static;
+  }
+
+  body.modern-setting-page.worldbook-config-page .worldbook-workbench-head,
+  body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.modern-setting-page.worldbook-config-page .worldbook-workbench-state {
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  body.modern-setting-page.worldbook-config-page .worldbook-workbench-stats,
+  body.modern-setting-page.worldbook-config-page .worldbook-settings-grid,
+  body.modern-setting-page.worldbook-config-page .worldbook-setting-card .grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions button,
+  body.modern-setting-page.worldbook-config-page .worldbook-workbench-actions .button-link {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   Worldbook Settings v1.0.6: clean switch rows + semantic green status.
+   Keep existing toggles themselves; remove the oversized pill wrapper only on this page.
+   ========================================================= */
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  width: 100% !important;
+  min-height: 42px !important;
+  max-width: 100% !important;
+  padding: 6px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text) !important;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row span {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  font-weight: 780 !important;
+  line-height: 1.45 !important;
+  color: color-mix(in srgb, var(--text) 90%, var(--muted)) !important;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row input[type="checkbox"] {
+  flex: 0 0 auto !important;
+  order: 2 !important;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card.wide > .grid-two {
+  align-items: center !important;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card.wide > .grid-two .checkbox-row {
+  min-height: 44px !important;
+  padding: 8px 0 !important;
+}
+
+body.modern-setting-page.worldbook-config-page .config-status-pill.is-success {
+  color: #2f8f5f !important;
+  border-color: rgba(74, 166, 109, 0.46) !important;
+  background: linear-gradient(180deg, rgba(84, 184, 126, 0.14), color-mix(in srgb, var(--input-bg) 90%, transparent 10%)) !important;
+}
+
+body.modern-setting-page.worldbook-config-page .config-status-pill.is-success::before {
+  color: #2f8f5f !important;
+  background: rgba(84, 184, 126, 0.16) !important;
+}
+
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .config-status-pill.is-success {
+  color: #78d89d !important;
+  border-color: rgba(120, 216, 157, 0.48) !important;
+  background: linear-gradient(180deg, rgba(58, 160, 97, 0.20), rgba(15, 32, 28, 0.62)) !important;
+}
+
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .config-status-pill.is-success::before {
+  color: #78d89d !important;
+  background: rgba(120, 216, 157, 0.16) !important;
+}
+
+/* Avoid making the simple switch rows look like large action cards on mobile too. */
+@media (max-width: 900px) {
+  body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+}
+
+
+
+/* =========================================================
+   Worldbook Settings v1.0.7: compact local toggles for all switch rows.
+   Only /config/worldbook is affected. Text remains text; switches are small,
+   horizontal, centered controls.
+   ========================================================= */
+body.modern-setting-page.worldbook-config-page {
+  --wb-config-toggle-w: 34px;
+  --wb-config-toggle-h: 18px;
+  --wb-config-toggle-dot: 14px;
+  --wb-config-toggle-offset: 2px;
+  --wb-config-toggle-shift: 16px;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-height: 36px !important;
+  max-width: 100% !important;
+  padding: 6px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row span {
+  order: 1 !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  color: color-mix(in srgb, var(--text) 92%, var(--muted)) !important;
+  font-weight: 780 !important;
+  line-height: 1.45 !important;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  order: 2 !important;
+  position: relative !important;
+  flex: 0 0 var(--wb-config-toggle-w) !important;
+  width: var(--wb-config-toggle-w) !important;
+  min-width: var(--wb-config-toggle-w) !important;
+  height: var(--wb-config-toggle-h) !important;
+  min-height: var(--wb-config-toggle-h) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(152, 110, 78, 0.34) !important;
+  background: rgba(185, 195, 204, 0.56) !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.30),
+    0 1px 3px rgba(86, 55, 32, 0.08) !important;
+  cursor: pointer !important;
+  transform: none !important;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row input[type="checkbox"]::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: var(--wb-config-toggle-offset) !important;
+  width: var(--wb-config-toggle-dot) !important;
+  height: var(--wb-config-toggle-dot) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.24) !important;
+  opacity: 1 !important;
+  transform: translateY(-50%) !important;
+  transition: transform 0.16s ease !important;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row input[type="checkbox"]:checked {
+  border-color: color-mix(in srgb, var(--accent) 76%, rgba(160, 126, 96, 0.34)) !important;
+  background: var(--accent) !important;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--accent) 14%, transparent),
+    inset 0 1px 1px rgba(255, 255, 255, 0.24) !important;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row input[type="checkbox"]:checked::before {
+  transform: translate(var(--wb-config-toggle-shift), -50%) !important;
+}
+
+body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row input[type="checkbox"]:focus-visible {
+  outline: none !important;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent),
+    inset 0 1px 1px rgba(255, 255, 255, 0.24) !important;
+}
+
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row input[type="checkbox"] {
+  border-color: rgba(126, 149, 169, 0.38) !important;
+  background: rgba(77, 94, 112, 0.56) !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.22) !important;
+}
+
+html[data-theme="dark"] body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row input[type="checkbox"]:checked {
+  border-color: color-mix(in srgb, var(--accent) 78%, rgba(126, 149, 169, 0.38)) !important;
+  background: var(--accent) !important;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent),
+    inset 0 1px 1px rgba(255, 255, 255, 0.12) !important;
+}
+
+@media (max-width: 900px) {
+  body.modern-setting-page.worldbook-config-page .worldbook-setting-card .checkbox-row {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+}
+
+/* =========================================================
+   Worldbook Manager v1.1.2: sidebar brand fix + checkbox behavior.
+   Keep WBmanager outside modern-setting-page so checkbox-row remains checkbox UI.
+   ========================================================= */
+body.app-sidebar-shell.worldbook-manager-page:not(.chat-page) .topbar-stack .brand,
+body.app-sidebar-shell.worldbook-manager-page:not(.chat-page) .topbar-stack > .topbar .brand {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 58px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 9px 10px;
+  border-radius: 17px;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  overflow: visible;
+  white-space: nowrap;
+  text-overflow: clip;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255,255,255,0.50), transparent 42%),
+    linear-gradient(135deg,
+      rgba(255, 250, 244, 0.78),
+      rgba(247, 234, 217, 0.58)
+    );
+  border-color: rgba(190, 152, 121, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.42),
+    0 10px 24px rgba(84, 57, 38, 0.055);
+}
+
+body.app-sidebar-shell.worldbook-manager-page:not(.chat-page) .topbar-stack .brand::before,
+body.app-sidebar-shell.worldbook-manager-page:not(.chat-page) .topbar-stack > .topbar .brand::before {
+  position: static;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  flex: 0 0 36px;
+  background:
+    url("/static/fantareal_icon.ico") center / cover no-repeat,
+    rgba(255, 252, 248, 0.94);
+  opacity: 1;
+}
+
+:root[data-theme="dark"] body.app-sidebar-shell.worldbook-manager-page:not(.chat-page) .topbar-stack .brand,
+:root[data-theme="dark"] body.app-sidebar-shell.worldbook-manager-page:not(.chat-page) .topbar-stack > .topbar .brand {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(121, 159, 202, 0.12), transparent 42%),
+    linear-gradient(135deg, rgba(36, 52, 70, 0.90), rgba(17, 28, 41, 0.84));
+  border-color: rgba(153, 187, 224, 0.18);
+}
+
+/* Defensive reset: WBmanager should not inherit modern config switch overrides. */
+body.worldbook-manager-page .checkbox-row input[type="checkbox"]:not(.wb-quick-enabled) {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
 }

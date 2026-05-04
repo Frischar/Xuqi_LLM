@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Card Config - Xuqi LLM Chat</title>
-    <link rel="stylesheet" href="/static/styles.css?v=config-wide-v2-ui-unify-v1" />
+    <title>Card Config - Fantareal</title>
+    <link rel="stylesheet" href="/static/styles.css?v=card-v098" />
   
     <style id="ui-unify-v1">
       body.modern-setting-page {
@@ -316,10 +316,10 @@
     </style>
 
   </head>
-  <body class="modern-setting-page">
+  <body class="modern-setting-page card-config-page app-sidebar-shell">
     <div class="topbar-stack">
       <div class="topbar">
-        <a class="brand" href="/chat">Xuqi LLM Chat</a>
+        <a class="brand" href="/chat">Fantareal</a>
         {% include "_grouped_nav.html" %}
       </div>
             <div class="slot-toolbar">
@@ -339,34 +339,48 @@
           <p class="muted">这里把常用的 JSON 键都拆成了固定输入位。玩家只需要逐项填写，然后点击保存并加载即可。加载后的当前角色卡也支持直接导出。</p>
         </div>
 
-        <div class="grid-two card-top-grid">
-          <div>
-            <label for="card-file-select">文件夹里的角色卡</label>
-            <select id="card-file-select">
-              <option value="">选择一个角色卡文件</option>
-              {% for item in cards %}
-              <option value="{{ item.filename }}" {% if current_card.source_name == item.filename %}selected{% endif %}>{{ item.filename }}</option>
-              {% endfor %}
-            </select>
+        <div class="card-workbench">
+          <div class="card-workbench-head">
+            <div class="card-workbench-title">
+              <span class="eyebrow mini">CARD WORKBENCH</span>
+              <strong>角色工作台</strong>
+              <span class="muted compact">加载、导入、导出与保存都在这里完成。</span>
+            </div>
+            <div class="card-workbench-status" aria-live="polite">
+              <span class="card-status-dot"></span>
+              <p id="status-text" class="muted status-line">就绪</p>
+            </div>
           </div>
-          <div>
-            <label for="card-filename">保存文件名</label>
-            <input id="card-filename" value="{{ current_card.source_name or 'role_card.json' }}" placeholder="例如 yuki.json" />
-          </div>
-        </div>
 
-        <div class="button-row">
-          <button id="refresh-cards" type="button" class="secondary">刷新列表</button>
-          <button id="load-card" type="button">加载所选角色卡</button>
-          <button id="import-local-card" type="button" class="secondary">导入本地角色卡</button>
-          <button id="save-card" type="button" class="secondary">保存并加载当前角色卡</button>
-          <button id="export-card" type="button" class="secondary">导出当前角色卡</button>
-          <input
-            id="import-local-card-file"
-            type="file"
-            accept=".json,.txt,application/json,text/plain"
-            style="display: none"
-          />
+          <div class="grid-two card-top-grid card-workbench-grid">
+            <div>
+              <label for="card-file-select">文件夹里的角色卡</label>
+              <select id="card-file-select">
+                <option value="">选择一个角色卡文件</option>
+                {% for item in cards %}
+                <option value="{{ item.filename }}" {% if current_card.source_name == item.filename %}selected{% endif %}>{{ item.filename }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label for="card-filename">保存文件名</label>
+              <input id="card-filename" value="{{ current_card.source_name or 'role_card.json' }}" placeholder="例如 yuki.json" />
+            </div>
+          </div>
+
+          <div class="card-workbench-actions">
+            <button id="refresh-cards" type="button" class="secondary compact">刷新</button>
+            <button id="load-card" type="button" class="secondary compact">加载</button>
+            <button id="import-local-card" type="button" class="secondary compact">导入</button>
+            <button id="export-card" type="button" class="secondary compact">导出</button>
+            <button id="save-card" type="button" class="compact">保存并加载</button>
+            <input
+              id="import-local-card-file"
+              type="file"
+              accept=".json,.txt,application/json,text/plain"
+              style="display: none"
+            />
+          </div>
         </div>
       </section>
 
@@ -391,6 +405,7 @@
               <textarea id="card-scenario" rows="4">{{ card_template.scenario }}</textarea>
 
               <label for="card-first-mes">first_mes <span class="field-note">（开场白 / 初见时第一句）</span></label>
+              <p class="field-note card-field-tip">只作为新对话首次展示，不作为常驻提示词反复注入。</p>
               <textarea id="card-first-mes" rows="4">{{ card_template.first_mes }}</textarea>
 
               <label for="card-mes-example">mes_example <span class="field-note">（示例对话 / 说话风格参考）</span></label>
@@ -405,15 +420,18 @@
               <div class="persona-toolbar">
                 <h3>剧情阶段</h3>
                 <div class="button-row">
-                  <button id="add-stage" type="button" class="secondary compact">+ 新增阶段</button>
+                  <button id="add-stage" type="button" class="secondary compact card-add-button">＋ 新增阶段</button>
                 </div>
               </div>
               <div id="stage-grid" class="stage-grid">
                 {% for stage_key, stage in stage_items %}
                 <div class="sub-block stage-card" data-stage-key="{{ stage_key }}">
-                  <div class="memory-card-head persona-card-head">
-                    <div class="sub-title">plotStages.{{ stage_key }}</div>
-                    <button type="button" class="secondary compact remove-stage">删除</button>
+                  <div class="memory-card-head persona-card-head card-item-head">
+                    <div class="card-item-title">
+                      <strong>plotStages.{{ stage_key }}</strong>
+                      <span class="card-summary-chip">剧情阶段</span>
+                    </div>
+                    <button type="button" class="card-icon-button card-danger-icon remove-stage" title="删除阶段" aria-label="删除阶段">×</button>
                   </div>
                   <label for="stage-{{ stage_key }}-description">description <span class="field-note">（这一阶段发生了什么）</span></label>
                   <textarea id="stage-{{ stage_key }}-description" rows="3">{{ stage.description }}</textarea>
@@ -427,18 +445,21 @@
         </div>
 
         <div class="persona-toolbar">
-          <h3>多人人设</h3>
+          <h3>多角色</h3>
           <div class="button-row">
-            <button id="add-persona" type="button" class="secondary compact">+ 新增人设</button>
+            <button id="add-persona" type="button" class="secondary compact card-add-button">＋ 新增角色</button>
           </div>
         </div>
 
         <div id="persona-grid" class="card-persona-grid">
           {% for key, persona in persona_items %}
           <div class="card-block persona-card" data-persona-key="{{ key }}">
-            <div class="memory-card-head persona-card-head">
-              <strong>personas.{{ key }}</strong>
-              <button type="button" class="secondary compact remove-persona">删除</button>
+            <div class="memory-card-head persona-card-head card-item-head">
+              <div class="card-item-title">
+                <strong class="persona-display-title">{{ persona.name or ('角色' ~ loop.index) }}</strong>
+                <span class="card-summary-chip">多角色</span>
+              </div>
+              <button type="button" class="card-icon-button card-danger-icon remove-persona" title="删除角色" aria-label="删除角色">×</button>
             </div>
             <label for="persona-{{ key }}-name">name <span class="field-note">（该角色显示名）</span></label>
             <input id="persona-{{ key }}-name" value="{{ persona.name }}" />
@@ -459,13 +480,6 @@
         </div>
       </section>
 
-      <section class="panel config-panel full-span">
-        <div class="section-head">
-          <p class="eyebrow">Status</p>
-          <h2>当前状态</h2>
-          <p id="status-text" class="muted status-line">就绪</p>
-        </div>
-      </section>
     </div>
 
     <script>
@@ -504,8 +518,14 @@
       const initialWorkshopTemp = Number({{ workshop_state.temp or 0 }}) || 0;
       let currentWorkshop = null;
 
-      function setStatus(text) {
+      function setStatus(text, state = "") {
+        if (!statusEl) return;
         statusEl.textContent = text;
+        statusEl.dataset.state = state;
+      }
+
+      function markCardDirty() {
+        setStatus("已修改，尚未保存。", "dirty");
       }
 
       function applyTheme(theme) {
@@ -1019,9 +1039,12 @@
         wrapper.className = "sub-block stage-card";
         wrapper.dataset.stageKey = key;
         wrapper.innerHTML = `
-          <div class="memory-card-head persona-card-head">
-            <div class="sub-title">plotStages.${key}</div>
-            <button type="button" class="secondary compact remove-stage">删除</button>
+          <div class="memory-card-head persona-card-head card-item-head">
+            <div class="card-item-title">
+              <strong>plotStages.${key}</strong>
+              <span class="card-summary-chip">剧情阶段</span>
+            </div>
+            <button type="button" class="card-icon-button card-danger-icon remove-stage" title="删除阶段" aria-label="删除阶段">×</button>
           </div>
           <label for="stage-${key}-description">description <span class="field-note">${STAGE_LABELS.description}</span></label>
           <textarea id="stage-${key}-description" rows="3"></textarea>
@@ -1037,14 +1060,25 @@
         return wrapper;
       }
 
+      function formatPersonaIndex(value) {
+        const number = Number(value);
+        const chinese = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+        if (Number.isFinite(number) && number > 0 && number <= 10) return chinese[number];
+        if (Number.isFinite(number) && number > 10) return String(number);
+        return String(value || "一");
+      }
+
       function createPersonaBlock(key, persona = {}) {
         const wrapper = document.createElement("div");
         wrapper.className = "card-block persona-card";
         wrapper.dataset.personaKey = key;
         wrapper.innerHTML = `
-          <div class="memory-card-head persona-card-head">
-            <strong>personas.${key}</strong>
-            <button type="button" class="secondary compact remove-persona">删除</button>
+          <div class="memory-card-head persona-card-head card-item-head">
+            <div class="card-item-title">
+              <strong class="persona-display-title">角色${formatPersonaIndex(key)}</strong>
+              <span class="card-summary-chip">多角色</span>
+            </div>
+            <button type="button" class="card-icon-button card-danger-icon remove-persona" title="删除角色" aria-label="删除角色">×</button>
           </div>
           <label for="persona-${key}-name">name <span class="field-note">${PERSONA_LABELS.name}</span></label>
           <input id="persona-${key}-name" />
@@ -1062,13 +1096,21 @@
           <textarea id="persona-${key}-creator-notes" rows="3"></textarea>
         `;
         wrapper.querySelector(`#persona-${key}-name`).value = persona.name || "";
+        const personaTitle = wrapper.querySelector(".persona-display-title");
+        if (personaTitle) {
+          personaTitle.textContent = persona.name || `角色${formatPersonaIndex(key)}`;
+        }
+        wrapper.querySelector(`#persona-${key}-name`).addEventListener("input", (event) => {
+          const target = wrapper.querySelector(".persona-display-title");
+          if (target) target.textContent = event.target.value.trim() || `角色${formatPersonaIndex(key)}`;
+        });
         wrapper.querySelector(`#persona-${key}-description`).value = persona.description || "";
         wrapper.querySelector(`#persona-${key}-personality`).value = persona.personality || "";
         wrapper.querySelector(`#persona-${key}-scenario`).value = persona.scenario || "";
         wrapper.querySelector(`#persona-${key}-creator-notes`).value = persona.creator_notes || "";
         wrapper.querySelector(".remove-persona").addEventListener("click", () => {
           wrapper.remove();
-          setStatus(`已删除 personas.${key}`);
+          setStatus(`已删除角色：personas.${key}`);
         });
         return wrapper;
       }
@@ -1293,16 +1335,29 @@
         document.getElementById("import-local-card-file").click();
       });
 
-      document.getElementById("add-stage").addEventListener("click", () => {
+      function flashButtonFeedback(button, text = "已新增") {
+        if (!button) return;
+        const originalText = button.textContent;
+        button.classList.add("is-feedback");
+        button.textContent = text;
+        window.setTimeout(() => {
+          button.classList.remove("is-feedback");
+          button.textContent = originalText;
+        }, 950);
+      }
+
+      document.getElementById("add-stage").addEventListener("click", (event) => {
         const key = getNextStageKey();
         stageGridEl.appendChild(createStageBlock(key, {}));
         setStatus(`已新增 plotStages.${key}`);
+        flashButtonFeedback(event.currentTarget, "已新增");
       });
 
-      document.getElementById("add-persona").addEventListener("click", () => {
+      document.getElementById("add-persona").addEventListener("click", (event) => {
         const key = getNextPersonaKey();
         personaGridEl.appendChild(createPersonaBlock(key, {}));
-        setStatus(`已新增 personas.${key}`);
+        setStatus(`已新增角色：personas.${key}`);
+        flashButtonFeedback(event.currentTarget, "已新增");
       });
 
       document.getElementById("add-workshop-rule")?.addEventListener("click", () => {
@@ -1447,6 +1502,15 @@
         if (!document.hidden) {
           refreshCardList().catch(() => {});
         }
+      });
+
+      document.querySelector(".card-builder")?.addEventListener("input", (event) => {
+        if (event.target.closest("button")) return;
+        markCardDirty();
+      });
+      document.querySelector(".card-builder")?.addEventListener("change", (event) => {
+        if (event.target.closest("button")) return;
+        markCardDirty();
       });
 
       applyTheme(currentTheme);

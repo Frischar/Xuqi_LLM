@@ -6,13 +6,73 @@ from starlette.requests import Request
 
 
 def register_page_routes(app: FastAPI, *, templates: Any, ctx: Any) -> None:
+    def _opening_message_from_persona(persona: dict[str, Any]) -> str:
+        if not isinstance(persona, dict):
+            return ""
+        return str(
+            persona.get("opening_message")
+            or persona.get("first_mes")
+            or persona.get("first_message")
+            or persona.get("greeting")
+            or ""
+        ).strip()
+
+    def _summary_buffer_content(slot_id: str | None = None) -> str:
+        service = getattr(ctx, "slot_runtime_service", None)
+        if service is None or not hasattr(service, "build_slot_state"):
+            return ""
+        try:
+            slot_state = service.build_slot_state(slot_id, persist_snapshot=False)
+            summary_buffer = getattr(slot_state, "summary_buffer", None)
+            if summary_buffer is None:
+                return ""
+            if isinstance(summary_buffer, dict):
+                return str(summary_buffer.get("content", "") or "").strip()
+            return str(getattr(summary_buffer, "content", "") or "").strip()
+        except Exception:
+            # 开场白只是 UI 展示，不应因为运行时快照读取异常影响聊天页打开。
+            return ""
+
+    def _has_workshop_progress(workshop_state: dict[str, Any]) -> bool:
+        if not isinstance(workshop_state, dict):
+            return False
+        try:
+            temp = int(workshop_state.get("temp", 0) or 0)
+        except (TypeError, ValueError):
+            temp = 0
+        trigger_history = workshop_state.get("trigger_history", [])
+        return temp > 0 or (isinstance(trigger_history, list) and len(trigger_history) > 0)
+
+    def _should_show_opening_message(
+        *,
+        opening_message: str,
+        history: list[dict[str, Any]],
+        memories: list[dict[str, Any]],
+        summary_buffer: str,
+        workshop_state: dict[str, Any],
+    ) -> bool:
+        return bool(
+            opening_message
+            and not history
+            and not memories
+            and not summary_buffer
+            and not _has_workshop_progress(workshop_state)
+        )
+
     def build_chat_template_context() -> dict[str, Any]:
+        active_slot = ctx.get_active_slot_id() if hasattr(ctx, "get_active_slot_id") else None
+        persona = ctx.get_persona()
+        history = ctx.get_conversation()
+        memories = ctx.get_memories()
+        workshop_state = ctx.get_workshop_state(active_slot) if active_slot is not None else ctx.get_workshop_state()
+        summary_buffer = _summary_buffer_content(active_slot)
+        opening_message = _opening_message_from_persona(persona)
         preset_store = ctx.get_preset_store()
         active_preset = ctx.get_active_preset_from_store(preset_store)
         preset_debug = ctx.build_preset_debug_payload()
         return {
-            "persona": ctx.get_persona(),
-            "history": ctx.get_conversation(),
+            "persona": persona,
+            "history": history,
             "settings": ctx.get_settings(),
             "worldbook_settings": ctx.get_worldbook_settings(),
             "user_profile": ctx.get_user_profile(),
@@ -21,6 +81,14 @@ def register_page_routes(app: FastAPI, *, templates: Any, ctx: Any) -> None:
             "active_preset": active_preset,
             "active_preset_modules": preset_debug["active_modules"],
             "preset_debug": preset_debug,
+            "opening_message": opening_message,
+            "show_opening_message": _should_show_opening_message(
+                opening_message=opening_message,
+                history=history,
+                memories=memories,
+                summary_buffer=summary_buffer,
+                workshop_state=workshop_state,
+            ),
         }
 
     @app.get("/", include_in_schema=False)

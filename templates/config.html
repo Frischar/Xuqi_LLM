@@ -3,379 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Config - Xuqi LLM Chat</title>
-    <link rel="stylesheet" href="/static/styles.css?v=config-wide-v2-ui-unify-v1" />
-    <style>
-      [hidden] {
-        display: none !important;
-      }
-    </style>
-  
-    <style>
-      .model-combo {
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        width: 100%;
-      }
-      .model-combo > input {
-        flex: 1 1 auto;
-      }
-      .model-menu {
-        position: absolute;
-        top: calc(100% + 0.35rem);
-        left: 0;
-        right: 0;
-        z-index: 30;
-        background: var(--panel-strong);
-        border: 1px solid var(--border);
-        border-radius: 0.9rem;
-        box-shadow: var(--shadow-soft);
-        padding: 0.4rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        max-height: 16rem;
-        overflow-y: auto;
-      }
-      .model-menu-item {
-        width: 100%;
-        text-align: left;
-        border: none;
-        border-radius: 0.7rem;
-        background: transparent;
-        color: var(--text);
-        padding: 0.7rem 0.8rem;
-        cursor: pointer;
-      }
-      .model-menu-item:hover {
-        background: var(--input-bg);
-      }
-      .model-menu-empty {
-        color: var(--muted);
-        padding: 0.7rem 0.8rem;
-      }
-    </style>
+    <title>Config - Fantareal</title>
+    <link rel="stylesheet" href="/static/styles.css?v=frontend-v089-components" />
 
-  
-    <style id="ui-unify-v1">
-      body.modern-setting-page {
-        --ui-card-radius: 24px;
-        --ui-sub-radius: 18px;
-        --ui-gap: 18px;
-      }
-
-      body.modern-setting-page .config-shell.compact {
-        width: min(1480px, calc(100% - 32px));
-        max-width: none;
-        gap: var(--ui-gap);
-      }
-
-      body.modern-setting-page .panel.config-panel {
-        position: relative;
-        overflow: hidden;
-        border-radius: var(--ui-card-radius);
-        border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
-        background:
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--panel-strong) 72%, transparent),
-            color-mix(in srgb, var(--panel) 92%, transparent));
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
-      }
-
-      body.modern-setting-page .panel.config-panel.full-span:first-of-type {
-        border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
-        background:
-          radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 12%, transparent), transparent 38%),
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--panel-strong) 82%, transparent),
-            color-mix(in srgb, var(--panel) 92%, transparent));
-      }
-
-      body.modern-setting-page .section-head {
-        gap: 0.35rem;
-      }
-
-      body.modern-setting-page .section-head h2,
-      body.modern-setting-page .section-head h3 {
-        margin-top: 0.08rem;
-        letter-spacing: -0.02em;
-      }
-
-      body.modern-setting-page .eyebrow {
-        display: inline-flex;
-        width: fit-content;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.26rem 0.64rem;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
-        background: color-mix(in srgb, var(--accent) 10%, transparent);
-      }
-
-      body.modern-setting-page .stats-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 12px;
-        margin-top: 14px;
-      }
-
-      body.modern-setting-page .stat-box {
-        min-height: 76px;
-        padding: 14px 16px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: var(--ui-sub-radius);
-        background:
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--input-bg) 78%, transparent),
-            color-mix(in srgb, var(--panel) 86%, transparent));
-        box-shadow: inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
-      }
-
-      body.modern-setting-page .stat-label {
-        display: block;
-        margin-bottom: 0.36rem;
-        font-size: 0.78rem;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        color: var(--muted);
-      }
-
-      body.modern-setting-page .stat-box strong {
-        font-size: 1.05rem;
-        line-height: 1.35;
-      }
-
-      body.modern-setting-page label:not(.checkbox-row):not(.check-chip) {
-        font-weight: 850;
-        color: color-mix(in srgb, var(--text) 82%, var(--muted));
-      }
-
-      body.modern-setting-page input,
-      body.modern-setting-page select,
-      body.modern-setting-page textarea {
-        border-radius: 15px;
-        border-color: color-mix(in srgb, var(--border) 84%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 92%, transparent);
-      }
-
-      body.modern-setting-page textarea {
-        line-height: 1.7;
-      }
-
-      body.modern-setting-page .button-row {
-        gap: 10px;
-      }
-
-      body.modern-setting-page button,
-      body.modern-setting-page .button-link,
-      body.modern-setting-page .ghost-link,
-      body.modern-setting-page .secondary,
-      body.modern-setting-page .compact {
-        border-radius: 999px;
-      }
-
-      body.modern-setting-page .secondary,
-      body.modern-setting-page .ghost-link,
-      body.modern-setting-page .button-link {
-        border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 70%, transparent);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-      }
-
-      body.modern-setting-page button:not(.secondary):not(.compact):not(.ghost-link):not(.button-link),
-      body.modern-setting-page #save-settings,
-      body.modern-setting-page #save-all,
-      body.modern-setting-page #save-user-profile,
-      body.modern-setting-page #save-worldbook-settings,
-      body.modern-setting-page #save-workshop,
-      body.modern-setting-page #save-card {
-        box-shadow: 0 10px 22px color-mix(in srgb, var(--accent) 18%, transparent);
-      }
-
-      body.modern-setting-page .checkbox-row {
-        display: flex;
-        align-items: center;
-        gap: 0.72rem;
-        min-height: 46px;
-        padding: 10px 12px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: 16px;
-        background: color-mix(in srgb, var(--input-bg) 64%, transparent);
-        color: var(--text);
-        font-weight: 760;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"] {
-        appearance: none;
-        -webkit-appearance: none;
-        position: relative;
-        flex: 0 0 auto;
-        width: 46px;
-        height: 26px;
-        margin: 0;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
-        background: color-mix(in srgb, var(--panel-strong) 76%, transparent);
-        cursor: pointer;
-        transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]::before {
-        content: "";
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 20px;
-        height: 20px;
-        border-radius: 999px;
-        background: color-mix(in srgb, var(--muted) 82%, white);
-        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
-        transition: transform 0.18s ease, background 0.18s ease;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]:checked {
-        border-color: color-mix(in srgb, var(--accent) 68%, var(--border));
-        background: color-mix(in srgb, var(--accent) 38%, var(--panel-strong));
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]:checked::before {
-        transform: translateX(20px);
-        background: white;
-      }
-
-      body.modern-setting-page .field-chip-row {
-        gap: 0.55rem;
-      }
-
-      body.modern-setting-page .check-chip {
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 62%, transparent);
-      }
-
-      body.modern-setting-page .helper-text,
-      body.modern-setting-page .field-note,
-      body.modern-setting-page .muted.compact {
-        color: color-mix(in srgb, var(--muted) 88%, var(--text));
-      }
-
-      body.modern-setting-page .status-line {
-        display: block;
-        min-height: 46px;
-        padding: 12px 14px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: 16px;
-        background: color-mix(in srgb, var(--input-bg) 72%, transparent);
-      }
-
-      body.modern-setting-page .inline-field,
-      body.modern-setting-page .model-combo-row {
-        align-items: stretch;
-      }
-
-      body.modern-setting-page .preview-card,
-      body.modern-setting-page .card-block,
-      body.modern-setting-page .sub-block,
-      body.modern-setting-page .workshop-runtime-panel,
-      body.modern-setting-page .workshop-search-block,
-      body.modern-setting-page .workshop-rule-shell {
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: var(--ui-sub-radius);
-        background: color-mix(in srgb, var(--input-bg) 58%, transparent);
-        box-shadow: inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
-      }
-
-      body.modern-setting-page .card-block,
-      body.modern-setting-page .sub-block,
-      body.modern-setting-page .workshop-runtime-panel,
-      body.modern-setting-page .workshop-search-block {
-        padding: 16px;
-      }
-
-      body.modern-setting-page .persona-toolbar,
-      body.modern-setting-page .memory-card-head,
-      body.modern-setting-page .workshop-rule-summary {
-        border-radius: 16px;
-      }
-
-      body.modern-setting-page .workshop-rule-shell {
-        overflow: hidden;
-        margin-bottom: 12px;
-      }
-
-      body.modern-setting-page .workshop-rule-summary {
-        padding: 12px 14px;
-        background: linear-gradient(180deg,
-          color-mix(in srgb, var(--panel-strong) 68%, transparent),
-          color-mix(in srgb, var(--input-bg) 76%, transparent));
-      }
-
-      body.modern-setting-page .workshop-rule-body {
-        padding: 16px;
-        border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-      }
-
-      body.modern-setting-page .workshop-rule-summary-meta,
-      body.modern-setting-page .workshop-rule-summary-text {
-        color: var(--muted);
-      }
-
-      body.modern-setting-page .workshop-rule-trigger-label,
-      body.modern-setting-page .workshop-rule-action-label {
-        display: inline-flex;
-        align-items: center;
-        min-height: 24px;
-        padding: 0.14rem 0.56rem;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
-        background: color-mix(in srgb, var(--accent) 9%, transparent);
-      }
-
-      body.modern-setting-page .sprite-frame {
-        border-radius: 22px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 62%, transparent);
-      }
-
-      body.modern-setting-page .topbar-stack {
-        gap: 12px;
-      }
-
-      body.modern-setting-page .slot-toolbar {
-        border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
-        background: color-mix(in srgb, var(--panel-strong) 72%, transparent);
-      }
-
-      body.modern-setting-page .slot-badge {
-        border-color: color-mix(in srgb, var(--accent) 36%, var(--border));
-        background: color-mix(in srgb, var(--accent) 12%, transparent);
-      }
-
-      @media (max-width: 768px) {
-        body.modern-setting-page .config-shell.compact {
-          width: min(100% - 16px, 100%);
-        }
-        body.modern-setting-page .stats-row {
-          grid-template-columns: 1fr;
-        }
-        body.modern-setting-page .inline-field,
-        body.modern-setting-page .model-combo-row {
-          flex-direction: column;
-        }
-      }
-    </style>
-
-  </head>
-  <body class="modern-setting-page">
+</head>
+  <body class="modern-setting-page app-sidebar-shell global-config-page">
+    <div id="config-toast-host" class="toast-host config-toast-host" aria-live="polite"></div>
     <div class="topbar-stack">
       <div class="topbar">
-        <a class="brand" href="/chat">Xuqi LLM Chat</a>
+        <a class="brand" href="/chat">Fantareal</a>
         {% include "_grouped_nav.html" %}
       </div>
-            <div class="slot-toolbar">
+            <div class="slot-toolbar config-hero-toolbar">
         <div class="slot-toolbar-left">
           <span class="slot-badge">Global</span>
           <div class="slot-meta">
@@ -384,29 +23,51 @@
           </div>
         </div>
       </div>
-    <div class="config-shell compact">
+
+      <div class="config-sticky-actions" aria-label="设置保存状态">
+        <div class="config-sticky-copy">
+          <span class="config-sticky-kicker">Settings Workbench</span>
+          <strong>设置工作台</strong>
+          <p id="status-text" class="task-status is-idle">已准备 · 修改后会自动保存，也可以手动保存全部配置。</p>
+        </div>
+        <div class="config-sticky-buttons">
+          <button id="save-all" type="button">保存全部配置</button>
+          <button id="test-connection-sticky" type="button" class="secondary compact">测试聊天模型</button>
+          <button id="reset-chat" type="button" class="secondary compact danger-action" title="清空当前聊天记录"><span class="danger-icon" aria-hidden="true">⚠</span> 清空聊天记录</button>
+        </div>
+      </div>
+
+    <div class="config-shell compact config-workbench-shell">
       <section class="panel config-panel full-span">
         <div class="section-head">
           <p class="eyebrow">Guide</p>
           <h2>配置总览</h2>
           <p class="muted">这里保留模型、检索和界面设置。角色卡请去单独的 <code>Card</code> 页面。记忆库在 <code>Memory</code> 页面里维护，会作为固定前情提要持续投喂给模型。</p>
         </div>
-        <div class="stats-row">
+        <div class="stats-row config-overview-grid">
           <div class="stat-box">
-            <span class="stat-label">当前已加载角色卡</span>
+            <span class="stat-label">当前角色卡</span>
             <strong>{{ current_card.source_name or '未命名角色卡' }}</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">聊天模型</span>
+            <strong>{{ settings.llm_model or '未配置' }}</strong>
           </div>
           <div class="stat-box">
             <span class="stat-label">记忆条数</span>
             <strong id="memory-count">{{ memory_count }}</strong>
           </div>
+          <div class="stat-box">
+            <span class="stat-label">界面状态</span>
+            <strong>{{ '暗色' if settings.theme == 'dark' else '浅色' }} · 透明度 {{ settings.ui_opacity }}</strong>
+          </div>
         </div>
-        <div class="button-row">
-          <button id="export-current-bundle" type="button" class="secondary">导出当前人设存档 ZIP</button>
+        <div class="button-row config-overview-actions">
+          <button id="export-current-bundle" type="button" class="secondary export-action">导出当前人设存档 ZIP</button>
         </div>
       </section>
 
-      <section class="panel config-panel">
+      <section class="panel config-panel config-primary-panel">
         <div class="section-head">
           <p class="eyebrow">LLM</p>
           <h2>聊天模型</h2>
@@ -468,9 +129,9 @@
             <input id="history-limit" type="number" min="1" max="100" step="1" value="{{ settings.history_limit }}" />
           </div>
           <div>
-            <label class="checkbox-row offset-top">
-              <input id="demo-mode" type="checkbox" {% if settings.demo_mode %}checked{% endif %} />
+            <label class="fr-setting-switch-row offset-top">
               <span>没有模型时允许演示模式</span>
+              <input id="demo-mode" type="checkbox" {% if settings.demo_mode %}checked{% endif %} />
             </label>
           </div>
         </div>
@@ -481,73 +142,9 @@
         </div>
       </section>
 
-      <section class="panel config-panel">
-        <div class="section-head">
-          <p class="eyebrow">Retrieval</p>
-          <h2>嵌入与重排序</h2>
-          <p class="muted">嵌入模型负责召回，重排序模型可在召回后进一步精选结果。</p>
-        </div>
 
-        <label for="embedding-base-url">嵌入 API URL</label>
-        <input id="embedding-base-url" value="{{ settings.embedding_base_url }}" placeholder="例如 http://127.0.0.1:8000/v1" />
 
-        <label for="embedding-api-key">嵌入 API Key</label>
-        <div class="inline-field">
-          <input id="embedding-api-key" type="password" value="{{ settings.embedding_api_key }}" placeholder="本地服务可留空" />
-          <button type="button" id="toggle-embedding-api-key" class="secondary compact">显示</button>
-        </div>
-
-        <label for="embedding-model">嵌入模型名</label>
-        <input id="embedding-model" value="{{ settings.embedding_model }}" placeholder="例如 text-embedding-3-small" />
-
-        <label>嵌入时读取字段</label>
-        <div class="field-chip-row">
-          <label class="check-chip"><input class="embedding-field" type="checkbox" value="title" {% if 'title' in settings.embedding_fields %}checked{% endif %} /><span>标题</span></label>
-          <label class="check-chip"><input class="embedding-field" type="checkbox" value="content" {% if 'content' in settings.embedding_fields %}checked{% endif %} /><span>正文</span></label>
-          <label class="check-chip"><input class="embedding-field" type="checkbox" value="tags" {% if 'tags' in settings.embedding_fields %}checked{% endif %} /><span>标签</span></label>
-          <label class="check-chip"><input class="embedding-field" type="checkbox" value="notes" {% if 'notes' in settings.embedding_fields %}checked{% endif %} /><span>备注</span></label>
-        </div>
-
-        <div class="grid-two">
-          <div>
-            <label for="retrieval-top-k">召回条数</label>
-            <input id="retrieval-top-k" type="number" min="1" max="12" step="1" value="{{ settings.retrieval_top_k }}" />
-          </div>
-          <div>
-            <label class="checkbox-row offset-top">
-              <input id="rerank-enabled" type="checkbox" {% if settings.rerank_enabled %}checked{% endif %} />
-              <span>启用重排序模型</span>
-            </label>
-          </div>
-        </div>
-
-        <label for="rerank-base-url">重排序 API URL</label>
-        <input id="rerank-base-url" value="{{ settings.rerank_base_url }}" placeholder="例如 http://127.0.0.1:8000/v1" />
-
-        <label for="rerank-api-key">重排序 API Key</label>
-        <div class="inline-field">
-          <input id="rerank-api-key" type="password" value="{{ settings.rerank_api_key }}" placeholder="本地服务可留空" />
-          <button type="button" id="toggle-rerank-api-key" class="secondary compact">显示</button>
-        </div>
-
-        <div class="grid-two">
-          <div>
-            <label for="rerank-model">重排序模型名</label>
-            <input id="rerank-model" value="{{ settings.rerank_model }}" placeholder="例如 jina-reranker-v2-base-multilingual" />
-          </div>
-          <div>
-            <label for="rerank-top-n">保留条数</label>
-            <input id="rerank-top-n" type="number" min="1" max="12" step="1" value="{{ settings.rerank_top_n }}" />
-          </div>
-        </div>
-
-        <div class="button-row">
-          <button id="save-retrieval" class="secondary">立即保存检索设置</button>
-          <button id="test-embedding" class="secondary">测试嵌入</button>
-        </div>
-      </section>
-
-      <section class="panel config-panel full-span">
+      <section class="panel config-panel config-appearance-panel">
         <div class="section-head">
           <p class="eyebrow">Appearance</p>
           <h2>界面与背景</h2>
@@ -584,18 +181,79 @@
         </div>
       </section>
 
-      <section class="panel config-panel full-span">
-        <div class="section-head">
-          <p class="eyebrow">Actions</p>
-          <h2>整体操作</h2>
-          <p id="status-text" class="muted status-line">就绪</p>
+      <details class="config-advanced-group full-span">
+        <summary class="config-advanced-summary">
+          <span class="config-advanced-title">高级设置</span>
+          <strong>嵌入与重排序</strong>
+          <span class="muted">召回、嵌入字段和重排序模型。新手可以先保持默认。</span>
+        </summary>
+        <section class="panel config-panel config-retrieval-panel">
+          <div class="section-head">
+            <p class="eyebrow">Retrieval</p>
+            <h2>嵌入与重排序</h2>
+            <p class="muted">嵌入模型负责召回，重排序模型可在召回后进一步精选结果。</p>
+          </div>
+
+        <label for="embedding-base-url">嵌入 API URL</label>
+        <input id="embedding-base-url" value="{{ settings.embedding_base_url }}" placeholder="例如 http://127.0.0.1:8000/v1" />
+
+        <label for="embedding-api-key">嵌入 API Key</label>
+        <div class="inline-field">
+          <input id="embedding-api-key" type="password" value="{{ settings.embedding_api_key }}" placeholder="本地服务可留空" />
+          <button type="button" id="toggle-embedding-api-key" class="secondary compact">显示</button>
+        </div>
+
+        <label for="embedding-model">嵌入模型名</label>
+        <input id="embedding-model" value="{{ settings.embedding_model }}" placeholder="例如 text-embedding-3-small" />
+
+        <label>嵌入时读取字段</label>
+        <div class="field-chip-row">
+          <label class="check-chip"><input class="embedding-field" type="checkbox" value="title" {% if 'title' in settings.embedding_fields %}checked{% endif %} /><span>标题</span></label>
+          <label class="check-chip"><input class="embedding-field" type="checkbox" value="content" {% if 'content' in settings.embedding_fields %}checked{% endif %} /><span>正文</span></label>
+          <label class="check-chip"><input class="embedding-field" type="checkbox" value="tags" {% if 'tags' in settings.embedding_fields %}checked{% endif %} /><span>标签</span></label>
+          <label class="check-chip"><input class="embedding-field" type="checkbox" value="notes" {% if 'notes' in settings.embedding_fields %}checked{% endif %} /><span>备注</span></label>
+        </div>
+
+        <div class="grid-two">
+          <div>
+            <label for="retrieval-top-k">召回条数</label>
+            <input id="retrieval-top-k" type="number" min="1" max="12" step="1" value="{{ settings.retrieval_top_k }}" />
+          </div>
+          <div>
+            <label class="fr-setting-switch-row offset-top">
+              <span>启用重排序模型</span>
+              <input id="rerank-enabled" type="checkbox" {% if settings.rerank_enabled %}checked{% endif %} />
+            </label>
+          </div>
+        </div>
+
+        <label for="rerank-base-url">重排序 API URL</label>
+        <input id="rerank-base-url" value="{{ settings.rerank_base_url }}" placeholder="例如 http://127.0.0.1:8000/v1" />
+
+        <label for="rerank-api-key">重排序 API Key</label>
+        <div class="inline-field">
+          <input id="rerank-api-key" type="password" value="{{ settings.rerank_api_key }}" placeholder="本地服务可留空" />
+          <button type="button" id="toggle-rerank-api-key" class="secondary compact">显示</button>
+        </div>
+
+        <div class="grid-two">
+          <div>
+            <label for="rerank-model">重排序模型名</label>
+            <input id="rerank-model" value="{{ settings.rerank_model }}" placeholder="例如 jina-reranker-v2-base-multilingual" />
+          </div>
+          <div>
+            <label for="rerank-top-n">保留条数</label>
+            <input id="rerank-top-n" type="number" min="1" max="12" step="1" value="{{ settings.rerank_top_n }}" />
+          </div>
         </div>
 
         <div class="button-row">
-          <button id="save-all">立即保存全部配置</button>
-          <button id="reset-chat" class="secondary">清空聊天记录</button>
+          <button id="save-retrieval" class="secondary">立即保存检索设置</button>
+          <button id="test-embedding" class="secondary">测试嵌入</button>
         </div>
-      </section>
+        </section>
+      </details>
+
     </div>
 
     <div id="result-modal" class="result-modal" hidden style="display:none;">
@@ -624,6 +282,7 @@
       const resultModalTitleEl = document.getElementById("result-modal-title");
       const resultModalBodyEl = document.getElementById("result-modal-body");
       const presetHelperEl = document.getElementById("preset-helper");
+      const toastHostEl = document.getElementById("config-toast-host");
 
       const LLM_PRESETS = {
         custom: {
@@ -666,8 +325,66 @@
 
       const saveTimers = { settings: null };
 
-      function setStatus(text) {
-        statusEl.textContent = text;
+      function inferStatusKind(text) {
+        const value = String(text || "");
+        if (/失败|错误|异常|不能为空|不可用/.test(value)) return "error";
+        if (/正在|保存中|测试中|打包|上传|拉取|变更|切换|调整/.test(value)) return "busy";
+        if (/已|成功|完成|清空/.test(value)) return "success";
+        return "idle";
+      }
+
+      function setStatus(text, kind = null) {
+        if (!statusEl) return;
+        const statusKind = kind || inferStatusKind(text);
+        statusEl.textContent = text || "已准备";
+        statusEl.classList.remove("is-idle", "is-busy", "is-success", "is-error");
+        statusEl.classList.add("task-status", `is-${statusKind}`);
+      }
+
+      function showToast(message, type = "info") {
+        if (!toastHostEl || !message) return;
+        const toast = document.createElement("div");
+        toast.className = `app-toast ${type}`;
+        toast.textContent = message;
+        toastHostEl.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add("show"));
+        window.setTimeout(() => {
+          toast.classList.remove("show");
+          window.setTimeout(() => toast.remove(), 220);
+        }, 2200);
+      }
+
+      function rememberButtonLabel(button) {
+        if (!button) return "";
+        if (!button.dataset.defaultLabel) {
+          button.dataset.defaultLabel = button.textContent.trim();
+        }
+        return button.dataset.defaultLabel;
+      }
+
+      function setButtonState(button, state = "idle", label = "") {
+        if (!button) return;
+        const defaultLabel = rememberButtonLabel(button);
+        button.classList.remove("is-loading", "is-success", "is-error");
+        button.disabled = state === "loading";
+        if (state === "loading") {
+          button.classList.add("is-loading");
+          button.textContent = label || "处理中…";
+          return;
+        }
+        if (state === "success") {
+          button.classList.add("is-success");
+          button.textContent = label || "已完成 ✓";
+          window.setTimeout(() => setButtonState(button, "idle"), 1200);
+          return;
+        }
+        if (state === "error") {
+          button.classList.add("is-error");
+          button.textContent = label || "操作失败";
+          window.setTimeout(() => setButtonState(button, "idle"), 1500);
+          return;
+        }
+        button.textContent = defaultLabel;
       }
 
       function showResultModal(title, body) {
@@ -693,7 +410,8 @@
           try {
             await handler();
           } catch (error) {
-            setStatus(`自动保存失败：${error.message}`);
+            setStatus(`自动保存失败：${error.message}`, "error");
+            showToast(`自动保存失败：${error.message}`, "error");
           } finally {
             saveTimers.settings = null;
           }
@@ -901,19 +619,33 @@
         }
       });
 
-      document.getElementById("save-retrieval").addEventListener("click", async () => {
+      document.getElementById("save-retrieval").addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        setButtonState(button, "loading", "保存中…");
+        setStatus("正在保存检索配置…", "busy");
         try {
-          await saveSettings("检索配置已保存");
+          await saveSettings("已完成：检索配置已保存");
+          setButtonState(button, "success", "已保存 ✓");
+          showToast("检索配置已保存", "success");
         } catch (error) {
-          setStatus(`保存失败：${error.message}`);
+          setButtonState(button, "error", "保存失败");
+          setStatus(`保存失败：${error.message}`, "error");
+          showToast(`保存失败：${error.message}`, "error");
         }
       });
 
-      document.getElementById("save-all").addEventListener("click", async () => {
+      document.getElementById("save-all").addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        setButtonState(button, "loading", "保存中…");
+        setStatus("正在保存全部配置…", "busy");
         try {
-          await saveSettings("全部配置已保存");
+          await saveSettings("已完成：全部配置已保存");
+          setButtonState(button, "success", "已保存 ✓");
+          showToast("全部配置已保存", "success");
         } catch (error) {
-          setStatus(`保存失败：${error.message}`);
+          setButtonState(button, "error", "保存失败");
+          setStatus(`保存失败：${error.message}`, "error");
+          showToast(`保存失败：${error.message}`, "error");
         }
       });
 
@@ -929,6 +661,10 @@
         }
       });
 
+      document.getElementById("test-connection-sticky")?.addEventListener("click", () => {
+        document.getElementById("test-connection")?.click();
+      });
+
       document.getElementById("test-embedding").addEventListener("click", async () => {
         try {
           await saveSettings("正在测试嵌入模型...");
@@ -941,11 +677,17 @@
         }
       });
 
-      document.getElementById("fetch-models").addEventListener("click", async () => {
+      document.getElementById("fetch-models").addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        setButtonState(button, "loading", "拉取中…");
         try {
           await fetchModels();
+          setButtonState(button, "success", "已拉取 ✓");
+          showToast("模型列表已拉取", "success");
         } catch (error) {
-          setStatus(`拉取模型失败：${error.message}`);
+          setButtonState(button, "error", "拉取失败");
+          setStatus(`拉取模型失败：${error.message}`, "error");
+          showToast(`拉取模型失败：${error.message}`, "error");
           showResultModal("拉取模型失败", String(error.message || error));
         }
       });
@@ -969,20 +711,34 @@
         }
       });
 
-      document.getElementById("reset-chat").addEventListener("click", async () => {
+      document.getElementById("reset-chat").addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        setButtonState(button, "loading", "清空中…");
+        setStatus("正在清空聊天记录…", "busy");
         try {
           await postJson("/api/reset", {});
-          setStatus("聊天记录已清空");
+          setStatus("已完成：聊天记录已清空", "success");
+          setButtonState(button, "success", "已清空 ✓");
+          showToast("聊天记录已清空", "success");
         } catch (error) {
-          setStatus(`清空失败：${error.message}`);
+          setButtonState(button, "error", "清空失败");
+          setStatus(`清空失败：${error.message}`, "error");
+          showToast(`清空失败：${error.message}`, "error");
         }
       });
 
-      document.getElementById("upload-background").addEventListener("click", async () => {
+      document.getElementById("upload-background").addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        setButtonState(button, "loading", "上传中…");
+        setStatus("正在上传背景图…", "busy");
         try {
           await uploadBackground();
+          setButtonState(button, "success", "已上传 ✓");
+          showToast("背景图已上传", "success");
         } catch (error) {
-          setStatus(`上传失败：${error.message}`);
+          setButtonState(button, "error", "上传失败");
+          setStatus(`上传失败：${error.message}`, "error");
+          showToast(`上传失败：${error.message}`, "error");
         }
       });
 
@@ -1044,8 +800,15 @@
         scheduleSave(saveSettings, "已填入预设，正在保存...", 250);
       });
 
-      document.getElementById("export-current-bundle").addEventListener("click", () => {
-        setStatus("正在打包当前人设卡、记忆、世界书和预设...");
+      document.getElementById("export-current-bundle").addEventListener("click", (event) => {
+        const button = event.currentTarget;
+        setButtonState(button, "loading", "打包中…");
+        setStatus("正在打包当前人设卡、记忆、世界书和预设…", "busy");
+        showToast("正在导出当前人设存档", "info");
+        window.setTimeout(() => {
+          setButtonState(button, "success", "已开始下载 ✓");
+          setStatus("已完成：人设存档下载已开始", "success");
+        }, 700);
         window.location.href = "/api/export/current-bundle";
       });
 
@@ -1061,6 +824,7 @@
       toggleSecret("embedding-api-key", "toggle-embedding-api-key");
       toggleSecret("rerank-api-key", "toggle-rerank-api-key");
       hideResultModal();
+      setStatus("已准备 · 修改后会自动保存，也可以手动保存全部配置。", "idle");
       fillModelOptions([], document.getElementById("llm-model").value.trim());
       hideModelMenu();
       applyPresetSelection("custom");

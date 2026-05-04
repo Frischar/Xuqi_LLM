@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Preset - Xuqi LLM Chat</title>
-    <link rel="stylesheet" href="/static/styles.css?v=config-wide-v2" />
+    <title>Preset - Fantareal</title>
+    <link rel="stylesheet" href="/static/styles.css?v=global-sidebar-v081" />
     <style>
       .config-shell.compact {
         width: min(1760px, calc(100vw - 32px));
@@ -875,6 +875,106 @@
         background: linear-gradient(180deg, rgba(18, 29, 41, 0.42), rgba(13, 21, 31, 0.62));
       }
 
+
+
+      /* v1.0.2 restore preset page quality: keep original glass feel,
+         fix save-state card and preset library cards. */
+      html:not([data-theme="dark"]) .preset-overview-grid .stat-box.preset-save-state-box {
+        background:
+          linear-gradient(135deg, rgba(255, 246, 232, 0.96), rgba(245, 220, 192, 0.72)) !important;
+        border-color: rgba(205, 132, 75, 0.58) !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.68),
+          0 0 0 1px rgba(238, 169, 79, 0.14),
+          0 10px 24px rgba(116, 75, 42, 0.10) !important;
+      }
+
+      html:not([data-theme="dark"]) .preset-overview-grid .stat-box.preset-save-state-box strong {
+        color: #3d2a1c;
+        font-weight: 900;
+      }
+
+      html:not([data-theme="dark"]) .preset-overview-grid .stat-box.preset-save-state-box.is-dirty {
+        background:
+          linear-gradient(135deg, rgba(255, 238, 214, 0.98), rgba(238, 169, 79, 0.26)) !important;
+        border-color: rgba(205, 116, 52, 0.72) !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.70),
+          0 0 0 2px rgba(238, 169, 79, 0.18),
+          0 12px 28px rgba(116, 75, 42, 0.12) !important;
+      }
+
+      .preset-card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 14px;
+      }
+
+      .preset-item,
+      html:not([data-theme="dark"]) .preset-item,
+      html[data-theme="dark"] .preset-item {
+        border-radius: 18px !important;
+        min-height: 118px;
+        padding: 16px 17px;
+        text-align: left;
+        align-items: stretch;
+        overflow: hidden;
+        transform: none !important;
+      }
+
+      html:not([data-theme="dark"]) .preset-item {
+        background:
+          linear-gradient(180deg, rgba(252, 246, 239, 0.94), rgba(245, 235, 224, 0.88)) !important;
+        border-color: rgba(160, 116, 84, 0.36) !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.62),
+          0 6px 16px rgba(96, 63, 35, 0.055) !important;
+      }
+
+      .preset-item:hover,
+      html:not([data-theme="dark"]) .preset-item:hover,
+      html[data-theme="dark"] .preset-item:hover {
+        transform: none !important;
+      }
+
+      html:not([data-theme="dark"]) .preset-item:hover {
+        background:
+          linear-gradient(180deg, rgba(255, 248, 241, 0.96), rgba(246, 235, 223, 0.92)) !important;
+        border-color: rgba(176, 109, 55, 0.48) !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.66),
+          0 8px 18px rgba(96, 63, 35, 0.075) !important;
+      }
+
+      html:not([data-theme="dark"]) .preset-item.current-runtime {
+        background:
+          linear-gradient(135deg, rgba(255, 240, 219, 0.98), rgba(242, 211, 181, 0.86)) !important;
+        border-color: rgba(219, 133, 61, 0.68) !important;
+        box-shadow:
+          inset 4px 0 0 rgba(219, 133, 61, 0.82),
+          inset 0 1px 0 rgba(255, 255, 255, 0.64),
+          0 10px 22px rgba(116, 75, 42, 0.12) !important;
+      }
+
+      html:not([data-theme="dark"]) .preset-item.active-editor:not(.current-runtime) {
+        border-color: rgba(94, 194, 168, 0.66) !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.64),
+          0 0 0 2px rgba(94, 194, 168, 0.13),
+          0 8px 18px rgba(96, 63, 35, 0.06) !important;
+      }
+
+      .preset-item-head {
+        align-items: flex-start;
+      }
+
+      .preset-pill-row {
+        gap: 6px;
+      }
+
+      .preset-pill {
+        border-radius: 999px !important;
+      }
+
       @media (max-width: 1180px) {
         .preset-overview-grid,
         .preset-editor-grid {
@@ -907,10 +1007,10 @@
       }
     </style>
   </head>
-  <body>
+  <body class="app-sidebar-shell modern-setting-page preset-config-page">
     <div class="topbar-stack">
       <div class="topbar">
-        <a class="brand" href="/chat">Xuqi LLM Chat</a>
+        <a class="brand" href="/chat">Fantareal</a>
         {% include "_grouped_nav.html" %}
       </div>
       <div class="slot-toolbar">
@@ -925,11 +1025,13 @@
     </div>
 
     <div class="config-shell compact">
-      <section class="panel config-panel full-span">
-        <div class="section-head">
-          <p class="eyebrow">Preset</p>
-          <h2>多预设管理</h2>
-          <p class="muted">全局预设库内可保存多套写作预设；聊天时只会使用当前激活的那一份。</p>
+      <section class="panel config-panel full-span preset-workbench-panel">
+        <div class="section-head preset-workbench-head">
+          <div>
+            <p class="eyebrow">Preset Workbench</p>
+            <h2>预设工作台</h2>
+            <p class="muted">查看当前编辑与聊天使用状态；新增、导入、导出和保存都在这里完成。</p>
+          </div>
         </div>
         <div class="preset-overview-grid">
           <div class="stat-box"><span class="stat-label">聊天使用中</span><strong id="active-preset-label">{{ active_preset.name }}</strong></div>
@@ -938,9 +1040,19 @@
           <div class="stat-box"><span class="stat-label">启用状态</span><strong id="preset-enabled-label">{{ '启用' if active_preset.enabled else '停用' }}</strong></div>
           <div class="stat-box preset-save-state-box"><span class="stat-label">保存状态</span><strong id="dirty-state-label">已保存</strong></div>
         </div>
-        <div id="preset-status-strip" class="preset-status-strip">
-          <span><strong>状态提示：</strong><span id="status-text" class="muted status-line">就绪</span></span>
+        <div id="preset-status-strip" class="preset-status-strip config-status-strip">
+          <span id="status-text" class="config-status-pill status-line is-success" aria-live="polite">就绪</span>
           <span class="muted helper-text">切换卡片只切换编辑对象；只有点击“设为聊天使用”后，才会真正用于聊天。</span>
+        </div>
+        <div class="config-workbench-actions preset-workbench-actions">
+          <button id="create-preset" type="button" class="secondary">新增</button>
+          <button id="duplicate-preset" type="button" class="secondary">复制</button>
+          <button id="activate-preset" type="button" class="secondary">启用</button>
+          <button id="import-preset" type="button" class="secondary">导入</button>
+          <button id="export-preset" type="button" class="secondary">导出</button>
+          <button id="delete-preset" type="button" class="secondary danger-button">删除</button>
+          <button id="save-preset-top" type="button">保存</button>
+          <input id="import-preset-file" type="file" accept=".json,.jsonc,application/json,text/plain" hidden />
         </div>
       </section>
 
@@ -950,15 +1062,6 @@
             <p class="eyebrow">Library</p>
             <h2>预设库</h2>
             <p class="muted">橙色表示聊天正在使用，绿色边框表示当前正在编辑。</p>
-          </div>
-          <div class="preset-library-actions">
-            <button id="create-preset" type="button">新增预设</button>
-            <button id="duplicate-preset" type="button" class="secondary">复制当前</button>
-            <button id="activate-preset" type="button" class="secondary">设为聊天使用</button>
-            <button id="import-preset" type="button" class="secondary">导入预设</button>
-            <button id="export-preset" type="button" class="secondary">导出当前</button>
-            <button id="delete-preset" type="button" class="secondary danger-button">删除预设</button>
-            <input id="import-preset-file" type="file" accept=".json,.jsonc,application/json,text/plain" hidden />
           </div>
         </div>
         <div id="preset-items" class="preset-card-grid"></div>
@@ -1085,7 +1188,22 @@
       }
 
       function setStatus(text) {
-        statusEl.textContent = text;
+        const value = text || "就绪";
+        statusEl.textContent = value;
+        const state = getStatusState(value);
+        statusEl.classList.remove("is-saving", "is-success", "is-error", "is-dirty", "is-idle");
+        statusEl.classList.add(`is-${state}`);
+        statusStripEl?.classList.remove("is-saving", "is-success", "is-error", "is-dirty", "is-idle");
+        statusStripEl?.classList.add(`is-${state}`);
+      }
+
+      function getStatusState(text) {
+        const value = String(text || "");
+        if (/失败|错误|异常|无法/.test(value)) return "error";
+        if (/正在|保存中|读取中|导入中|导出中|生成中|请不要重复/.test(value)) return "saving";
+        if (/未保存|修改|记得保存|待保存/.test(value)) return "dirty";
+        if (/就绪|已保存|已加载|已读取|读取完成|已导出|已导入|已新增|已复制|已删除|已切换|重新读取|完成/.test(value)) return "success";
+        return "idle";
       }
 
       function setDirty(dirty, message) {
@@ -1635,6 +1753,7 @@
       }
 
       async function reloadStore() {
+        setStatus("正在读取预设...");
         const data = await fetch("/api/preset").then((response) => response.json());
         presetStore = data.preset_store || { active_preset_id: "", presets: [] };
         editingPresetId = presetStore.active_preset_id || presetStore.presets?.[0]?.id || "";
@@ -1644,6 +1763,7 @@
       }
 
       async function saveStore() {
+        setStatus("正在保存预设...");
         syncEditorToStore();
         const data = await postJson("/api/preset", presetStore);
         presetStore = data.preset_store || presetStore;
@@ -1773,6 +1893,7 @@
         markDirty("已新增一个规则组。");
       });
       document.getElementById("save-preset").addEventListener("click", async () => { try { await saveStore(); } catch (error) { setStatus(`保存失败：${error.message}`); } });
+      document.getElementById("save-preset-top")?.addEventListener("click", async () => { try { await saveStore(); } catch (error) { setStatus(`保存失败：${error.message}`); } });
       document.getElementById("reload-preset").addEventListener("click", async () => { try { await reloadStore(); } catch (error) { setStatus(`读取失败：${error.message}`); } });
       document.getElementById("create-preset").addEventListener("click", async () => { try { await createPreset(); } catch (error) { setStatus(`新增失败：${error.message}`); } });
       document.getElementById("duplicate-preset").addEventListener("click", async () => { try { await duplicatePreset(); } catch (error) { setStatus(`复制失败：${error.message}`); } });
@@ -1792,6 +1913,13 @@
         if (!presetDirty) return;
         event.preventDefault();
         event.returnValue = "";
+      });
+
+      document.querySelectorAll(".config-workbench-actions button").forEach((button) => {
+        button.addEventListener("click", () => {
+          button.classList.add("is-feedback");
+          window.setTimeout(() => button.classList.remove("is-feedback"), 900);
+        });
       });
 
       applyTheme(currentTheme);

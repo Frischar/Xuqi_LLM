@@ -3,323 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Worldbook Config - Xuqi LLM Chat</title>
-    <link rel="stylesheet" href="/static/styles.css?v=config-wide-v2-ui-unify-v1" />
-  
-    <style id="ui-unify-v1">
-      body.modern-setting-page {
-        --ui-card-radius: 24px;
-        --ui-sub-radius: 18px;
-        --ui-gap: 18px;
-      }
-
-      body.modern-setting-page .config-shell.compact {
-        width: min(1480px, calc(100% - 32px));
-        max-width: none;
-        gap: var(--ui-gap);
-      }
-
-      body.modern-setting-page .panel.config-panel {
-        position: relative;
-        overflow: hidden;
-        border-radius: var(--ui-card-radius);
-        border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
-        background:
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--panel-strong) 72%, transparent),
-            color-mix(in srgb, var(--panel) 92%, transparent));
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
-      }
-
-      body.modern-setting-page .panel.config-panel.full-span:first-of-type {
-        border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
-        background:
-          radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 12%, transparent), transparent 38%),
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--panel-strong) 82%, transparent),
-            color-mix(in srgb, var(--panel) 92%, transparent));
-      }
-
-      body.modern-setting-page .section-head {
-        gap: 0.35rem;
-      }
-
-      body.modern-setting-page .section-head h2,
-      body.modern-setting-page .section-head h3 {
-        margin-top: 0.08rem;
-        letter-spacing: -0.02em;
-      }
-
-      body.modern-setting-page .eyebrow {
-        display: inline-flex;
-        width: fit-content;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.26rem 0.64rem;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
-        background: color-mix(in srgb, var(--accent) 10%, transparent);
-      }
-
-      body.modern-setting-page .stats-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 12px;
-        margin-top: 14px;
-      }
-
-      body.modern-setting-page .stat-box {
-        min-height: 76px;
-        padding: 14px 16px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: var(--ui-sub-radius);
-        background:
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--input-bg) 78%, transparent),
-            color-mix(in srgb, var(--panel) 86%, transparent));
-        box-shadow: inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
-      }
-
-      body.modern-setting-page .stat-label {
-        display: block;
-        margin-bottom: 0.36rem;
-        font-size: 0.78rem;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        color: var(--muted);
-      }
-
-      body.modern-setting-page .stat-box strong {
-        font-size: 1.05rem;
-        line-height: 1.35;
-      }
-
-      body.modern-setting-page label:not(.checkbox-row):not(.check-chip) {
-        font-weight: 850;
-        color: color-mix(in srgb, var(--text) 82%, var(--muted));
-      }
-
-      body.modern-setting-page input,
-      body.modern-setting-page select,
-      body.modern-setting-page textarea {
-        border-radius: 15px;
-        border-color: color-mix(in srgb, var(--border) 84%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 92%, transparent);
-      }
-
-      body.modern-setting-page textarea {
-        line-height: 1.7;
-      }
-
-      body.modern-setting-page .button-row {
-        gap: 10px;
-      }
-
-      body.modern-setting-page button,
-      body.modern-setting-page .button-link,
-      body.modern-setting-page .ghost-link,
-      body.modern-setting-page .secondary,
-      body.modern-setting-page .compact {
-        border-radius: 999px;
-      }
-
-      body.modern-setting-page .secondary,
-      body.modern-setting-page .ghost-link,
-      body.modern-setting-page .button-link {
-        border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 70%, transparent);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-      }
-
-      body.modern-setting-page button:not(.secondary):not(.compact):not(.ghost-link):not(.button-link),
-      body.modern-setting-page #save-settings,
-      body.modern-setting-page #save-all,
-      body.modern-setting-page #save-user-profile,
-      body.modern-setting-page #save-worldbook-settings,
-      body.modern-setting-page #save-workshop,
-      body.modern-setting-page #save-card {
-        box-shadow: 0 10px 22px color-mix(in srgb, var(--accent) 18%, transparent);
-      }
-
-      body.modern-setting-page .checkbox-row {
-        display: flex;
-        align-items: center;
-        gap: 0.72rem;
-        min-height: 46px;
-        padding: 10px 12px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: 16px;
-        background: color-mix(in srgb, var(--input-bg) 64%, transparent);
-        color: var(--text);
-        font-weight: 760;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"] {
-        appearance: none;
-        -webkit-appearance: none;
-        position: relative;
-        flex: 0 0 auto;
-        width: 46px;
-        height: 26px;
-        margin: 0;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
-        background: color-mix(in srgb, var(--panel-strong) 76%, transparent);
-        cursor: pointer;
-        transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]::before {
-        content: "";
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 20px;
-        height: 20px;
-        border-radius: 999px;
-        background: color-mix(in srgb, var(--muted) 82%, white);
-        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
-        transition: transform 0.18s ease, background 0.18s ease;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]:checked {
-        border-color: color-mix(in srgb, var(--accent) 68%, var(--border));
-        background: color-mix(in srgb, var(--accent) 38%, var(--panel-strong));
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]:checked::before {
-        transform: translateX(20px);
-        background: white;
-      }
-
-      body.modern-setting-page .field-chip-row {
-        gap: 0.55rem;
-      }
-
-      body.modern-setting-page .check-chip {
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 62%, transparent);
-      }
-
-      body.modern-setting-page .helper-text,
-      body.modern-setting-page .field-note,
-      body.modern-setting-page .muted.compact {
-        color: color-mix(in srgb, var(--muted) 88%, var(--text));
-      }
-
-      body.modern-setting-page .status-line {
-        display: block;
-        min-height: 46px;
-        padding: 12px 14px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: 16px;
-        background: color-mix(in srgb, var(--input-bg) 72%, transparent);
-      }
-
-      body.modern-setting-page .inline-field,
-      body.modern-setting-page .model-combo-row {
-        align-items: stretch;
-      }
-
-      body.modern-setting-page .preview-card,
-      body.modern-setting-page .card-block,
-      body.modern-setting-page .sub-block,
-      body.modern-setting-page .workshop-runtime-panel,
-      body.modern-setting-page .workshop-search-block,
-      body.modern-setting-page .workshop-rule-shell {
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: var(--ui-sub-radius);
-        background: color-mix(in srgb, var(--input-bg) 58%, transparent);
-        box-shadow: inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
-      }
-
-      body.modern-setting-page .card-block,
-      body.modern-setting-page .sub-block,
-      body.modern-setting-page .workshop-runtime-panel,
-      body.modern-setting-page .workshop-search-block {
-        padding: 16px;
-      }
-
-      body.modern-setting-page .persona-toolbar,
-      body.modern-setting-page .memory-card-head,
-      body.modern-setting-page .workshop-rule-summary {
-        border-radius: 16px;
-      }
-
-      body.modern-setting-page .workshop-rule-shell {
-        overflow: hidden;
-        margin-bottom: 12px;
-      }
-
-      body.modern-setting-page .workshop-rule-summary {
-        padding: 12px 14px;
-        background: linear-gradient(180deg,
-          color-mix(in srgb, var(--panel-strong) 68%, transparent),
-          color-mix(in srgb, var(--input-bg) 76%, transparent));
-      }
-
-      body.modern-setting-page .workshop-rule-body {
-        padding: 16px;
-        border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-      }
-
-      body.modern-setting-page .workshop-rule-summary-meta,
-      body.modern-setting-page .workshop-rule-summary-text {
-        color: var(--muted);
-      }
-
-      body.modern-setting-page .workshop-rule-trigger-label,
-      body.modern-setting-page .workshop-rule-action-label {
-        display: inline-flex;
-        align-items: center;
-        min-height: 24px;
-        padding: 0.14rem 0.56rem;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
-        background: color-mix(in srgb, var(--accent) 9%, transparent);
-      }
-
-      body.modern-setting-page .sprite-frame {
-        border-radius: 22px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 62%, transparent);
-      }
-
-      body.modern-setting-page .topbar-stack {
-        gap: 12px;
-      }
-
-      body.modern-setting-page .slot-toolbar {
-        border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
-        background: color-mix(in srgb, var(--panel-strong) 72%, transparent);
-      }
-
-      body.modern-setting-page .slot-badge {
-        border-color: color-mix(in srgb, var(--accent) 36%, var(--border));
-        background: color-mix(in srgb, var(--accent) 12%, transparent);
-      }
-
-      @media (max-width: 768px) {
-        body.modern-setting-page .config-shell.compact {
-          width: min(100% - 16px, 100%);
-        }
-        body.modern-setting-page .stats-row {
-          grid-template-columns: 1fr;
-        }
-        body.modern-setting-page .inline-field,
-        body.modern-setting-page .model-combo-row {
-          flex-direction: column;
-        }
-      }
-    </style>
-
+    <title>Worldbook Config - Fantareal</title>
+    <link rel="stylesheet" href="/static/styles.css?v=worldbook-config-v107" />
   </head>
-  <body class="modern-setting-page">
+  <body class="modern-setting-page app-sidebar-shell worldbook-config-page">
     <div class="topbar-stack">
       <div class="topbar">
-        <a class="brand" href="/chat">Xuqi LLM Chat</a>
+        <a class="brand" href="/chat">Fantareal</a>
         {% include "_grouped_nav.html" %}
       </div>
       <div class="slot-toolbar">
@@ -327,50 +17,75 @@
           <span class="slot-badge">Worldbook</span>
           <div class="slot-meta">
             <strong>当前为全局世界书设置</strong>
-            <p class="slot-hint">这里配置的是全局世界书默认触发规则与默认字段。</p>
+            <p class="slot-hint">这里配置全局世界书默认触发规则与默认字段；词条内容请在词条管理页维护。</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="config-shell compact">
-      <section class="panel config-panel full-span">
+    <div class="config-shell compact worldbook-config-shell">
+      <section class="panel config-panel full-span worldbook-settings-hero">
         <div class="section-head">
-          <p class="eyebrow">Worldbook</p>
+          <p class="eyebrow">WORLDBOOK</p>
           <h2>世界书触发设置</h2>
-          <p class="muted">这里控制世界书是否启用、每轮最多注入多少条，以及新词条默认采用怎样的触发方式。词条内容本身请去 <code>Worldbook Entries</code> 页面维护。</p>
-          <p class="muted helper-text">“每轮最多注入条数”指的是单次回复里最多往 prompt 里塞多少条命中的世界书，不是总词条数。命中的词条会按顺序处理后，再按命中上限截断。</p>
-        </div>
-        <div class="stats-row">
-          <div class="stat-box">
-            <span class="stat-label">当前模式</span>
-            <strong id="enabled-label">{% if worldbook_settings.enabled %}启用{% else %}停用{% endif %}</strong>
-          </div>
-          <div class="stat-box">
-            <span class="stat-label">默认命中上限</span>
-            <strong id="max-hits-label">{{ worldbook_settings.max_hits }}</strong>
-          </div>
+          <p class="muted">控制世界书是否启用、每轮最多注入多少条，以及新词条默认采用怎样的触发方式。</p>
+          <p class="muted helper-text">“每轮最多命中条数”指单次回复里最多注入多少条命中的世界书。命中词条会按顺序处理后，再按命中上限截断。</p>
         </div>
       </section>
 
-      <section class="panel config-panel full-span">
-        <label class="checkbox-row">
-          <input id="wb-enabled" type="checkbox" {% if worldbook_settings.enabled %}checked{% endif %} />
-          <span>启用世界书</span>
-        </label>
+      <section class="panel config-panel full-span worldbook-workbench-panel">
+        <div class="worldbook-workbench-head">
+          <div class="worldbook-workbench-title">
+            <p class="eyebrow">WORLDBOOK WORKBENCH</p>
+            <h2>世界书工作台</h2>
+            <p class="muted">保存、读取与词条管理入口集中在这里，滚动时会置顶方便随时操作。</p>
+          </div>
+          <div class="worldbook-workbench-state">
+            <span id="wb-status-pill" class="config-status-pill is-success">就绪</span>
+          </div>
+        </div>
 
-        <label class="checkbox-row">
-          <input id="wb-debug-enabled" type="checkbox" {% if worldbook_settings.debug_enabled %}checked{% endif %} />
-          <span>在 Chat 页面显示 Worldbook Debug 侧边按钮</span>
-        </label>
+        <div class="worldbook-workbench-stats">
+          <div class="worldbook-mini-stat">
+            <span>当前模式</span>
+            <strong id="enabled-label">{% if worldbook_settings.enabled %}启用{% else %}停用{% endif %}</strong>
+          </div>
+          <div class="worldbook-mini-stat">
+            <span>默认命中上限</span>
+            <strong id="max-hits-label">{{ worldbook_settings.max_hits }}</strong>
+          </div>
+        </div>
 
-        <div class="grid-two">
-          <div>
+        <div class="worldbook-workbench-actions">
+          <a class="button-link secondary" href="/config/worldbook/entries">词条管理</a>
+          <button id="reload-worldbook-settings" type="button" class="secondary">重新读取</button>
+          <button id="save-worldbook-settings" type="button">保存设置</button>
+        </div>
+      </section>
+
+      <section class="panel config-panel full-span worldbook-settings-panel">
+        <div class="worldbook-settings-grid">
+          <div class="worldbook-setting-card wide">
+            <h3>基础开关</h3>
+            <div class="grid-two">
+              <label class="checkbox-row">
+                <input id="wb-enabled" type="checkbox" {% if worldbook_settings.enabled %}checked{% endif %} />
+                <span>启用世界书</span>
+              </label>
+
+              <label class="checkbox-row">
+                <input id="wb-debug-enabled" type="checkbox" {% if worldbook_settings.debug_enabled %}checked{% endif %} />
+                <span>在 Chat 页面显示 Worldbook Debug 侧边按钮</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="worldbook-setting-card">
+            <h3>命中与默认类型</h3>
             <label for="wb-max-hits">每轮最多命中条数</label>
             <input id="wb-max-hits" type="number" min="1" max="20" step="1" value="{{ worldbook_settings.max_hits }}" />
             <p class="muted helper-text">数字越小，注入越克制；数字越大，模型拿到的世界书上下文越多。</p>
-          </div>
-          <div>
+
             <label for="wb-default-entry-type">新词条默认触发类型</label>
             <select id="wb-default-entry-type">
               <option value="keyword" {% if (worldbook_settings.default_entry_type or 'keyword') == 'keyword' %}selected{% endif %}>关键词触发</option>
@@ -378,29 +93,23 @@
             </select>
             <p class="muted helper-text">常驻词条默认不依赖关键词；关键词触发词条仍依赖主关键词。</p>
           </div>
-        </div>
 
-        <div class="grid-two">
-          <div>
+          <div class="worldbook-setting-card">
+            <h3>关键词逻辑</h3>
             <label for="wb-default-match-mode">主关键词组默认逻辑</label>
             <select id="wb-default-match-mode">
               <option value="any" {% if worldbook_settings.default_match_mode == 'any' %}selected{% endif %}>任意命中</option>
               <option value="all" {% if worldbook_settings.default_match_mode == 'all' %}selected{% endif %}>全部命中</option>
             </select>
             <p class="muted helper-text">“任意命中”表示多个别名里命中一个就算；“全部命中”表示填写的词都要同时出现。</p>
-          </div>
-          <div>
+
             <label for="wb-default-secondary-mode">副关键词组默认逻辑</label>
             <select id="wb-default-secondary-mode">
               <option value="any" {% if worldbook_settings.default_secondary_mode == 'any' %}selected{% endif %}>任意命中</option>
               <option value="all" {% if worldbook_settings.default_secondary_mode == 'all' %}selected{% endif %}>全部命中</option>
             </select>
             <p class="muted helper-text">这是副关键词组内部多个别名之间的默认关系。</p>
-          </div>
-        </div>
 
-        <div class="grid-two">
-          <div>
             <label for="wb-default-group-operator">主副组默认关系</label>
             <select id="wb-default-group-operator">
               <option value="and" {% if (worldbook_settings.default_group_operator or 'and') == 'and' %}selected{% endif %}>与所有（主副都要触发）</option>
@@ -408,33 +117,27 @@
             </select>
             <p class="muted helper-text">这是主关键词组与副关键词组之间的默认关系，不是组内别名关系。</p>
           </div>
-          <div class="button-row offset-top">
-            <a class="ghost-link button-link" href="/config/worldbook/entries">打开词条管理页</a>
-          </div>
-        </div>
 
-        <div class="grid-two">
-          <div>
+          <div class="worldbook-setting-card">
+            <h3>概率、黏性与冷却</h3>
             <label for="wb-default-chance">默认触发概率（0-100）</label>
             <input id="wb-default-chance" type="number" min="0" max="100" step="1" value="{{ worldbook_settings.default_chance if worldbook_settings.default_chance is not none else 100 }}" />
             <p class="muted helper-text">只影响新建词条的默认值，不会强行覆盖已有词条。</p>
-          </div>
-          <div>
-            <label for="wb-default-sticky-turns">默认黏性（额外跟随几轮）</label>
-            <input id="wb-default-sticky-turns" type="number" min="0" max="999" step="1" value="{{ worldbook_settings.default_sticky_turns if worldbook_settings.default_sticky_turns is not none else 0 }}" />
-          </div>
-        </div>
 
-        <div class="grid-two">
-          <div>
-            <label for="wb-default-cooldown-turns">默认冷却（结束后冷却几轮）</label>
-            <input id="wb-default-cooldown-turns" type="number" min="0" max="999" step="1" value="{{ worldbook_settings.default_cooldown_turns if worldbook_settings.default_cooldown_turns is not none else 0 }}" />
+            <div class="grid-two">
+              <div>
+                <label for="wb-default-sticky-turns">默认黏性</label>
+                <input id="wb-default-sticky-turns" type="number" min="0" max="999" step="1" value="{{ worldbook_settings.default_sticky_turns if worldbook_settings.default_sticky_turns is not none else 0 }}" />
+              </div>
+              <div>
+                <label for="wb-default-cooldown-turns">默认冷却</label>
+                <input id="wb-default-cooldown-turns" type="number" min="0" max="999" step="1" value="{{ worldbook_settings.default_cooldown_turns if worldbook_settings.default_cooldown_turns is not none else 0 }}" />
+              </div>
+            </div>
           </div>
-          <div></div>
-        </div>
 
-        <div class="grid-two">
-          <div>
+          <div class="worldbook-setting-card">
+            <h3>注入位置</h3>
             <label for="wb-default-insertion-position">新词条默认插入位置</label>
             <select id="wb-default-insertion-position">
               <option value="before_char_defs" {% if worldbook_settings.default_insertion_position == 'before_char_defs' %}selected{% endif %}>角色定义前</option>
@@ -442,75 +145,94 @@
               <option value="in_chat" {% if worldbook_settings.default_insertion_position == 'in_chat' %}selected{% endif %}>聊天内注入</option>
             </select>
             <p class="muted helper-text">旧版世界书没有该字段时，会跟随这里的默认值。</p>
-          </div>
-          <div>
-            <label for="wb-default-injection-order">默认注入顺序</label>
-            <input id="wb-default-injection-order" type="number" min="0" max="999999" step="1" value="{{ worldbook_settings.default_injection_order if worldbook_settings.default_injection_order is not none else 100 }}" />
-            <p class="muted helper-text">用于同一层里的先后顺序。旧词条没有该字段时会继承原顺序。</p>
-          </div>
-        </div>
 
-        <div class="grid-two">
-          <div>
-            <label for="wb-default-injection-depth">默认聊天深度</label>
-            <input id="wb-default-injection-depth" type="number" min="0" max="3" step="1" value="{{ worldbook_settings.default_injection_depth if worldbook_settings.default_injection_depth is not none else 0 }}" />
-            <p class="muted helper-text">仅在“聊天内注入”时生效；0 最靠近当前输入。</p>
-          </div>
-          <div>
+            <div class="grid-two">
+              <div>
+                <label for="wb-default-injection-order">默认注入顺序</label>
+                <input id="wb-default-injection-order" type="number" min="0" max="999999" step="1" value="{{ worldbook_settings.default_injection_order if worldbook_settings.default_injection_order is not none else 100 }}" />
+              </div>
+              <div>
+                <label for="wb-default-injection-depth">默认聊天深度</label>
+                <input id="wb-default-injection-depth" type="number" min="0" max="3" step="1" value="{{ worldbook_settings.default_injection_depth if worldbook_settings.default_injection_depth is not none else 0 }}" />
+              </div>
+            </div>
+
             <label for="wb-default-injection-role">默认注入角色</label>
             <select id="wb-default-injection-role">
               <option value="system" {% if (worldbook_settings.default_injection_role or 'system') == 'system' %}selected{% endif %}>system</option>
             </select>
             <p class="muted helper-text">当前节点版先只支持 system。</p>
           </div>
-        </div>
 
-
-        <div class="grid-two">
-          <label class="checkbox-row">
-            <input id="wb-recursive-scan-enabled" type="checkbox" {% if worldbook_settings.recursive_scan_enabled %}checked{% endif %} />
-            <span>启用递归扫描（V1）</span>
-          </label>
-          <div>
-            <label for="wb-recursion-max-depth">递归最大层级</label>
-            <input id="wb-recursion-max-depth" type="number" min="0" max="5" step="1" value="{{ worldbook_settings.recursion_max_depth if worldbook_settings.recursion_max_depth is not none else 2 }}" />
-            <p class="muted helper-text">递归 V1 当前只使用 title / trigger / secondary_trigger 做递归语料；0 表示关闭递归扩展。</p>
+          <div class="worldbook-setting-card wide">
+            <h3>递归与匹配细节</h3>
+            <div class="grid-two">
+              <label class="checkbox-row">
+                <input id="wb-recursive-scan-enabled" type="checkbox" {% if worldbook_settings.recursive_scan_enabled %}checked{% endif %} />
+                <span>启用递归扫描（V1）</span>
+              </label>
+              <div>
+                <label for="wb-recursion-max-depth">递归最大层级</label>
+                <input id="wb-recursion-max-depth" type="number" min="0" max="5" step="1" value="{{ worldbook_settings.recursion_max_depth if worldbook_settings.recursion_max_depth is not none else 2 }}" />
+                <p class="muted helper-text">递归 V1 当前只使用 title / trigger / secondary_trigger 做递归语料；0 表示关闭递归扩展。</p>
+              </div>
+            </div>
+            <div class="grid-two">
+              <label class="checkbox-row">
+                <input id="wb-default-case-sensitive" type="checkbox" {% if worldbook_settings.default_case_sensitive %}checked{% endif %} />
+                <span>默认区分大小写</span>
+              </label>
+              <label class="checkbox-row">
+                <input id="wb-default-whole-word" type="checkbox" {% if worldbook_settings.default_whole_word %}checked{% endif %} />
+                <span>默认完整词匹配</span>
+              </label>
+            </div>
           </div>
         </div>
 
-        <div class="grid-two">
-          <label class="checkbox-row">
-            <input id="wb-default-case-sensitive" type="checkbox" {% if worldbook_settings.default_case_sensitive %}checked{% endif %} />
-            <span>默认区分大小写</span>
-          </label>
-          <label class="checkbox-row">
-            <input id="wb-default-whole-word" type="checkbox" {% if worldbook_settings.default_whole_word %}checked{% endif %} />
-            <span>默认完整词匹配</span>
-          </label>
-        </div>
-
-        <div class="button-row">
-          <button id="save-worldbook-settings">保存世界书设置</button>
-          <button id="reload-worldbook-settings" type="button" class="secondary">重新读取</button>
+        <div class="button-row worldbook-actions-row">
+          <a class="button-link secondary" href="/config/worldbook/entries">打开词条管理页</a>
+          <button id="reload-worldbook-settings-bottom" type="button" class="secondary">重新读取</button>
+          <button id="save-worldbook-settings-bottom" type="button">保存设置</button>
         </div>
       </section>
     </div>
 
-    <footer class="status-footer">
-      <span id="status-text">就绪</span>
-    </footer>
-
     <script>
       const rootEl = document.documentElement;
       const bodyEl = document.body;
-      const statusEl = document.getElementById("status-text");
+      const statusPill = document.getElementById("wb-status-pill");
       const currentTheme = {{ settings.theme | tojson }};
       const currentOpacity = {{ settings.ui_opacity | tojson }};
       const currentBackground = {{ settings.background_image_url | tojson }};
       const currentOverlay = {{ settings.background_overlay | tojson }};
+      let dirty = false;
 
-      function setStatus(text) {
-        statusEl.textContent = text;
+      function setStatus(text, type = "success") {
+        statusPill.textContent = text;
+        statusPill.classList.remove("is-idle", "is-saving", "is-success", "is-dirty", "is-error");
+        const className = type === "saving" ? "is-saving"
+          : type === "dirty" ? "is-dirty"
+          : type === "error" ? "is-error"
+          : "is-success";
+        statusPill.classList.add(className);
+      }
+
+      function markDirty() {
+        if (dirty) return;
+        dirty = true;
+        setStatus("有未保存修改", "dirty");
+      }
+
+      function flashButton(button, text = "已完成") {
+        if (!button) return;
+        const oldText = button.textContent;
+        button.classList.add("is-feedback");
+        button.textContent = text;
+        window.setTimeout(() => {
+          button.classList.remove("is-feedback");
+          button.textContent = oldText;
+        }, 950);
       }
 
       function applyTheme(theme) {
@@ -593,34 +315,48 @@
         document.getElementById("wb-recursion-max-depth").value = settings.recursion_max_depth ?? 2;
         document.getElementById("enabled-label").textContent = settings.enabled ? "启用" : "停用";
         document.getElementById("max-hits-label").textContent = String(settings.max_hits ?? 3);
+        dirty = false;
       }
 
-      async function reloadSettings() {
+      async function reloadSettings(triggerButton) {
+        setStatus("正在读取世界书设置...", "saving");
         const data = await fetch("/api/worldbook/settings").then((response) => response.json());
         fillSettingsForm(data.settings || {});
-        setStatus("世界书设置已重新读取。");
+        setStatus("已重新读取", "success");
+        flashButton(triggerButton, "已读取");
       }
 
-      async function saveSettings() {
+      async function saveSettings(triggerButton) {
+        setStatus("正在保存世界书设置...", "saving");
         const data = await postJson("/api/worldbook/settings", readSettingsForm());
         fillSettingsForm(data.settings || {});
-        setStatus("世界书设置已保存。");
+        setStatus("已保存", "success");
+        flashButton(triggerButton, "已保存");
       }
 
-      document.getElementById("save-worldbook-settings").addEventListener("click", async () => {
-        try {
-          await saveSettings();
-        } catch (error) {
-          setStatus(`保存失败：${error.message}`);
-        }
+      document.querySelectorAll("#save-worldbook-settings, #save-worldbook-settings-bottom").forEach((button) => {
+        button.addEventListener("click", async () => {
+          try {
+            await saveSettings(button);
+          } catch (error) {
+            setStatus(`保存失败：${error.message}`, "error");
+          }
+        });
       });
 
-      document.getElementById("reload-worldbook-settings").addEventListener("click", async () => {
-        try {
-          await reloadSettings();
-        } catch (error) {
-          setStatus(`读取失败：${error.message}`);
-        }
+      document.querySelectorAll("#reload-worldbook-settings, #reload-worldbook-settings-bottom").forEach((button) => {
+        button.addEventListener("click", async () => {
+          try {
+            await reloadSettings(button);
+          } catch (error) {
+            setStatus(`读取失败：${error.message}`, "error");
+          }
+        });
+      });
+
+      document.querySelectorAll("input, select, textarea").forEach((control) => {
+        control.addEventListener("input", markDirty);
+        control.addEventListener("change", markDirty);
       });
 
       applyTheme(currentTheme);

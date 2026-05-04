@@ -3,419 +3,174 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User - Xuqi LLM Chat</title>
-    <link rel="stylesheet" href="/static/styles.css?v=config-wide-v2-ui-unify-v1" />
-  
-    <style id="ui-unify-v1">
-      body.modern-setting-page {
-        --ui-card-radius: 24px;
-        --ui-sub-radius: 18px;
-        --ui-gap: 18px;
-      }
-
-      body.modern-setting-page .config-shell.compact {
-        width: min(1480px, calc(100% - 32px));
-        max-width: none;
-        gap: var(--ui-gap);
-      }
-
-      body.modern-setting-page .panel.config-panel {
-        position: relative;
-        overflow: hidden;
-        border-radius: var(--ui-card-radius);
-        border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
-        background:
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--panel-strong) 72%, transparent),
-            color-mix(in srgb, var(--panel) 92%, transparent));
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
-      }
-
-      body.modern-setting-page .panel.config-panel.full-span:first-of-type {
-        border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
-        background:
-          radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 12%, transparent), transparent 38%),
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--panel-strong) 82%, transparent),
-            color-mix(in srgb, var(--panel) 92%, transparent));
-      }
-
-      body.modern-setting-page .section-head {
-        gap: 0.35rem;
-      }
-
-      body.modern-setting-page .section-head h2,
-      body.modern-setting-page .section-head h3 {
-        margin-top: 0.08rem;
-        letter-spacing: -0.02em;
-      }
-
-      body.modern-setting-page .eyebrow {
-        display: inline-flex;
-        width: fit-content;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.26rem 0.64rem;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
-        background: color-mix(in srgb, var(--accent) 10%, transparent);
-      }
-
-      body.modern-setting-page .stats-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 12px;
-        margin-top: 14px;
-      }
-
-      body.modern-setting-page .stat-box {
-        min-height: 76px;
-        padding: 14px 16px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: var(--ui-sub-radius);
-        background:
-          linear-gradient(180deg,
-            color-mix(in srgb, var(--input-bg) 78%, transparent),
-            color-mix(in srgb, var(--panel) 86%, transparent));
-        box-shadow: inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
-      }
-
-      body.modern-setting-page .stat-label {
-        display: block;
-        margin-bottom: 0.36rem;
-        font-size: 0.78rem;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        color: var(--muted);
-      }
-
-      body.modern-setting-page .stat-box strong {
-        font-size: 1.05rem;
-        line-height: 1.35;
-      }
-
-      body.modern-setting-page label:not(.checkbox-row):not(.check-chip) {
-        font-weight: 850;
-        color: color-mix(in srgb, var(--text) 82%, var(--muted));
-      }
-
-      body.modern-setting-page input,
-      body.modern-setting-page select,
-      body.modern-setting-page textarea {
-        border-radius: 15px;
-        border-color: color-mix(in srgb, var(--border) 84%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 92%, transparent);
-      }
-
-      body.modern-setting-page textarea {
-        line-height: 1.7;
-      }
-
-      body.modern-setting-page .button-row {
-        gap: 10px;
-      }
-
-      body.modern-setting-page button,
-      body.modern-setting-page .button-link,
-      body.modern-setting-page .ghost-link,
-      body.modern-setting-page .secondary,
-      body.modern-setting-page .compact {
-        border-radius: 999px;
-      }
-
-      body.modern-setting-page .secondary,
-      body.modern-setting-page .ghost-link,
-      body.modern-setting-page .button-link {
-        border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 70%, transparent);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-      }
-
-      body.modern-setting-page button:not(.secondary):not(.compact):not(.ghost-link):not(.button-link),
-      body.modern-setting-page #save-settings,
-      body.modern-setting-page #save-all,
-      body.modern-setting-page #save-user-profile,
-      body.modern-setting-page #save-worldbook-settings,
-      body.modern-setting-page #save-workshop,
-      body.modern-setting-page #save-card {
-        box-shadow: 0 10px 22px color-mix(in srgb, var(--accent) 18%, transparent);
-      }
-
-      body.modern-setting-page .checkbox-row {
-        display: flex;
-        align-items: center;
-        gap: 0.72rem;
-        min-height: 46px;
-        padding: 10px 12px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: 16px;
-        background: color-mix(in srgb, var(--input-bg) 64%, transparent);
-        color: var(--text);
-        font-weight: 760;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"] {
-        appearance: none;
-        -webkit-appearance: none;
-        position: relative;
-        flex: 0 0 auto;
-        width: 46px;
-        height: 26px;
-        margin: 0;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
-        background: color-mix(in srgb, var(--panel-strong) 76%, transparent);
-        cursor: pointer;
-        transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]::before {
-        content: "";
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 20px;
-        height: 20px;
-        border-radius: 999px;
-        background: color-mix(in srgb, var(--muted) 82%, white);
-        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
-        transition: transform 0.18s ease, background 0.18s ease;
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]:checked {
-        border-color: color-mix(in srgb, var(--accent) 68%, var(--border));
-        background: color-mix(in srgb, var(--accent) 38%, var(--panel-strong));
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
-      }
-
-      body.modern-setting-page .checkbox-row input[type="checkbox"]:checked::before {
-        transform: translateX(20px);
-        background: white;
-      }
-
-      body.modern-setting-page .field-chip-row {
-        gap: 0.55rem;
-      }
-
-      body.modern-setting-page .check-chip {
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 62%, transparent);
-      }
-
-      body.modern-setting-page .helper-text,
-      body.modern-setting-page .field-note,
-      body.modern-setting-page .muted.compact {
-        color: color-mix(in srgb, var(--muted) 88%, var(--text));
-      }
-
-      body.modern-setting-page .status-line {
-        display: block;
-        min-height: 46px;
-        padding: 12px 14px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: 16px;
-        background: color-mix(in srgb, var(--input-bg) 72%, transparent);
-      }
-
-      body.modern-setting-page .inline-field,
-      body.modern-setting-page .model-combo-row {
-        align-items: stretch;
-      }
-
-      body.modern-setting-page .preview-card,
-      body.modern-setting-page .card-block,
-      body.modern-setting-page .sub-block,
-      body.modern-setting-page .workshop-runtime-panel,
-      body.modern-setting-page .workshop-search-block,
-      body.modern-setting-page .workshop-rule-shell {
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        border-radius: var(--ui-sub-radius);
-        background: color-mix(in srgb, var(--input-bg) 58%, transparent);
-        box-shadow: inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
-      }
-
-      body.modern-setting-page .card-block,
-      body.modern-setting-page .sub-block,
-      body.modern-setting-page .workshop-runtime-panel,
-      body.modern-setting-page .workshop-search-block {
-        padding: 16px;
-      }
-
-      body.modern-setting-page .persona-toolbar,
-      body.modern-setting-page .memory-card-head,
-      body.modern-setting-page .workshop-rule-summary {
-        border-radius: 16px;
-      }
-
-      body.modern-setting-page .workshop-rule-shell {
-        overflow: hidden;
-        margin-bottom: 12px;
-      }
-
-      body.modern-setting-page .workshop-rule-summary {
-        padding: 12px 14px;
-        background: linear-gradient(180deg,
-          color-mix(in srgb, var(--panel-strong) 68%, transparent),
-          color-mix(in srgb, var(--input-bg) 76%, transparent));
-      }
-
-      body.modern-setting-page .workshop-rule-body {
-        padding: 16px;
-        border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-      }
-
-      body.modern-setting-page .workshop-rule-summary-meta,
-      body.modern-setting-page .workshop-rule-summary-text {
-        color: var(--muted);
-      }
-
-      body.modern-setting-page .workshop-rule-trigger-label,
-      body.modern-setting-page .workshop-rule-action-label {
-        display: inline-flex;
-        align-items: center;
-        min-height: 24px;
-        padding: 0.14rem 0.56rem;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
-        background: color-mix(in srgb, var(--accent) 9%, transparent);
-      }
-
-      body.modern-setting-page .sprite-frame {
-        border-radius: 22px;
-        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
-        background: color-mix(in srgb, var(--input-bg) 62%, transparent);
-      }
-
-      body.modern-setting-page .topbar-stack {
-        gap: 12px;
-      }
-
-      body.modern-setting-page .slot-toolbar {
-        border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
-        background: color-mix(in srgb, var(--panel-strong) 72%, transparent);
-      }
-
-      body.modern-setting-page .slot-badge {
-        border-color: color-mix(in srgb, var(--accent) 36%, var(--border));
-        background: color-mix(in srgb, var(--accent) 12%, transparent);
-      }
-
-      @media (max-width: 768px) {
-        body.modern-setting-page .config-shell.compact {
-          width: min(100% - 16px, 100%);
-        }
-        body.modern-setting-page .stats-row {
-          grid-template-columns: 1fr;
-        }
-        body.modern-setting-page .inline-field,
-        body.modern-setting-page .model-combo-row {
-          flex-direction: column;
-        }
-      }
-    </style>
-
-  </head>
-  <body class="modern-setting-page">
+    <title>User - Fantareal</title>
+    <link rel="stylesheet" href="/static/styles.css?v=frontend-v089-components" />
+</head>
+    <body class="modern-setting-page app-sidebar-shell user-config-page">
+    <div id="user-toast-host" class="toast-host config-toast-host" aria-live="polite"></div>
     <div class="topbar-stack">
       <div class="topbar">
-        <a class="brand" href="/chat">Xuqi LLM Chat</a>
+        <a class="brand" href="/chat">Fantareal</a>
         {% include "_grouped_nav.html" %}
       </div>
-            <div class="slot-toolbar">
+      <div class="slot-toolbar config-hero-toolbar user-hero-toolbar">
         <div class="slot-toolbar-left">
           <span class="slot-badge">User</span>
           <div class="slot-meta">
-            <strong>当前为全局用户资料</strong>
-            <p class="slot-hint">这里维护当前全局用户资料和头像，不再按存档拆分。</p>
+            <strong>用户资料</strong>
+            <p class="slot-hint">维护当前全局用户资料、头像与用户设定文本。</p>
           </div>
         </div>
       </div>
-    <div class="config-shell compact">
-      <section class="panel config-panel full-span">
-        <div class="section-head">
-          <p class="eyebrow">User</p>
-          <h2>用户资料</h2>
-          <p class="muted">你可以在这里设置用户显示名、昵称、用户设定文本和头像。聊天页右侧会优先使用这里上传的头像。</p>
-        </div>
-        <div class="stats-row">
-          <div class="stat-box">
-            <span class="stat-label">显示名</span>
-            <strong id="profile-display-name">{{ user_profile.display_name or "我" }}</strong>
-          </div>
-          <div class="stat-box">
-            <span class="stat-label">当前头像</span>
-            <strong id="profile-avatar-status">{{ "已上传" if user_profile.avatar_url else "未设置" }}</strong>
-          </div>
-        </div>
-      </section>
 
-      <section class="panel config-panel">
-        <div class="section-head">
+      <div class="config-sticky-actions user-layout-a-toolbar" aria-label="用户资料保存状态">
+        <div class="config-sticky-copy">
+          <span class="config-sticky-kicker">Workbench</span>
+          <strong>用户工作台</strong>
+          <p id="status-text" class="task-status is-idle">已准备 · 修改资料后点击保存，上传头像会立即写入。</p>
+        </div>
+        <div class="config-sticky-buttons">
+          <button id="save-user-profile-sticky" type="button" data-user-action="save">保存用户资料</button>
+          <button id="reload-user-profile-sticky" type="button" class="secondary compact" data-user-action="reload">重新读取</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="config-shell compact config-workbench-shell user-workbench-shell user-layout-a">
+      <section class="panel config-panel user-profile-main-card">
+        <div class="section-head user-section-head">
           <p class="eyebrow">Profile</p>
           <h2>基础信息</h2>
+          <p class="muted">用来决定聊天中“你”的显示名、称呼和基础设定。</p>
         </div>
+          <label for="display-name">显示名</label>
+          <input id="display-name" value="{{ user_profile.display_name }}" placeholder="例如：我 / 苏打" />
 
-        <label for="display-name">显示名</label>
-        <input id="display-name" value="{{ user_profile.display_name }}" placeholder="例如：我 / 苏打" />
+          <label for="nickname">昵称 / 备注称呼</label>
+          <input id="nickname" value="{{ user_profile.nickname }}" placeholder="例如：哥哥 / 老公 / 主人" />
 
-        <label for="nickname">昵称 / 备注称呼</label>
-        <input id="nickname" value="{{ user_profile.nickname }}" placeholder="例如：哥哥 / 老公 / 主人" />
+          <label for="profile-text">用户设定文本</label>
+          <textarea id="profile-text" rows="9" placeholder="这里填写用户长期设定，后续可用于聊天页展示或扩展注入。">{{ user_profile.profile_text }}</textarea>
 
-        <label for="profile-text">用户设定文本</label>
-        <textarea id="profile-text" rows="8" placeholder="这里填写用户长期设定，后续可用于聊天页展示或扩展注入。">{{ user_profile.profile_text }}</textarea>
+          <label for="profile-notes">备注</label>
+          <textarea id="profile-notes" rows="4" placeholder="补充说明，可选。">{{ user_profile.notes }}</textarea>
 
-        <label for="profile-notes">备注</label>
-        <textarea id="profile-notes" rows="4" placeholder="补充说明，可选。">{{ user_profile.notes }}</textarea>
-
-        <div class="button-row">
-          <button id="save-user-profile" type="button">保存用户资料</button>
-          <button id="reload-user-profile" type="button" class="secondary">重新读取</button>
+        <div class="button-row user-form-actions">
+          <button id="save-user-profile" type="button" data-user-action="save">保存用户资料</button>
         </div>
       </section>
 
-      <section class="panel config-panel">
-        <div class="section-head">
+      <aside class="panel config-panel user-avatar-card user-layout-a-side">
+        <div class="section-head user-section-head">
           <p class="eyebrow">Avatar</p>
           <h2>用户头像</h2>
+          <p class="muted">聊天页右侧会优先使用这里上传的头像。</p>
         </div>
 
-        <div class="sprite-frame" style="max-width: 220px;">
-          {% if user_profile.avatar_url %}
-          <img id="user-avatar-preview" class="sprite-image" src="{{ user_profile.avatar_url }}" alt="用户头像" />
-          {% else %}
-          <div id="user-avatar-preview" class="sprite-placeholder">当前未设置用户头像</div>
-          {% endif %}
-        </div>
+        <div class="user-avatar-stack">
+              <div class="sprite-frame user-avatar-frame">
+                {% if user_profile.avatar_url %}
+                <img id="user-avatar-preview" class="sprite-image user-avatar-image" src="{{ user_profile.avatar_url }}" alt="用户头像" />
+                {% else %}
+                <div id="user-avatar-preview" class="sprite-placeholder">当前未设置用户头像</div>
+                {% endif %}
+              </div>
 
-        <label for="user-avatar-file">上传头像</label>
-        <input id="user-avatar-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
+          <div class="user-side-summary">
+            <div class="user-summary-item">
+              <span>显示名</span>
+              <strong id="profile-display-name">{{ user_profile.display_name or "我" }}</strong>
+            </div>
+            <div class="user-summary-item">
+              <span>当前头像</span>
+              <strong id="profile-avatar-status">{{ "已上传" if user_profile.avatar_url else "未设置" }}</strong>
+            </div>
+          </div>
 
-        <div class="button-row">
-          <button id="upload-user-avatar" type="button">上传头像</button>
+          <div class="user-avatar-controls">
+            <label for="user-avatar-file">上传头像</label>
+            <input id="user-avatar-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
+            <p class="muted helper-text">建议使用正方形头像。上传后会立即写入。</p>
+            <button id="upload-user-avatar" type="button">上传头像</button>
+          </div>
         </div>
-      </section>
-
-      <section class="panel config-panel full-span">
-        <div class="section-head">
-          <p class="eyebrow">Status</p>
-          <h2>当前状态</h2>
-          <p id="status-text" class="muted status-line">就绪</p>
-        </div>
-      </section>
+      </aside>
     </div>
 
     <script>
       const rootEl = document.documentElement;
       const bodyEl = document.body;
       const statusEl = document.getElementById("status-text");
+      const toastHostEl = document.getElementById("user-toast-host");
       const currentTheme = {{ settings.theme | tojson }};
       const currentOpacity = {{ settings.ui_opacity | tojson }};
       const currentBackground = {{ settings.background_image_url | tojson }};
       const currentOverlay = {{ settings.background_overlay | tojson }};
 
-      function setStatus(text) {
-        statusEl.textContent = text;
+      function inferStatusKind(text) {
+        const value = String(text || "");
+        if (/失败|错误|异常|不能为空|不可用|请先选择/.test(value)) return "error";
+        if (/正在|保存中|上传|读取|重新读取|处理中/.test(value)) return "busy";
+        if (/已|成功|完成/.test(value)) return "success";
+        return "idle";
+      }
+
+      function setStatus(text, kind = null) {
+        if (!statusEl) return;
+        const statusKind = kind || inferStatusKind(text);
+        statusEl.textContent = text || "已准备";
+        statusEl.classList.remove("is-idle", "is-busy", "is-success", "is-error");
+        statusEl.classList.add("task-status", `is-${statusKind}`);
+      }
+
+      function showToast(message, type = "info") {
+        if (!toastHostEl || !message) return;
+        const toast = document.createElement("div");
+        toast.className = `app-toast ${type}`;
+        toast.textContent = message;
+        toastHostEl.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add("show"));
+        window.setTimeout(() => {
+          toast.classList.remove("show");
+          window.setTimeout(() => toast.remove(), 220);
+        }, 2200);
+      }
+
+      function rememberButtonLabel(button) {
+        if (!button) return "";
+        if (!button.dataset.defaultLabel) {
+          button.dataset.defaultLabel = button.textContent.trim();
+        }
+        return button.dataset.defaultLabel;
+      }
+
+      function setButtonState(button, state = "idle", label = "") {
+        if (!button) return;
+        const defaultLabel = rememberButtonLabel(button);
+        button.classList.remove("is-loading", "is-success", "is-error");
+        button.disabled = state === "loading";
+        if (state === "loading") {
+          button.classList.add("is-loading");
+          button.textContent = label || "处理中…";
+          return;
+        }
+        if (state === "success") {
+          button.classList.add("is-success");
+          button.textContent = label || "已完成 ✓";
+          window.setTimeout(() => setButtonState(button, "idle"), 1200);
+          return;
+        }
+        if (state === "error") {
+          button.classList.add("is-error");
+          button.textContent = label || "操作失败";
+          window.setTimeout(() => setButtonState(button, "idle"), 1500);
+          return;
+        }
+        button.textContent = defaultLabel;
+      }
+
+      function setButtonsState(selector, state = "idle", label = "") {
+        document.querySelectorAll(selector).forEach((button) => setButtonState(button, state, label));
       }
 
       function applyTheme(theme) {
@@ -456,56 +211,93 @@
 
       function profilePayload() {
         return {
-          display_name: document.getElementById("display-name").value.trim() || "我",
-          nickname: document.getElementById("nickname").value.trim(),
-          profile_text: document.getElementById("profile-text").value.trim(),
-          notes: document.getElementById("profile-notes").value.trim(),
+          display_name: document.getElementById("display-name")?.value.trim() || "我",
+          nickname: document.getElementById("nickname")?.value.trim() || "",
+          profile_text: document.getElementById("profile-text")?.value.trim() || "",
+          notes: document.getElementById("profile-notes")?.value.trim() || "",
         };
       }
 
+      function updateText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      }
+
       function applyProfile(profile) {
-        document.getElementById("display-name").value = profile.display_name || "我";
-        document.getElementById("nickname").value = profile.nickname || "";
-        document.getElementById("profile-text").value = profile.profile_text || "";
-        document.getElementById("profile-notes").value = profile.notes || "";
-        document.getElementById("profile-display-name").textContent = profile.display_name || "我";
-        document.getElementById("profile-avatar-status").textContent = profile.avatar_url ? "已上传" : "未设置";
+        const displayName = profile.display_name || "我";
+        const avatarStatus = profile.avatar_url ? "已上传" : "未设置";
+        const displayNameInput = document.getElementById("display-name");
+        const nicknameInput = document.getElementById("nickname");
+        const profileTextInput = document.getElementById("profile-text");
+        const notesInput = document.getElementById("profile-notes");
+        if (displayNameInput) displayNameInput.value = displayName;
+        if (nicknameInput) nicknameInput.value = profile.nickname || "";
+        if (profileTextInput) profileTextInput.value = profile.profile_text || "";
+        if (notesInput) notesInput.value = profile.notes || "";
+        updateText("profile-display-name", displayName);
+        updateText("profile-avatar-status", avatarStatus);
+        updateText("profile-panel-display-name", displayName);
+        updateText("profile-panel-avatar-status", avatarStatus);
 
         const preview = document.getElementById("user-avatar-preview");
+        if (!preview) return;
         if (profile.avatar_url) {
-          preview.outerHTML = `<img id="user-avatar-preview" class="sprite-image" src="${profile.avatar_url}" alt="用户头像" />`;
+          preview.outerHTML = `<img id="user-avatar-preview" class="sprite-image user-avatar-image" src="${profile.avatar_url}" alt="用户头像" />`;
         } else {
           preview.outerHTML = `<div id="user-avatar-preview" class="sprite-placeholder">当前未设置用户头像</div>`;
         }
       }
 
-      document.getElementById("save-user-profile").addEventListener("click", async () => {
+      async function saveProfileAction(button = null) {
+        setButtonState(button, "loading", "保存中…");
+        setButtonsState("[data-user-action='save']:not(:disabled)", "loading", "保存中…");
+        setStatus("正在保存用户资料…", "busy");
         try {
           const data = await postJson("/api/user-profile", profilePayload());
           applyProfile(data.profile || {});
-          setStatus("用户资料已保存。");
+          setStatus("已完成：用户资料已保存。", "success");
+          setButtonsState("[data-user-action='save']", "success", "已保存 ✓");
+          showToast("用户资料已保存", "success");
         } catch (error) {
-          setStatus(`保存失败：${error.message}`);
+          setStatus(`保存失败：${error.message}`, "error");
+          setButtonsState("[data-user-action='save']", "error", "保存失败");
+          showToast(`保存失败：${error.message}`, "error");
         }
-      });
+      }
 
-      document.getElementById("reload-user-profile").addEventListener("click", async () => {
+      async function reloadProfileAction(button = null) {
+        setButtonState(button, "loading", "读取中…");
+        setButtonsState("[data-user-action='reload']:not(:disabled)", "loading", "读取中…");
+        setStatus("正在重新读取用户资料…", "busy");
         try {
-          const data = await fetch("/api/user-profile").then((response) => response.json());
+          const response = await fetch("/api/user-profile");
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.detail || "读取失败");
+          }
+          const data = await response.json();
           applyProfile(data.profile || {});
-          setStatus("用户资料已重新读取。");
+          setStatus("已完成：用户资料已重新读取。", "success");
+          setButtonsState("[data-user-action='reload']", "success", "已读取 ✓");
+          showToast("用户资料已重新读取", "success");
         } catch (error) {
-          setStatus(`读取失败：${error.message}`);
+          setStatus(`读取失败：${error.message}`, "error");
+          setButtonsState("[data-user-action='reload']", "error", "读取失败");
+          showToast(`读取失败：${error.message}`, "error");
         }
-      });
+      }
 
-      document.getElementById("upload-user-avatar").addEventListener("click", async () => {
+      async function uploadAvatarAction(button = null) {
         const input = document.getElementById("user-avatar-file");
-        const file = input.files?.[0];
+        const file = input?.files?.[0];
         if (!file) {
-          setStatus("请先选择一张头像图片。");
+          setStatus("请先选择一张头像图片。", "error");
+          setButtonState(button, "error", "未选择图片");
+          showToast("请先选择头像图片", "warn");
           return;
         }
+        setButtonState(button, "loading", "上传中…");
+        setStatus("正在上传用户头像…", "busy");
         try {
           const formData = new FormData();
           formData.append("file", file);
@@ -517,15 +309,32 @@
           const data = await response.json();
           applyProfile(data.profile || {});
           input.value = "";
-          setStatus("用户头像已上传。");
+          setStatus("已完成：用户头像已上传。", "success");
+          setButtonState(button, "success", "已上传 ✓");
+          showToast("用户头像已上传", "success");
         } catch (error) {
-          setStatus(`上传失败：${error.message}`);
+          setStatus(`上传失败：${error.message}`, "error");
+          setButtonState(button, "error", "上传失败");
+          showToast(`上传失败：${error.message}`, "error");
         }
+      }
+
+      document.querySelectorAll("[data-user-action='save']").forEach((button) => {
+        button.addEventListener("click", (event) => saveProfileAction(event.currentTarget));
+      });
+
+      document.querySelectorAll("[data-user-action='reload']").forEach((button) => {
+        button.addEventListener("click", (event) => reloadProfileAction(event.currentTarget));
+      });
+
+      document.getElementById("upload-user-avatar")?.addEventListener("click", (event) => {
+        uploadAvatarAction(event.currentTarget);
       });
 
       applyTheme(currentTheme);
       applyUiOpacity(currentOpacity);
       applyBackground(currentBackground, currentOverlay);
+      setStatus("已准备 · 修改资料后点击保存，上传头像会立即写入。", "idle");
     </script>
   </body>
 </html>

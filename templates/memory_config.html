@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Memory - Xuqi LLM Chat</title>
-    <link rel="stylesheet" href="/static/styles.css?v=config-wide-v2" />
+    <title>Memory - Fantareal</title>
+    <link rel="stylesheet" href="/static/styles.css?v=global-sidebar-v081" />
     <style>
       .config-shell.compact.memory-wide {
         width: min(1760px, calc(100vw - 32px));
@@ -997,10 +997,10 @@
       }
     </style>
   </head>
-  <body>
+  <body class="app-sidebar-shell modern-setting-page memory-config-page">
     <div class="topbar-stack">
       <div class="topbar">
-        <a class="brand" href="/chat">Xuqi LLM Chat</a>
+        <a class="brand" href="/chat">Fantareal</a>
         {% include "_grouped_nav.html" %}
       </div>
 
@@ -1016,13 +1016,15 @@
     </div>
 
     <div class="config-shell compact memory-wide">
-      <section class="panel config-panel full-span">
-        <div class="section-head">
-          <p class="eyebrow">Memory</p>
-          <h2>记忆库管理</h2>
-          <p class="muted">
-            原记忆仍按原方式参与聊天。你可以勾选多条原记忆，批量合并为“合并后的记忆”，同时写入下方大纲表。
-          </p>
+      <section class="panel config-panel full-span memory-workbench-panel">
+        <div class="section-head memory-workbench-head">
+          <div>
+            <p class="eyebrow">Memory Workbench</p>
+            <h2>记忆工作台</h2>
+            <p class="muted">
+              原记忆仍按原方式参与聊天；新增、保存、读取、导入与导出都在这里完成。
+            </p>
+          </div>
         </div>
         <div class="memory-overview-strip">
           <div class="memory-overview-metrics">
@@ -1031,43 +1033,31 @@
             <span class="memory-overview-pill">大纲表 <strong id="outline-count">0</strong></span>
             <span class="memory-overview-pill">当前选中 <strong id="selected-count">0</strong></span>
           </div>
-          <div class="memory-overview-status">
-            <span>当前状态</span>
-            <strong id="status-text" class="status-line strong">就绪</strong>
+          <div class="memory-overview-status config-status-strip">
+            <strong id="status-text" class="config-status-pill status-line strong is-success" aria-live="polite">就绪</strong>
           </div>
+        </div>
+        <div class="config-workbench-actions memory-workbench-actions">
+          <button id="add-memory" type="button" class="secondary">新增</button>
+          <button id="save-memories" type="button">保存</button>
+          <button id="reload-all" type="button" class="secondary">读取</button>
+          <select id="memory-import-select" class="memory-transfer-select" aria-label="导入记忆">
+            <option value="" selected>导入 ▾</option>
+            <option value="original">导入原记忆 JSON</option>
+            <option value="bundle">导入完整记忆包 ZIP</option>
+          </select>
+          <select id="memory-export-select" class="memory-transfer-select is-primary" aria-label="导出记忆">
+            <option value="" selected>导出 ▾</option>
+            <option value="original">导出原记忆 JSON</option>
+            <option value="bundle">导出完整记忆包 ZIP</option>
+          </select>
+          <input id="import-memories-file" type="file" accept=".json,.jsonc,application/json,text/plain" hidden />
+          <input id="import-memory-bundle-file" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden />
         </div>
       </section>
 
       <section class="panel config-panel full-span">
         <div class="memory-tool-stack">
-          <div class="memory-tool-block">
-            <div class="memory-tool-head">
-              <div>
-                <h3>记忆操作</h3>
-                <p class="muted helper-text">管理原记忆和完整记忆包的导入导出。</p>
-              </div>
-            </div>
-            <div class="memory-actions">
-              <div class="button-row memory-action-row">
-                <button id="add-memory" type="button">新增记忆</button>
-                <button id="save-memories" type="button" class="secondary">保存全部记忆</button>
-                <button id="reload-all" type="button" class="secondary">重新读取全部</button>
-                <select id="memory-import-select" class="memory-transfer-select" aria-label="导入记忆">
-                  <option value="" selected>导入 ▾</option>
-                  <option value="original">导入原记忆 JSON</option>
-                  <option value="bundle">导入完整记忆包 ZIP</option>
-                </select>
-                <select id="memory-export-select" class="memory-transfer-select is-primary" aria-label="导出记忆">
-                  <option value="" selected>导出 ▾</option>
-                  <option value="original">导出原记忆 JSON</option>
-                  <option value="bundle">导出完整记忆包 ZIP</option>
-                </select>
-                <input id="import-memories-file" type="file" accept=".json,.jsonc,application/json,text/plain" hidden />
-                <input id="import-memory-bundle-file" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden />
-              </div>
-            </div>
-          </div>
-
           <div class="memory-tool-block">
             <div class="memory-tool-head">
               <div>
@@ -1281,7 +1271,20 @@
       const DELETE_SOURCES_PREF_KEY = "xuqi_memory_delete_sources_toggle";
 
       function setStatus(text) {
-        statusEl.textContent = text || "就绪";
+        const value = text || "就绪";
+        statusEl.textContent = value;
+        const state = getStatusState(value);
+        statusEl.classList.remove("is-saving", "is-success", "is-error", "is-dirty", "is-idle");
+        statusEl.classList.add(`is-${state}`);
+      }
+
+      function getStatusState(text) {
+        const value = String(text || "");
+        if (/失败|错误|异常|无法/.test(value)) return "error";
+        if (/正在|保存中|读取中|导入中|导出中|生成中|请不要重复|合并中/.test(value)) return "saving";
+        if (/未保存|修改|记得保存|待保存/.test(value)) return "dirty";
+        if (/就绪|已保存|已加载|已读取|读取完成|已导出|已导入|已新增|已删除|已重新读取|重新读取|生成完成|导入完成|保存/.test(value)) return "success";
+        return "idle";
       }
 
       function getDeleteSourcesToggle() {
@@ -1891,7 +1894,16 @@
         setStatus("已新增一条空白原记忆。");
       });
 
+      document.querySelectorAll(".config-workbench-actions button").forEach((button) => {
+        button.addEventListener("click", () => {
+          button.classList.add("is-feedback");
+          window.setTimeout(() => button.classList.remove("is-feedback"), 900);
+        });
+      });
+
+
       document.getElementById("save-memories").addEventListener("click", async () => {
+        setStatus("正在保存到 Memory...");
         try {
           await saveMemories();
         } catch (error) {
@@ -1900,6 +1912,7 @@
       });
 
       document.getElementById("reload-all").addEventListener("click", async () => {
+        setStatus("正在读取 Memory...");
         try {
           await loadAllPanels();
         } catch (error) {

@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN" data-theme="{{ settings.theme }}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Xuqi LLM Chat</title>
-    <link rel="stylesheet" href="/static/styles.css?v=chat-layout-transparent-v4" />
+    <title>Fantareal Chat</title>
+    <link rel="icon" href="/static/fantareal_icon.ico" />
+    <link rel="stylesheet" href="/static/styles.css?v=global-sidebar-v081" />
     {% for mod in registered_mods or [] %}
       {% for href in mod.hooks.chat_styles or [] %}
     <link rel="stylesheet" href="{{ href }}{% if '?' in href %}&{% else %}?{% endif %}v=ttsvoice-chip-v1" data-mod-hook="{{ mod.slug }}" />
@@ -541,60 +542,6 @@
         font-size: 0.8rem;
       }
 
-      .worldbook-debug-rail {
-        z-index: 35;
-        overflow: visible;
-      }
-      .worldbook-debug-rail .worldbook-rail-toggle {
-        z-index: 4;
-      }
-      .chat-layout.worldbook-rail-collapsed .worldbook-debug-rail .worldbook-rail-content {
-        display: none;
-      }
-      .worldbook-debug-rail.expanded {
-        width: min(560px, calc(100vw - 2rem));
-        min-width: min(560px, calc(100vw - 2rem));
-        border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.16);
-        backdrop-filter: blur(16px);
-      }
-      html[data-theme="light"] .worldbook-debug-rail.expanded {
-        background: rgba(255, 250, 244, 0.97);
-      }
-      html[data-theme="dark"] .worldbook-debug-rail.expanded {
-        background: rgba(18, 27, 37, 0.97);
-      }
-      .worldbook-debug-rail .worldbook-rail-content {
-        overflow-y: auto;
-        max-height: calc(100vh - 9rem);
-        padding: 0.85rem 0.95rem 0.95rem 1.05rem;
-      }
-      .worldbook-debug-rail .worldbook-debug-panel {
-        margin: 0;
-        border: none;
-        background: transparent;
-        box-shadow: none;
-        padding: 0.65rem 0 0;
-      }
-      .worldbook-debug-rail .drawer-debug-head {
-        margin-bottom: 0.75rem;
-      }
-      .worldbook-debug-rail .worldbook-debug-body {
-        display: block;
-        margin-top: 0.75rem;
-      }
-      .worldbook-debug-rail .worldbook-debug-groups {
-        gap: 0.7rem;
-      }
-      .worldbook-debug-rail .worldbook-debug-group,
-      .worldbook-debug-rail .worldbook-debug-item,
-      .worldbook-debug-rail .worldbook-debug-empty {
-        background: color-mix(in srgb, var(--input-bg) 92%, var(--panel-strong));
-      }
-      .worldbook-debug-rail .debug-code-block {
-        max-height: 14rem;
-        overflow: auto;
-      }
       @media (max-width: 768px) {
         .worldbook-debug-toggle {
           gap: 0.75rem;
@@ -607,55 +554,20 @@
     </style>
 
   </head>
-  <body>
+  <body class="chat-page chat-visual-shell">
     <div class="topbar topbar-chat">
       <div class="topbar-left">
-        <a class="brand" href="/chat">Xuqi LLM Chat</a>
+        <a class="brand chat-brand" href="/chat">Fantareal</a>
       </div>
       {% include "_grouped_nav.html" %}
       </div>
 
     <div class="chat-shell">
-      <div id="chat-layout" class="chat-layout worldbook-rail-collapsed">
-        {% if worldbook_settings.debug_enabled %}
-        <aside id="worldbook-hit-rail" class="worldbook-hit-rail worldbook-debug-rail panel" aria-label="Worldbook Debug">
-          <button id="toggle-worldbook-rail" class="worldbook-rail-toggle" type="button" aria-expanded="false" aria-controls="worldbook-rail-content" title="展开 Worldbook Debug">
-            <span id="worldbook-rail-arrow" class="worldbook-rail-arrow" aria-hidden="true">›</span>
-            <span id="worldbook-rail-count" class="worldbook-rail-count" aria-label="Worldbook 命中数量" hidden>0</span>
-          </button>
-          <div id="worldbook-rail-content" class="worldbook-rail-content">
-            <div class="worldbook-debug-panel expanded" id="worldbook-debug-panel">
-              <div class="drawer-debug-head">
-                <div class="drawer-debug-meta">
-                  <span class="drawer-debug-title">Worldbook Debug</span>
-                  <span id="worldbook-debug-status" class="debug-status-chip">No Hit</span>
-                  <span id="worldbook-debug-count" class="muted">暂无命中</span>
-                </div>
-              </div>
-              <div id="worldbook-debug-body" class="worldbook-debug-body">
-                <div id="worldbook-debug-summary" class="worldbook-debug-summary"></div>
-
-                <div id="worldbook-debug-filters" class="worldbook-debug-filters" hidden>
-                  <button type="button" class="secondary compact active" data-debug-filter="all">全部</button>
-                  <button type="button" class="secondary compact" data-debug-filter="selected">只看已注入</button>
-                  <button type="button" class="secondary compact" data-debug-filter="dropped">只看未注入</button>
-                  <button type="button" class="secondary compact" data-debug-filter="recursive">只看递归链</button>
-                </div>
-
-                <div id="worldbook-debug-groups" class="worldbook-debug-groups">
-                  <div class="worldbook-debug-empty">当前轮没有可展示的 Worldbook Debug。</div>
-                </div>
-
-                <details class="worldbook-debug-raw-wrap">
-                  <summary>查看原始调试文本</summary>
-                  <pre id="worldbook-debug-prompt" class="debug-code-block">本轮 Worldbook 调试文本会显示在这里。</pre>
-                </details>
-              </div>
-            </div>
-          </div>
-        </aside>
-        {% endif %}
-
+      <div id="chat-layout" class="chat-layout runtime-panel-collapsed">
+        <button id="toggle-runtime-panel" type="button" class="runtime-panel-handle" aria-expanded="false" aria-controls="runtime-panel" title="展开辅助栏">
+          <span id="runtime-panel-handle-icon" class="runtime-panel-handle-icon" aria-hidden="true">«</span>
+          <span class="sr-only">辅助栏</span>
+        </button>
         <main class="chat-area standalone">
           <div class="chat-header">
             <div>
@@ -664,29 +576,10 @@
               <p id="chat-subtitle" class="chat-greeting-scroll">角色卡已加载。</p>
             </div>
             <div class="header-actions">
-              <div class="theme-pill" id="theme-pill">{{ "暗色模式" if settings.theme == "dark" else "浅色模式" }}</div>
-              <button id="open-drawer-secondary" type="button" class="secondary compact">打开侧栏</button>
+              <button id="open-drawer-secondary" type="button" class="secondary compact icon-button config-gear-button" aria-label="运行配置" title="运行配置" aria-expanded="false" aria-controls="config-drawer">
+                <span aria-hidden="true">⚙</span>
+              </button>
             </div>
-          </div>
-
-          <div class="preset-toolbar">
-            <div class="preset-toolbar-left">
-              <span class="preset-pill-label">Preset</span>
-              <div class="preset-current-meta">
-                <strong id="chat-preset-name">未选择预设</strong>
-                <p id="chat-preset-modules" class="muted">当前无激活模块</p>
-              </div>
-            </div>
-
-            <div class="preset-toolbar-right">
-              <div class="preset-combo">
-                <button id="toggle-preset-menu" type="button" class="preset-pill-button">
-                  <span id="preset-pill-text">切换预设</span>
-                  <span class="preset-pill-arrow">▾</span>
-                </button>
-                <div id="preset-menu" class="preset-menu" hidden></div>
-              </div>
-              </div>
           </div>
 
           <div class="retrieval-bar" id="retrieval-bar" hidden>
@@ -695,7 +588,7 @@
           </div>
 
           <div id="messages" class="messages">
-            {% if not history and persona.greeting %}
+            {% if show_opening_message and opening_message %}
             <div class="message assistant opening-message" data-opening-message="true">
               <div class="message-avatar assistant-avatar" aria-hidden="true">
                 {% if role_avatar_url %}
@@ -705,8 +598,8 @@
                 {% endif %}
               </div>
               <div class="bubble-wrap">
-                <div class="bubble">{{ persona.greeting }}</div>
-                <div class="message-meta">开场白</div>
+                <div class="bubble">{{ opening_message }}</div>
+                <div class="message-meta">开场白 · 不计入提示词</div>
               </div>
             </div>
             {% endif %}
@@ -740,11 +633,12 @@
             </div>
             {% endfor %}
           </div>
+          <button id="scroll-bottom-button" class="scroll-bottom-button" type="button" hidden>↓ 回到底部</button>
 
           <form id="chat-form" class="composer">
             <textarea id="message-input" placeholder="输入你想说的话..." rows="3"></textarea>
             <div class="composer-actions">
-              <span id="status-text" class="muted">就绪</span>
+              <span id="status-text" class="task-status is-idle">Enter 发送 · Shift + Enter 换行</span>
               <div class="action-group">
                 <button type="button" id="end-conversation" class="secondary compact">结束当前对话</button>
                 <button type="button" id="export-history" class="secondary compact">导出记录</button>
@@ -753,6 +647,163 @@
             </div>
           </form>
         </main>
+
+        <aside id="runtime-panel" class="runtime-panel panel" aria-label="聊天辅助栏" aria-hidden="true">
+          <div class="runtime-panel-head">
+            <div>
+              <p class="eyebrow">Runtime</p>
+              <h2>聊天辅助栏</h2>
+              <p class="muted">运行状态、Worldbook Debug、Prompt 预览和插件入口。</p>
+            </div>
+            <button id="close-runtime-panel" type="button" class="secondary compact" aria-label="收起辅助栏">收起</button>
+          </div>
+
+          <div class="runtime-panel-tabs" role="tablist" aria-label="聊天辅助栏分类">
+            <button type="button" class="runtime-tab active" data-runtime-tab="status" role="tab" aria-selected="true">状态</button>
+            <button type="button" class="runtime-tab" data-runtime-tab="preset" role="tab" aria-selected="false">预设</button>
+            <button type="button" class="runtime-tab" data-runtime-tab="worldbook" role="tab" aria-selected="false">世界书 <span id="worldbook-rail-count" class="runtime-tab-count" hidden>0</span></button>
+            <button type="button" class="runtime-tab" data-runtime-tab="prompt" role="tab" aria-selected="false">Prompt <span id="prompt-runtime-dot" class="runtime-tab-dot" hidden></span></button>
+            <button type="button" class="runtime-tab" data-runtime-tab="tts" role="tab" aria-selected="false">TTS</button>
+            <button type="button" class="runtime-tab" data-runtime-tab="plugins" role="tab" aria-selected="false">插件 <span id="plugins-runtime-count" class="runtime-tab-count"{% if not registered_mods %} hidden{% endif %}>{{ (registered_mods or []) | length }}</span></button>
+          </div>
+
+          <div class="runtime-panel-body">
+            <section id="runtime-tab-status" class="runtime-tab-panel active" data-runtime-panel="status" role="tabpanel">
+              <div class="runtime-card">
+                <div class="runtime-card-head">
+                  <strong>当前会话</strong>
+                  <span class="runtime-card-chip">Live</span>
+                </div>
+                <div class="runtime-kv-list">
+                  <div><span>角色</span><strong>{{ persona.name }}</strong></div>
+                  <div><span>模型</span><strong id="runtime-model-label">{{ settings.llm_model or "未配置" }}</strong></div>
+                  <div><span>上下文</span><strong id="runtime-history-label">{{ settings.history_limit }} 条</strong></div>
+                  <div><span>最近操作</span><strong id="runtime-last-action-label">暂无</strong></div>
+                </div>
+              </div>
+            </section>
+
+            <section id="runtime-tab-preset" class="runtime-tab-panel" data-runtime-panel="preset" role="tabpanel" hidden>
+              <div class="runtime-card runtime-preset-card">
+                <div class="runtime-card-head">
+                  <strong>当前预设</strong>
+                  <a href="/config/preset" class="runtime-inline-link">管理</a>
+                </div>
+                <div class="runtime-preset-summary">
+                  <span class="preset-pill-label">Preset</span>
+                  <div class="preset-current-meta">
+                    <strong id="chat-preset-name">未选择预设</strong>
+                    <p id="chat-preset-modules" class="muted">当前无激活模块</p>
+                  </div>
+                </div>
+                <div class="preset-combo runtime-preset-combo">
+                  <button id="toggle-preset-menu" type="button" class="preset-pill-button">
+                    <span id="preset-pill-text">切换预设</span>
+                    <span class="preset-pill-arrow">▾</span>
+                  </button>
+                  <div id="preset-menu" class="preset-menu" hidden></div>
+                </div>
+              </div>
+              <div id="preset-debug-panel" class="drawer-debug-panel runtime-card" hidden>
+                <div class="drawer-debug-head">
+                  <div class="drawer-debug-meta">
+                    <span class="drawer-debug-title">Preset Debug</span>
+                    <span id="preset-debug-status" class="preset-debug-chip">启用</span>
+                    <span id="preset-debug-name" class="muted">当前预设：未选择预设</span>
+                  </div>
+                  <button id="toggle-preset-debug" type="button" class="secondary compact">展开 Debug</button>
+                </div>
+                <div id="preset-debug-body" class="drawer-debug-body">
+                  <div id="preset-debug-modules" class="preset-module-chip-row"></div>
+                  <pre id="preset-debug-prompt" class="debug-code-block"></pre>
+                </div>
+              </div>
+            </section>
+
+            <section id="runtime-tab-worldbook" class="runtime-tab-panel" data-runtime-panel="worldbook" role="tabpanel" hidden>
+              {% if worldbook_settings.debug_enabled %}
+            <div class="worldbook-debug-panel expanded" id="worldbook-debug-panel">
+              <div class="drawer-debug-head">
+                <div class="drawer-debug-meta">
+                  <span class="drawer-debug-title">Worldbook Debug</span>
+                  <span id="worldbook-debug-status" class="debug-status-chip">No Hit</span>
+                  <span id="worldbook-debug-count" class="muted">暂无命中</span>
+                </div>
+              </div>
+              <div id="worldbook-debug-body" class="worldbook-debug-body">
+                <div id="worldbook-debug-summary" class="worldbook-debug-summary"></div>
+
+                <div id="worldbook-debug-filters" class="worldbook-debug-filters" hidden>
+                  <button type="button" class="secondary compact active" data-debug-filter="all">全部</button>
+                  <button type="button" class="secondary compact" data-debug-filter="selected">只看已注入</button>
+                  <button type="button" class="secondary compact" data-debug-filter="dropped">只看未注入</button>
+                  <button type="button" class="secondary compact" data-debug-filter="recursive">只看递归链</button>
+                </div>
+
+                <div id="worldbook-debug-groups" class="worldbook-debug-groups">
+                  <div class="worldbook-debug-empty">当前轮没有可展示的 Worldbook Debug。</div>
+                </div>
+
+                <details class="worldbook-debug-raw-wrap">
+                  <summary>查看原始调试文本</summary>
+                  <pre id="worldbook-debug-prompt" class="debug-code-block">本轮 Worldbook 调试文本会显示在这里。</pre>
+                </details>
+              </div>
+            </div>
+              {% else %}
+              <div class="runtime-card runtime-empty-card">
+                <strong>Worldbook Debug 未开启</strong>
+                <p class="muted">到世界书设置里打开 Debug 后，本轮命中、注入和递归链会显示在这里。</p>
+                <a href="/config/worldbook" class="secondary compact runtime-card-action">打开世界书设置</a>
+              </div>
+              {% endif %}
+            </section>
+
+            <section id="runtime-tab-prompt" class="runtime-tab-panel" data-runtime-panel="prompt" role="tabpanel" hidden>
+              <div class="runtime-card">
+                <div class="runtime-card-head">
+                  <strong>本轮打包预览</strong>
+                  <button id="preview-prompt-package" type="button" class="secondary compact">预览当前轮 Prompt</button>
+                </div>
+                <p class="muted">输入框里有内容时，可以查看系统提示、人设、记忆、世界书、最近聊天和本轮输入如何一起发送给模型。</p>
+              </div>
+              <div id="prompt-package-panel" class="drawer-debug-panel runtime-card" hidden>
+                <div class="drawer-debug-head">
+                  <div class="drawer-debug-meta">
+                    <span class="drawer-debug-title">Prompt Package</span>
+                    <span id="prompt-package-summary" class="prompt-package-summary muted">尚未生成</span>
+                  </div>
+                </div>
+                <div class="drawer-debug-body">
+                  <div id="prompt-package-layers" class="prompt-layer-list"></div>
+                  <pre id="prompt-package-preview" class="debug-code-block"></pre>
+                </div>
+              </div>
+            </section>
+
+            <section id="runtime-tab-tts" class="runtime-tab-panel" data-runtime-panel="tts" role="tabpanel" hidden>
+              <div class="runtime-card runtime-empty-card">
+                <strong>TTS 运行状态</strong>
+                <p class="muted">这里先预留给语音标签、当前说话人、情绪和播放状态。TTS 的完整设置仍从左侧「插件」进入。</p>
+              </div>
+            </section>
+
+            <section id="runtime-tab-plugins" class="runtime-tab-panel" data-runtime-panel="plugins" role="tabpanel" hidden>
+              <div class="runtime-card runtime-empty-card">
+                <strong>插件快捷入口</strong>
+                <p class="muted">聊天辅助栏只放运行时入口。状态栏浮球保持旧模式，继续覆盖在页面之上。</p>
+                <div class="runtime-plugin-links">
+                  {% for mod in registered_mods or [] %}
+                    {% if mod.slug == 'tts-studio' %}<a href="/mods/tts-studio" class="secondary compact">语音 TTS</a>{% endif %}
+                    {% if mod.slug == 'status-panel' %}<a href="/mods/status-panel/app/" class="secondary compact">游玩状态栏</a>{% endif %}
+                    {% if mod.slug == 'worldbook-maker' %}<a href="/mods/worldbook-maker" class="secondary compact">世界书生成器</a>{% endif %}
+                    {% if mod.slug == 'soul-weaver' %}<a href="/mods/soul-weaver" class="secondary compact">余音</a>{% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            </section>
+          </div>
+        </aside>
       </div>
     </div>
 
@@ -777,6 +828,7 @@
       </div>
     </div>
     <audio id="workshop-audio-player" preload="auto"></audio>
+    <div id="toast-host" class="toast-host" aria-live="polite" aria-atomic="true"></div>
 
     <div id="drawer-overlay" class="drawer-overlay" hidden></div>
     <aside id="config-drawer" class="config-drawer" aria-hidden="true">
@@ -790,56 +842,6 @@
       </div>
 
       <div class="drawer-body">
-        <section class="drawer-section">
-          <div class="section-head">
-            <p class="eyebrow">Preset</p>
-            <h3>预设侧栏</h3>
-            <p class="muted">这里集中放预设管理与调试，不占聊天主区域。</p>
-          </div>
-          <div class="drawer-preset-tools">
-            <a href="/config/preset" class="secondary compact preset-manage-link">管理预设</a>
-            <button id="toggle-preset-debug" type="button" class="secondary compact">展开 Debug</button>
-          </div>
-          <div class="drawer-preset-current">
-            <strong id="drawer-preset-name">未选择预设</strong>
-            <p id="drawer-preset-modules">当前无激活模块</p>
-          </div>
-          <div id="preset-debug-panel" class="drawer-debug-panel" hidden>
-            <div class="drawer-debug-head">
-              <div class="drawer-debug-meta">
-                <span class="drawer-debug-title">Preset Debug</span>
-                <span id="preset-debug-status" class="preset-debug-chip">启用</span>
-                <span id="preset-debug-name" class="muted">当前预设：未选择预设</span>
-              </div>
-            </div>
-            <div id="preset-debug-body" class="drawer-debug-body">
-              <div id="preset-debug-modules" class="preset-module-chip-row"></div>
-              <pre id="preset-debug-prompt" class="debug-code-block"></pre>
-            </div>
-          </div>
-        </section>
-        <section class="drawer-section">
-          <div class="section-head">
-            <p class="eyebrow">Prompt</p>
-            <h3>本轮打包预览</h3>
-            <p class="muted">可以直接看到系统提示、人设、记忆、世界书、最近聊天和这一轮输入是怎样一起发给模型的。</p>
-          </div>
-          <div class="prompt-package-tools">
-            <button id="preview-prompt-package" type="button" class="secondary compact">预览当前轮 Prompt</button>
-          </div>
-          <div id="prompt-package-panel" class="drawer-debug-panel" hidden>
-            <div class="drawer-debug-head">
-              <div class="drawer-debug-meta">
-                <span class="drawer-debug-title">Prompt Package</span>
-                <span id="prompt-package-summary" class="prompt-package-summary muted">尚未生成</span>
-              </div>
-            </div>
-            <div class="drawer-debug-body">
-              <div id="prompt-package-layers" class="prompt-layer-list"></div>
-              <pre id="prompt-package-preview" class="debug-code-block"></pre>
-            </div>
-          </div>
-        </section>
         <section class="drawer-section">
           <div class="section-head">
             <p class="eyebrow">LLM</p>
@@ -981,13 +983,25 @@
       const messagesEl = document.getElementById("messages");
       const chatForm = document.getElementById("chat-form");
       const inputEl = document.getElementById("message-input");
+      const sendButtonEl = chatForm?.querySelector('button[type="submit"]');
+      const scrollBottomBtn = document.getElementById("scroll-bottom-button");
+      const scrollBottomLabelEl = scrollBottomBtn;
+      const toastHostEl = document.getElementById("toast-host");
       const statusEl = document.getElementById("status-text");
       const themePillEl = document.getElementById("theme-pill");
       const chatLayoutEl = document.getElementById("chat-layout");
-      const worldbookRailEl = document.getElementById("worldbook-hit-rail");
-      const worldbookRailToggleEl = document.getElementById("toggle-worldbook-rail");
-      const worldbookRailArrowEl = document.getElementById("worldbook-rail-arrow");
-      const worldbookRailCountEl = document.getElementById("worldbook-rail-count");
+      const runtimePanelEl = document.getElementById("runtime-panel");
+      const runtimePanelToggleEl = document.getElementById("toggle-runtime-panel");
+      const runtimePanelHandleIconEl = document.getElementById("runtime-panel-handle-icon");
+      const runtimePanelCloseEl = document.getElementById("close-runtime-panel");
+      const promptRuntimeDotEl = document.getElementById("prompt-runtime-dot");
+      const runtimeTabButtons = [...document.querySelectorAll("[data-runtime-tab]")];
+      const runtimeTabPanels = [...document.querySelectorAll("[data-runtime-panel]")];
+      const worldbookRuntimeCountEl = document.getElementById("worldbook-rail-count");
+      const runtimeThemeLabelEl = document.getElementById("runtime-theme-label");
+      const runtimeModelLabelEl = document.getElementById("runtime-model-label");
+      const runtimeHistoryLabelEl = document.getElementById("runtime-history-label");
+      const runtimeLastActionLabelEl = document.getElementById("runtime-last-action-label");
       const retrievalBarEl = document.getElementById("retrieval-bar");
       const retrievalItemsEl = document.getElementById("retrieval-items");
       const worldbookBarEl = document.getElementById("worldbook-bar");
@@ -1006,8 +1020,8 @@
       const worldbookDebugEnabled = {{ worldbook_settings.debug_enabled | tojson }};
       const presetNameEl = document.getElementById("chat-preset-name");
       const presetModulesEl = document.getElementById("chat-preset-modules");
-      const drawerPresetNameEl = document.getElementById("drawer-preset-name");
-      const drawerPresetModulesEl = document.getElementById("drawer-preset-modules");
+      const runtimePresetNameEl = document.getElementById("runtime-preset-name");
+      const runtimePresetModulesEl = document.getElementById("runtime-preset-modules");
       const presetMenuEl = document.getElementById("preset-menu");
       const togglePresetMenuBtn = document.getElementById("toggle-preset-menu");
       const presetPillTextEl = document.getElementById("preset-pill-text");
@@ -1155,6 +1169,7 @@
         syncDrawerFromState();
         if (statusText) {
           setStatus(statusText);
+          showToast(statusText, "success");
         }
       }
 
@@ -1178,8 +1193,87 @@
         }, 250);
       }
 
-      function setStatus(text) {
-        statusEl.textContent = text;
+      function normalizeStatusText(text) {
+        const value = String(text || "").trim();
+        if (!value || value === "就绪") {
+          return "Enter 发送 · Shift + Enter 换行";
+        }
+        return value;
+      }
+
+      function inferStatusKind(text) {
+        const value = String(text || "");
+        if (/失败|出错|错误|异常/.test(value)) return "error";
+        if (/已|完成|成功|写入|保存/.test(value)) return "success";
+        if (/正在|生成中|保存中|整理|预览|回复/.test(value)) return "busy";
+        return "idle";
+      }
+
+      function setStatus(text, kind = null) {
+        if (!statusEl) return;
+        const normalized = normalizeStatusText(text);
+        const statusKind = kind || inferStatusKind(normalized);
+        statusEl.textContent = normalized;
+        statusEl.classList.remove("is-idle", "is-busy", "is-success", "is-error");
+        statusEl.classList.add("task-status", `is-${statusKind}`);
+        if (runtimeLastActionLabelEl && statusKind !== "idle") {
+          runtimeLastActionLabelEl.textContent = normalized;
+        }
+      }
+
+      function showToast(message, type = "info") {
+        if (!toastHostEl || !message) return;
+        const toast = document.createElement("div");
+        toast.className = `app-toast ${type}`;
+        toast.textContent = message;
+        toastHostEl.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add("show"));
+        window.setTimeout(() => {
+          toast.classList.remove("show");
+          window.setTimeout(() => toast.remove(), 220);
+        }, 2200);
+      }
+
+      function setComposerBusy(isBusy) {
+        if (!sendButtonEl) return;
+        sendButtonEl.disabled = !!isBusy;
+        sendButtonEl.classList.toggle("is-busy", !!isBusy);
+        sendButtonEl.textContent = isBusy ? "生成中" : "发送";
+      }
+
+      function syncComposerState() {
+        const hasValue = !!inputEl.value.trim();
+        chatForm?.classList.toggle("has-input", hasValue);
+        inputEl.style.height = "auto";
+        const nextHeight = Math.min(Math.max(inputEl.scrollHeight, 66), 150);
+        inputEl.style.height = `${nextHeight}px`;
+      }
+
+      function isMessagesNearBottom(threshold = 96) {
+        if (!messagesEl) return true;
+        return messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight <= threshold;
+      }
+
+      function updateScrollBottomButton(hasNew = false) {
+        if (!scrollBottomBtn) return;
+        const shouldShow = !isMessagesNearBottom(120);
+        scrollBottomBtn.hidden = !shouldShow;
+        scrollBottomBtn.classList.toggle("has-new", !!hasNew && shouldShow);
+        scrollBottomBtn.textContent = hasNew && shouldShow ? "有新回复 ↓" : "↓ 回到底部";
+      }
+
+      function scrollMessagesToBottom() {
+        if (!messagesEl) return;
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        updateScrollBottomButton(false);
+      }
+
+      function settleMessageScroll(shouldStick, hasNew = false) {
+        if (shouldStick) {
+          scrollMessagesToBottom();
+        } else {
+          updateScrollBottomButton(hasNew);
+        }
       }
 
       function drawerInput(id) {
@@ -1245,6 +1339,8 @@
         applyTheme(runtimeState.theme);
         applyUiOpacity(runtimeState.ui_opacity);
         applyBackground(runtimeState.background_image_url, runtimeState.background_overlay);
+        if (runtimeModelLabelEl) runtimeModelLabelEl.textContent = runtimeState.llm_model || "未配置";
+        if (runtimeHistoryLabelEl) runtimeHistoryLabelEl.textContent = `${runtimeState.history_limit || 20} 条`;
 
         const shouldSyncServer = DRAWER_SERVER_INPUT_IDS.has(event?.target?.id || "")
           || !!event?.target?.classList?.contains("drawer-embedding-field");
@@ -1253,26 +1349,49 @@
         }
       }
 
+      function syncConfigGearButton(open) {
+        const button = document.getElementById("open-drawer-secondary");
+        if (!button) return;
+        button.setAttribute("aria-expanded", String(!!open));
+        button.classList.toggle("active", !!open);
+      }
+
       function openDrawer() {
-        drawerEl.classList.add("open");
-        drawerEl.setAttribute("aria-hidden", "false");
-        drawerOverlayEl.hidden = false;
+        drawerEl?.classList.add("open");
+        drawerEl?.setAttribute("aria-hidden", "false");
+        if (drawerOverlayEl) drawerOverlayEl.hidden = false;
+        syncConfigGearButton(true);
       }
 
       function closeDrawer() {
-        drawerEl.classList.remove("open");
-        drawerEl.setAttribute("aria-hidden", "true");
-        drawerOverlayEl.hidden = true;
+        drawerEl?.classList.remove("open");
+        drawerEl?.setAttribute("aria-hidden", "true");
+        if (drawerOverlayEl) drawerOverlayEl.hidden = true;
+        syncConfigGearButton(false);
+      }
+
+      function toggleDrawer() {
+        const isOpen = drawerEl?.classList.contains("open");
+        if (isOpen) {
+          closeDrawer();
+        } else {
+          openDrawer();
+        }
       }
 
       function updateThemeBadge() {
         const theme = rootEl.getAttribute("data-theme") === "dark" ? "dark" : "light";
-        themePillEl.textContent = theme === "dark" ? "暗色模式" : "浅色模式";
+        if (themePillEl) {
+          themePillEl.textContent = theme === "dark" ? "暗色模式" : "浅色模式";
+        }
       }
 
       function applyTheme(theme) {
         rootEl.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
         updateThemeBadge();
+        if (runtimeThemeLabelEl) {
+          runtimeThemeLabelEl.textContent = theme === "dark" ? "暗色" : "浅色";
+        }
       }
 
       function applyUiOpacity(value) {
@@ -1288,6 +1407,11 @@
         rootEl.style.setProperty("--input-bg", `rgba(${palette.input}, ${Math.max(opacity - 0.1, 0.16).toFixed(2)})`);
         rootEl.style.setProperty("--user", `rgba(${palette.user}, ${Math.min(opacity + 0.1, 0.98).toFixed(2)})`);
         rootEl.style.setProperty("--assistant", `rgba(${palette.assistant}, ${Math.min(opacity + 0.12, 0.99).toFixed(2)})`);
+
+        const readingMaskAlpha = theme === "dark"
+          ? Math.min(0.42, 0.18 + opacity * 0.22)
+          : Math.min(0.62, 0.28 + opacity * 0.30);
+        rootEl.style.setProperty("--chat-reading-mask-alpha", readingMaskAlpha.toFixed(2));
       }
 
       function applyBackground(url, overlay) {
@@ -1763,6 +1887,7 @@
         meta.textContent = createdAt;
 
         const avatar = buildAvatar(role);
+        const shouldStickToBottom = isMessagesNearBottom(120);
 
         bubbleWrap.appendChild(bubble);
         bubbleWrap.appendChild(meta);
@@ -1776,7 +1901,7 @@
         }
 
         messagesEl.appendChild(wrapper);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
+        settleMessageScroll(shouldStickToBottom, true);
 
         return {
           wrapper,
@@ -1799,11 +1924,12 @@
 
       function updateMessage(entry, content, createdAt = "") {
         if (!entry) return;
+        const shouldStickToBottom = isMessagesNearBottom(120);
         renderBubbleContent(entry.bubble, content);
         if (createdAt) {
           entry.meta.textContent = createdAt;
         }
-        messagesEl.scrollTop = messagesEl.scrollHeight;
+        settleMessageScroll(shouldStickToBottom, true);
       }
 
       function requestUiFrame(callback) {
@@ -1818,9 +1944,10 @@
         if (!entry || entry.framePending) return;
         entry.framePending = true;
         requestUiFrame(() => {
+          const shouldStickToBottom = isMessagesNearBottom(120);
           entry.framePending = false;
           renderBubbleContent(entry.bubble, entry.state);
-          messagesEl.scrollTop = messagesEl.scrollHeight;
+          settleMessageScroll(shouldStickToBottom, true);
         });
       }
 
@@ -1913,29 +2040,55 @@
         retrievalBarEl.hidden = false;
       }
 
-      function setWorldbookRailExpanded(expanded) {
-        const shouldExpand = !!expanded;
-        chatLayoutEl?.classList.toggle("worldbook-rail-collapsed", !shouldExpand);
-        worldbookRailEl?.classList.toggle("expanded", shouldExpand);
-        worldbookRailToggleEl?.setAttribute("aria-expanded", String(shouldExpand));
-        if (worldbookRailArrowEl) {
-          worldbookRailArrowEl.textContent = shouldExpand ? "‹" : "›";
+      function setRuntimePanelOpen(open) {
+        const shouldOpen = !!open;
+        chatLayoutEl?.classList.toggle("runtime-panel-open", shouldOpen);
+        chatLayoutEl?.classList.toggle("runtime-panel-collapsed", !shouldOpen);
+        runtimePanelEl?.setAttribute("aria-hidden", String(!shouldOpen));
+        runtimePanelToggleEl?.setAttribute("aria-expanded", String(shouldOpen));
+        if (runtimePanelToggleEl) {
+          runtimePanelToggleEl.setAttribute("title", shouldOpen ? "收起辅助栏" : "展开辅助栏");
+          runtimePanelToggleEl.setAttribute("aria-label", shouldOpen ? "收起辅助栏" : "展开辅助栏");
         }
-        if (worldbookRailToggleEl) {
-          worldbookRailToggleEl.title = shouldExpand ? "收起 Worldbook Debug" : "展开 Worldbook Debug";
+        if (runtimePanelHandleIconEl) {
+          runtimePanelHandleIconEl.textContent = shouldOpen ? "»" : "«";
         }
       }
 
-      worldbookRailToggleEl?.addEventListener("click", () => {
-        setWorldbookRailExpanded(!worldbookRailEl?.classList.contains("expanded"));
+      function setRuntimeTab(tabName, { openPanel = true } = {}) {
+        const target = tabName || "status";
+        runtimeTabButtons.forEach((button) => {
+          const active = button.dataset.runtimeTab === target;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-selected", String(active));
+        });
+        runtimeTabPanels.forEach((panel) => {
+          const active = panel.dataset.runtimePanel === target;
+          panel.classList.toggle("active", active);
+          panel.hidden = !active;
+        });
+        if (target === "prompt" && promptRuntimeDotEl) {
+          promptRuntimeDotEl.hidden = true;
+        }
+        if (openPanel) {
+          setRuntimePanelOpen(true);
+        }
+      }
+
+      runtimePanelToggleEl?.addEventListener("click", () => {
+        setRuntimePanelOpen(!chatLayoutEl?.classList.contains("runtime-panel-open"));
       });
-      setWorldbookRailExpanded(false);
+      runtimePanelCloseEl?.addEventListener("click", () => setRuntimePanelOpen(false));
+      runtimeTabButtons.forEach((button) => {
+        button.addEventListener("click", () => setRuntimeTab(button.dataset.runtimeTab || "status"));
+      });
+      setRuntimePanelOpen(false);
 
       function renderWorldbookHits(items) {
         const hitCount = Array.isArray(items) ? items.length : 0;
-        if (worldbookRailCountEl) {
-          worldbookRailCountEl.textContent = String(hitCount);
-          worldbookRailCountEl.hidden = hitCount <= 0;
+        if (worldbookRuntimeCountEl) {
+          worldbookRuntimeCountEl.textContent = String(hitCount);
+          worldbookRuntimeCountEl.hidden = hitCount <= 0;
         }
         if (!worldbookItemsEl || !worldbookBarEl) {
           return;
@@ -1958,7 +2111,7 @@
       }
 
       function setWorldbookDebugCollapsed(collapsed) {
-        // Debug 现在由左侧 rail 负责展开/收起；rail 展开后内容始终可见。
+        // Debug 现在在右侧聊天辅助栏内展示；切到世界书 Tab 后内容始终可见。
         worldbookDebugCollapsed = false;
         if (worldbookDebugBodyEl) {
           worldbookDebugBodyEl.hidden = false;
@@ -2377,24 +2530,32 @@
 
       function renderPresetSummaryFromStore(store) {
         if (!store) {
-          presetNameEl.textContent = "未选择预设";
-          presetModulesEl.textContent = "当前无激活模块";
-          presetPillTextEl.textContent = "切换预设";
+          if (presetNameEl) presetNameEl.textContent = "未选择预设";
+          if (presetModulesEl) presetModulesEl.textContent = "当前无激活模块";
+          if (runtimePresetNameEl) runtimePresetNameEl.textContent = "未选择预设";
+          if (runtimePresetModulesEl) runtimePresetModulesEl.textContent = "当前无激活模块";
+          if (presetPillTextEl) presetPillTextEl.textContent = "切换预设";
           return;
         }
         const active = getActivePresetFromStore(store);
         if (!active) {
-          presetNameEl.textContent = "未选择预设";
-          presetModulesEl.textContent = "当前无激活模块";
-          presetPillTextEl.textContent = "切换预设";
+          if (presetNameEl) presetNameEl.textContent = "未选择预设";
+          if (presetModulesEl) presetModulesEl.textContent = "当前无激活模块";
+          if (runtimePresetNameEl) runtimePresetNameEl.textContent = "未选择预设";
+          if (runtimePresetModulesEl) runtimePresetModulesEl.textContent = "当前无激活模块";
+          if (presetPillTextEl) presetPillTextEl.textContent = "切换预设";
           return;
         }
-        presetNameEl.textContent = active.name || "未命名预设";
-        presetPillTextEl.textContent = active.name || "切换预设";
+        const presetName = active.name || "未命名预设";
+        if (presetNameEl) presetNameEl.textContent = presetName;
+        if (runtimePresetNameEl) runtimePresetNameEl.textContent = presetName;
+        if (presetPillTextEl) presetPillTextEl.textContent = active.name || "切换预设";
         const enabledModules = getEnabledModuleLabels(active.modules);
-        presetModulesEl.textContent = enabledModules.length
+        const modulesText = enabledModules.length
           ? `激活模块：${enabledModules.join(" / ")}`
           : "当前无激活模块";
+        if (presetModulesEl) presetModulesEl.textContent = modulesText;
+        if (runtimePresetModulesEl) runtimePresetModulesEl.textContent = modulesText;
       }
 
       function renderPresetDebug(debug, store = presetStoreCache) {
@@ -2457,9 +2618,9 @@
         const layers = Array.isArray(pkg?.layers) ? pkg.layers : [];
         const previewText = typeof pkg?.preview_text === "string" ? pkg.preview_text.trim() : "";
         if (!layers.length && !previewText) {
-          promptPackagePanelEl.hidden = true;
-          promptPackageLayersEl.innerHTML = "";
-          promptPackagePreviewEl.textContent = "";
+          if (promptPackagePanelEl) promptPackagePanelEl.hidden = true;
+          if (promptPackageLayersEl) promptPackageLayersEl.innerHTML = "";
+          if (promptPackagePreviewEl) promptPackagePreviewEl.textContent = "";
           return;
         }
 
@@ -2473,8 +2634,9 @@
         if (typeof pkg?.message_count === "number") {
           summaryBits.push(`messages ${pkg.message_count} 条`);
         }
-        promptPackageSummaryEl.textContent = summaryBits.join(" · ") || `共 ${layers.length} 层`;
+        if (promptPackageSummaryEl) promptPackageSummaryEl.textContent = summaryBits.join(" · ") || `共 ${layers.length} 层`;
 
+        if (!promptPackagePanelEl || !promptPackageLayersEl || !promptPackagePreviewEl) return;
         promptPackageLayersEl.innerHTML = "";
         layers.forEach((layer, index) => {
           const card = document.createElement("div");
@@ -2511,6 +2673,9 @@
           .map((layer, index) => `[${index + 1}. ${layer.title || "未命名层"}]\n${String(layer.content || "").trim()}`)
           .join("\n\n");
         promptPackagePanelEl.hidden = false;
+        if (promptRuntimeDotEl) {
+          promptRuntimeDotEl.hidden = false;
+        }
       }
 
       async function previewPromptPackage() {
@@ -2531,10 +2696,12 @@
           renderWorldbookDebug(data.worldbook_debug || {});
           renderPresetDebug(data.preset_debug || {}, presetStoreCache);
           renderPromptPackage(data.prompt_package || {});
-          openDrawer();
+          setRuntimeTab("prompt");
           setStatus("已生成本轮 Prompt 预览");
+          showToast("Prompt 预览已生成", "success");
         } catch (error) {
           setStatus(`Prompt 预览失败：${error.message}`);
+          showToast(`Prompt 预览失败：${error.message}`, "error");
         }
       }
 
@@ -2604,15 +2771,6 @@
       if (togglePresetDebugBtn) {
         togglePresetDebugBtn.addEventListener("click", () => {
           setPresetDebugCollapsed(!presetDebugCollapsed);
-        });
-      }
-
-      if (worldbookDebugToggleEl) {
-        worldbookDebugToggleEl.addEventListener("click", () => {
-          if (worldbookDebugPanelEl.hidden) {
-            return;
-          }
-          setWorldbookDebugCollapsed(!worldbookDebugCollapsed);
         });
       }
 
@@ -2909,6 +3067,14 @@
         };
       }
 
+      inputEl.addEventListener("input", syncComposerState);
+      inputEl.addEventListener("focus", () => chatForm?.classList.add("composer-focused"));
+      inputEl.addEventListener("blur", () => chatForm?.classList.remove("composer-focused"));
+      messagesEl?.addEventListener("scroll", () => updateScrollBottomButton(false));
+      scrollBottomBtn?.addEventListener("click", scrollMessagesToBottom);
+      syncComposerState();
+      scrollMessagesToBottom();
+
       inputEl.addEventListener("keydown", (event) => {
         if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
@@ -2922,8 +3088,11 @@
         if (!text) return;
         addMessage("user", text);
         inputEl.value = "";
+        syncComposerState();
         setStatus("正在回复...");
-        const assistantEntry = createMessage("assistant", "");
+        setComposerBusy(true);
+        const assistantEntry = createMessage("assistant", "", "正在回复...");
+        assistantEntry.wrapper.classList.add("streaming");
         streamingEntries.add(assistantEntry);
         let finalReply = "";
         try {
@@ -2979,18 +3148,22 @@
                 || assistantEntry.pendingVisibleChars.length
                 || assistantEntry.state.think.trim()
               ) {
+                const shouldStickToBottom = isMessagesNearBottom(120);
                 renderBubbleContent(assistantEntry.bubble, assistantEntry.state);
-                messagesEl.scrollTop = messagesEl.scrollHeight;
+                settleMessageScroll(shouldStickToBottom, true);
               } else {
                 assistantEntry.wrapper.remove();
               }
+              assistantEntry.wrapper.classList.remove("streaming");
+              assistantEntry.meta.textContent = new Date().toLocaleString();
               streamingEntries.delete(assistantEntry);
             },
             onError(data) {
               throw new Error(data.detail || "流式请求失败");
             },
           });
-          setStatus("就绪");
+          setStatus("就绪", "idle");
+          setComposerBusy(false);
         } catch (error) {
           streamingEntries.delete(assistantEntry);
           assistantEntry.wrapper.remove();
@@ -2998,7 +3171,9 @@
           renderRetrievedItems([]);
           renderWorldbookHits([]);
           renderWorldbookDebug({});
-          setStatus("回复失败");
+          setStatus("回复失败", "error");
+          setComposerBusy(false);
+          showToast(`回复失败：${error.message}`, "error");
         }
       });
 
@@ -3006,26 +3181,46 @@
         if (isEndingConversation) return;
         isEndingConversation = true;
         const button = document.getElementById("end-conversation");
-        button.disabled = true;
-        setStatus("正在整理当前对话...");
+        const originalButtonText = button?.textContent || "结束当前对话";
+        const progressTimers = [];
+        const queueEndStatus = (delay, text) => {
+          progressTimers.push(window.setTimeout(() => {
+            if (isEndingConversation) setStatus(text, "busy");
+          }, delay));
+        };
+        if (button) {
+          button.disabled = true;
+          button.classList.add("is-busy");
+          button.textContent = "保存中…";
+        }
+        setStatus("正在整理本轮对话…", "busy");
+        queueEndStatus(650, "正在生成记忆摘要…");
+        queueEndStatus(1400, "正在保存到 Memory…");
         try {
           const data = await postJson("/api/conversation/end", {});
           if (data.skipped) {
-            setStatus("对话已在前一次请求中结束，无需重复操作");
+            setStatus("已完成：当前对话已结束，无需重复保存", "success");
+            showToast("当前对话已结束", "success");
             return;
           }
           messagesEl.innerHTML = "";
           renderRetrievedItems([]);
           renderWorldbookHits([]);
-          setStatus(
-            "已写入长期记忆：" + (data.memory_item?.title || "完成")
-            + "；当前工坊阶段：" + (data.workshop_stage || "未知")
-          );
+          const memoryTitle = data.memory_item?.title || "记忆已保存";
+          const doneText = `已完成：${memoryTitle}；工坊阶段：${data.workshop_stage || "未知"}`;
+          setStatus(doneText, "success");
+          showToast("本轮对话已结束，记忆已保存", "success");
         } catch (error) {
-          setStatus("结束失败：" + error.message);
+          setStatus("结束失败：" + error.message, "error");
+          showToast("结束对话失败：" + error.message, "error");
         } finally {
+          progressTimers.forEach((timer) => window.clearTimeout(timer));
           isEndingConversation = false;
-          button.disabled = false;
+          if (button) {
+            button.disabled = false;
+            button.classList.remove("is-busy");
+            button.textContent = originalButtonText;
+          }
         }
       });
 
@@ -3034,9 +3229,9 @@
       });
 
       document.getElementById("open-drawer")?.addEventListener("click", openDrawer);
-      document.getElementById("open-drawer-secondary").addEventListener("click", openDrawer);
-      document.getElementById("close-drawer").addEventListener("click", closeDrawer);
-      drawerOverlayEl.addEventListener("click", closeDrawer);
+      document.getElementById("open-drawer-secondary")?.addEventListener("click", toggleDrawer);
+      document.getElementById("close-drawer")?.addEventListener("click", closeDrawer);
+      drawerOverlayEl?.addEventListener("click", closeDrawer);
 
       document.querySelectorAll("#config-drawer input, #config-drawer select").forEach((element) => {
         element.addEventListener("input", syncStateFromDrawer);
